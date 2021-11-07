@@ -1,5 +1,6 @@
 import sys
 
+
 if __name__ == "__main__":
 
     sys.path.insert(0, ".")
@@ -11,11 +12,16 @@ if __name__ == "__main__":
 
 # from zzgui.zzgui import ZzWindow
 import zzgui.zzgui as zzgui
+from zzgui.zz_qt5.window import ZzQtWindow
+import zzgui.zzapp as zzapp
 
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QToolButton
+
+from PyQt5.QtWidgets import QApplication, QDialog, QWidget, QMainWindow, QToolButton
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QFormLayout
 from PyQt5.QtWidgets import QToolBar
 from PyQt5.QtCore import Qt
+
+# from PyQt5.QtWidgets import qApp
 
 from zzgui.zz_qt5.tab import ZzTabWidget
 
@@ -52,34 +58,6 @@ def layout(arg="h"):
     return layout
 
 
-class ZzQtWindow(zzgui.ZzWindow, QWidget):
-    def __init__(self, title=""):
-        super().__init__()
-        self.set_title(title)
-
-    def set_position(self, left, top):
-        self.move(left, top)
-
-    def set_size(self, width, height):
-        self.resize(width, height)
-
-    def get_position(self):
-        return (self.pos().x(), self.pos().y())
-
-    def get_size(self):
-        return (self.size().width(), self.size().height())
-
-    def set_title(self, title):
-        super().set_title(title)
-        QWidget.setWindowTitle(self, title)
-
-    def is_maximized(self):
-        return 1 if QWidget.isMaximized(self) else 0
-
-    def show_maximized(self):
-        QWidget.showMaximized(self)
-
-
 class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
     def __init__(self, title=""):
         self._core_app = QApplication([])
@@ -92,6 +70,28 @@ class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
         self.centralWidget().layout().addWidget(self.zz_tabwidget)
         self.statusBar().setVisible(True)
         self.set_title(title)
+
+    def zz_layout(self, arg="h"):
+        return layout(arg)
+
+    def show_form(self, form=None, modal="modal"):
+        if modal == "super":  # real modal dialog
+            form.exec_()
+        else:
+            if "modal" in modal:  # mdiarea modal window
+                form.prev_form = self.zz_tabwidget.currentWidget().activeSubWindow()
+                # if form.prev_form:
+                #     form.prev_form._lastWidget = qApp.focusWidget()
+                self.zz_tabwidget.currentWidget().addSubWindow(form)
+
+                if form.prev_form:
+                    form.prev_form.setDisabled(True)
+                # form.exec_()
+                # QDialog.exec_(form)
+                QDialog.show(form)
+            else:  # mdiarea normal window
+                self.zz_tabwidget.currentWidget().addSubWindow(form)
+                form.show()
 
     def build_menu(self):
         self.menu_list = super().reorder_menu(self.menu_list)

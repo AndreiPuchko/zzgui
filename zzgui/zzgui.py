@@ -9,8 +9,8 @@ if __name__ == "__main__":
     demo()
 
 from configparser import ConfigParser
-from zzgui.utils import num
-
+import zzgui.zzapp as zzapp
+from zzgui.zzwindow import ZzWindow
 import re
 
 
@@ -53,55 +53,6 @@ class ZzSettings:
         self.config.set(section, key, value)
 
 
-class ZzWindow:
-    def __init__(self, title=""):
-        super().__init__()
-        self.window_title = ""
-        self.set_title(title)
-
-    def set_title(self, title):
-        self.window_title = title
-
-    def set_position(self, left, top):
-        pass
-
-    def set_size(self, width, height):
-        pass
-
-    def get_position(self):
-        pass
-
-    def get_size(self):
-        pass
-
-    def is_maximized():
-        pass
-
-    def show_maximized():
-        return 0
-
-    def restore_geometry(self, settings):
-        left = num(settings.get(self.window_title, "left", "0"))
-        top = num(settings.get(self.window_title, "top", "0"))
-        self.set_position(left, top)
-        width = num(settings.get(self.window_title, "width", "800"))
-        height = num(settings.get(self.window_title, "height", "600"))
-        self.set_size(width, height)
-        if num(settings.get(self.window_title, "is_max", "0")):
-            self.show_maximized()
-
-    def save_geometry(self, settings):
-        settings.set(self.window_title, "is_max", f"{self.is_maximized()}")
-        if not self.is_maximized():
-            pos = self.get_position()
-            settings.set(self.window_title, "left", pos[0])
-            settings.set(self.window_title, "top", pos[1])
-            size = self.get_size()
-            settings.set(self.window_title, "width", size[0])
-            settings.set(self.window_title, "height", size[1])
-        settings.write()
-
-
 class ZzApp(ZzWindow):
     def __init__(self, title=""):
         super().__init__()
@@ -113,6 +64,13 @@ class ZzApp(ZzWindow):
 
         self.zz_toolbar = None
         self.zz_tabwidget = None
+        zzapp.zz_app = self
+
+    def zz_layout(self):
+        pass
+
+    def show_form(self, form=None, modal="modal"):
+        pass
 
     def add_menu(self, text="", worker=None, before=None, toolbar=None):
         if text.endswith("|"):
@@ -194,7 +152,6 @@ class ZzApp(ZzWindow):
 
     def is_statusbar_visible(self):
         pass
-
 
     def run(self):
         self.restore_geometry(self.settings)
