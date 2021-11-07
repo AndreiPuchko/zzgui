@@ -9,17 +9,15 @@ if __name__ == "__main__":
     demo()
 
 
-from zzgui.zzgui import ZzApp
-from zzgui.zzgui import ZzWindow
+# from zzgui.zzgui import ZzWindow
+import zzgui.zzgui as zzgui
 
-# from PyQt5.QtCore import *
-# from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QToolButton
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QFormLayout
 from PyQt5.QtWidgets import QToolBar
 from PyQt5.QtCore import Qt
 
-# from PyQt5.Qsci import *
+from zzgui.zz_qt5.tab import ZzTabWidget
 
 zzAlign = {
     "": Qt.AlignLeft | Qt.AlignTop,
@@ -54,7 +52,7 @@ def layout(arg="h"):
     return layout
 
 
-class ZzQtWindow(ZzWindow, QWidget):
+class ZzQtWindow(zzgui.ZzWindow, QWidget):
     def __init__(self, title=""):
         super().__init__()
         self.set_title(title)
@@ -82,15 +80,17 @@ class ZzQtWindow(ZzWindow, QWidget):
         QWidget.showMaximized(self)
 
 
-class ZzQtApp(ZzApp, QMainWindow, ZzQtWindow):
+class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
     def __init__(self, title=""):
         self._core_app = QApplication([])
         super().__init__()
+        self.zz_toolbar = QToolBar()
+        self.zz_tabwidget = ZzTabWidget()
         self.setCentralWidget(QWidget())
         self.centralWidget().setLayout(layout("v"))
+        self.centralWidget().layout().addWidget(self.zz_toolbar)
+        self.centralWidget().layout().addWidget(self.zz_tabwidget)
         self.statusBar().setVisible(True)
-        self.toolbar = QToolBar()
-        self.centralWidget().layout().addWidget(self.toolbar)
         self.set_title(title)
 
     def build_menu(self):
@@ -100,12 +100,10 @@ class ZzQtApp(ZzApp, QMainWindow, ZzQtWindow):
         QMainWindow.menuBar(self).show()
         for x in self.menu_list:
             _path = x["TEXT"]
-            if _path == "":
+            if _path == "" or _path in self._main_menu:
                 continue
             prevNode = "|".join(_path.split("|")[:-1])
             topic = _path.split("|")[-1]
-            if _path in self._main_menu:
-                continue
             if _path.count("|") == 0:  # first in chain - menu bar
                 node = QMainWindow.menuBar(self)
             else:
@@ -119,12 +117,12 @@ class ZzQtApp(ZzApp, QMainWindow, ZzQtWindow):
                     button = QToolButton()
                     button.setText(topic)
                     button.setDefaultAction(self._main_menu[_path])
-                    self.toolbar.addAction(self._main_menu[_path])
+                    self.zz_toolbar.addAction(self._main_menu[_path])
             else:
                 self._main_menu[_path] = node.addMenu(topic)
 
     def show_menubar(self, mode=True):
-        ZzApp.show_menubar(self)
+        zzgui.ZzApp.show_menubar(self)
         if mode:
             QMainWindow.menuBar(self).show()
         else:
@@ -134,14 +132,34 @@ class ZzQtApp(ZzApp, QMainWindow, ZzQtWindow):
         return QMainWindow.menuBar(self).isVisible()
 
     def show_toolbar(self, mode=True):
-        ZzApp.show_toolbar(self)
+        zzgui.ZzApp.show_toolbar(self)
         if mode:
-            self.toolbar.show()
+            self.zz_toolbar.show()
         else:
-            self.toolbar.hide()
+            self.zz_toolbar.hide()
 
     def is_toolbar_visible(self):
-        return self.toolbar.isVisible()
+        return self.zz_toolbar.isVisible()
+
+    def show_tabbar(self, mode=True):
+        zzgui.ZzApp.show_tabbar(self)
+        if mode:
+            self.zz_tabwidget.tabBar().show()
+        else:
+            self.zz_tabwidget.tabBar().hide()
+
+    def is_tabbar_visible(self):
+        return self.zz_tabwidget.tabBar().isVisible()
+
+    def show_statusbar(self, mode=True):
+        zzgui.ZzApp.show_statusbar(self)
+        if mode:
+            self.statusBar().show()
+        else:
+            self.statusBar().hide()
+
+    def is_statusbar_visible(self):
+        return self.statusBar().isVisible()
 
     def run(self):
         super().run()

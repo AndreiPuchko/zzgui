@@ -111,8 +111,8 @@ class ZzApp(ZzWindow):
         self._main_menu = {}
         self.on_init()
 
-        # self.toolbar = None
-        # self.tab_widget = None
+        self.zz_toolbar = None
+        self.zz_tabwidget = None
 
     def add_menu(self, text="", worker=None, before=None, toolbar=None):
         if text.endswith("|"):
@@ -140,18 +140,11 @@ class ZzApp(ZzWindow):
 
     def reorder_menu(self, menu):
         tmpList = [x["TEXT"] for x in menu]
-        print(tmpList)
         tmpDict = {x["TEXT"]: x for x in menu}
         reOrderedList = []
         for x in tmpList:
             # add node element for menu
-            # if "|" in x:
             menu_node = "|".join(x.split("|")[:-1])
-            # else:
-            #     menu_node = x
-            # print (f"{x}! {menu_node} !")
-            # if menu_node == "":
-            #     continue
             if menu_node not in reOrderedList:
                 reOrderedList.append(menu_node)
                 tmpDict[menu_node] = {
@@ -177,6 +170,31 @@ class ZzApp(ZzWindow):
 
     def is_toolbar_visible(self):
         pass
+
+    def show_tabbar(self, mode=True):
+        pass
+
+    def hide_tabbar(self, mode=True):
+        if mode:
+            self.show_tabbar(False)
+        else:
+            self.show_tabbar(True)
+
+    def is_tabbar_visible(self):
+        pass
+
+    def show_statusbar(self, mode=True):
+        pass
+
+    def hide_statusbar(self, mode=True):
+        if mode:
+            self.show_statusbar(False)
+        else:
+            self.show_statusbar(True)
+
+    def is_statusbar_visible(self):
+        pass
+
 
     def run(self):
         self.restore_geometry(self.settings)
