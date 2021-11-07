@@ -1,5 +1,16 @@
+import sys
+
+if __name__ == "__main__":
+
+    sys.path.insert(0, ".")
+
+    from demo.demo_01 import demo
+
+    demo()
+
 from configparser import ConfigParser
-from utils import num
+from zzgui.utils import num
+
 import re
 
 
@@ -18,7 +29,7 @@ class ZzSettings:
 
     def prepSection(self, section):
         return (
-            re.sub("\[.*\]", "", section)
+            re.sub(r"\[.*\]", "", section)
             .strip()
             .split("\n")[0]
             .replace("\n", "")
@@ -26,7 +37,6 @@ class ZzSettings:
         )
 
     def get(self, section="", key="", defaultValue=""):
-        # section=re.sub("\[.*\]","",section).strip().split("\n")[0].replace("\n","")
         section = self.prepSection(section)
         try:
             return self.config.get(section, key)
@@ -34,7 +44,8 @@ class ZzSettings:
             return defaultValue
 
     def set(self, section="", key="", value=""):
-        # section=re.sub("\[.*\]","",section).strip().split("\n")[0].replace("\n","")
+        if section == "":
+            return
         section = self.prepSection(section)
         value = "%(value)s" % locals()
         if not self.config.has_section(section):
@@ -43,8 +54,13 @@ class ZzSettings:
 
 
 class ZzWindow:
-    def set_title(self):
-        pass
+    def __init__(self, title=""):
+        super().__init__()
+        self.window_title = ""
+        self.set_title(title)
+
+    def set_title(self, title):
+        self.window_title = title
 
     def set_position(self, left, top):
         pass
@@ -58,62 +74,122 @@ class ZzWindow:
     def get_size(self):
         pass
 
+    def is_maximized():
+        pass
+
+    def show_maximized():
+        return 0
+
     def restore_geometry(self, settings):
-        left = num(settings.get("MainWindow", "left", "0"))
-        top = num(settings.get("MainWindow", "top", "0"))
+        left = num(settings.get(self.window_title, "left", "0"))
+        top = num(settings.get(self.window_title, "top", "0"))
         self.set_position(left, top)
-        width = num(settings.get("MainWindow", "width", "800"))
-        height = num(settings.get("MainWindow", "height", "600"))
+        width = num(settings.get(self.window_title, "width", "800"))
+        height = num(settings.get(self.window_title, "height", "600"))
         self.set_size(width, height)
+        if num(settings.get(self.window_title, "is_max", "0")):
+            self.show_maximized()
 
     def save_geometry(self, settings):
-        pos = self.get_position()
-        settings.set("MainWindow", "left", pos[0])
-        settings.set("MainWindow", "top", pos[1])
-        size = self.get_size()
-        settings.set("MainWindow", "width", size[0])
-        settings.set("MainWindow", "height", size[1])
+        settings.set(self.window_title, "is_max", f"{self.is_maximized()}")
+        if not self.is_maximized():
+            pos = self.get_position()
+            settings.set(self.window_title, "left", pos[0])
+            settings.set(self.window_title, "top", pos[1])
+            size = self.get_size()
+            settings.set(self.window_title, "width", size[0])
+            settings.set(self.window_title, "height", size[1])
         settings.write()
 
 
-class ZzApp:
-    def __init__(self):
+class ZzApp(ZzWindow):
+    def __init__(self, title=""):
         super().__init__()
-        # self.setStyle("Fusion")
-        # print(QStyleFactory.keys())
-        # if zzApp.zzApp.cssfile:
-        #     try:
-        #         self.setStyleSheet(open(zzApp.zzApp.cssfile).read())
-        #     except:
-        #         print("css file loading error")
-
-        # self._margins = [10, 10, 10, 10]
-        # self._spacing = 10
+        self.window_title = title
         self.settings = ZzSettings()
-        self.main_widget = None
-        self.mainMenu = {}
-        # self.justClosed = None
-        # qApp.zzApp=self
-        # self.focusChanged.connect(self._focusChanged)
+        self.menu_list = []
+        self._main_menu = {}
+        self.on_init()
 
-    @staticmethod
-    def app(engine="PyQt5"):
-        if engine == "PyQt5":
-            from zz_qt5.widgets import ZzQtApp
+        # self.toolbar = None
+        # self.tab_widget = None
 
-            return ZzQtApp()
+    def add_menu(self, text="", worker=None, before=None, toolbar=None):
+        if text.endswith("|"):
+            text = text[:-1]
+        if text.startswith("|"):
+            text = text[1:]
+        self.menu_list.append(
+            {"TEXT": text, "WORKER": worker, "BEFORE": before, "TOOLBAR": toolbar}
+        )
 
-    def close(self):
-        self.main_widget.save_geometry(self.settings)
+    def build_menu(self):
+        self.menu_list = self.reorder_menu(self.menu_list)
+
+    def show_menubar(self, mode=True):
+        pass
+
+    def hide_menubar(self, mode=True):
+        if mode:
+            self.show_menubar(False)
+        else:
+            self.show_menubar(True)
+
+    def is_menubar_visible(self):
+        pass
+
+    def reorder_menu(self, menu):
+        tmpList = [x["TEXT"] for x in menu]
+        print(tmpList)
+        tmpDict = {x["TEXT"]: x for x in menu}
+        reOrderedList = []
+        for x in tmpList:
+            # add node element for menu
+            # if "|" in x:
+            menu_node = "|".join(x.split("|")[:-1])
+            # else:
+            #     menu_node = x
+            # print (f"{x}! {menu_node} !")
+            # if menu_node == "":
+            #     continue
+            if menu_node not in reOrderedList:
+                reOrderedList.append(menu_node)
+                tmpDict[menu_node] = {
+                    "TEXT": menu_node,
+                    "WORKER": None,
+                    "BEFORE": None,
+                    "TOOLBAR": None,
+                }
+            if tmpDict[x].get("BEFORE") in reOrderedList:
+                reOrderedList.insert(reOrderedList.index(tmpDict[x].get("BEFORE")), x)
+            else:
+                reOrderedList.append(x)
+        return [tmpDict[x] for x in reOrderedList]
+
+    def show_toolbar(self, mode=True):
+        pass
+
+    def hide_toolbar(self, mode=True):
+        if mode:
+            self.show_toolbar(False)
+        else:
+            self.show_toolbar(True)
+
+    def is_toolbar_visible(self):
+        pass
 
     def run(self):
-        self.main_widget.restore_geometry(self.settings)
+        self.restore_geometry(self.settings)
+        self.build_menu()
+        self.show_menubar(True)
         self.on_start()
+        return self
+
+    def close(self):
+        self.save_geometry(self.settings)
+
+    def on_init(self):
+        pass
 
     def on_start(self):
         pass
-
-
-if __name__ == "__main__":
-    app = ZzApp.app()
-    app.run()
