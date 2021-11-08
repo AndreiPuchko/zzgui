@@ -10,7 +10,10 @@ if __name__ == "__main__":
     demo()
 
 from PyQt5.QtWidgets import QWidget
-import zzgui.zzgui as zzgui
+
+# import zzgui.zzgui as zzgui
+import zzgui.zzapp as zzgui
+
 
 class ZzQtWindow(zzgui.ZzWindow, QWidget):
     def __init__(self, title=""):
@@ -38,4 +41,3 @@ class ZzQtWindow(zzgui.ZzWindow, QWidget):
 
     def show_maximized(self):
         QWidget.showMaximized(self)
-

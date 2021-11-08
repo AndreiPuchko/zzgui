@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
 
 # from zzgui.zzgui import ZzWindow
-import zzgui.zzgui as zzgui
+# import zzgui.zzapp as zzgui
 from zzgui.zz_qt5.window import ZzQtWindow
 import zzgui.zzapp as zzapp
 
@@ -20,8 +20,6 @@ from PyQt5.QtWidgets import QApplication, QDialog, QWidget, QMainWindow, QToolBu
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QFormLayout
 from PyQt5.QtWidgets import QToolBar
 from PyQt5.QtCore import Qt
-
-# from PyQt5.QtWidgets import qApp
 
 from zzgui.zz_qt5.tab import ZzTabWidget
 
@@ -58,7 +56,7 @@ def layout(arg="h"):
     return layout
 
 
-class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
+class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
     def __init__(self, title=""):
         self._core_app = QApplication([])
         super().__init__()
@@ -122,7 +120,7 @@ class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
                 self._main_menu[_path] = node.addMenu(topic)
 
     def show_menubar(self, mode=True):
-        zzgui.ZzApp.show_menubar(self)
+        zzapp.ZzApp.show_menubar(self)
         if mode:
             QMainWindow.menuBar(self).show()
         else:
@@ -132,7 +130,7 @@ class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
         return QMainWindow.menuBar(self).isVisible()
 
     def show_toolbar(self, mode=True):
-        zzgui.ZzApp.show_toolbar(self)
+        zzapp.ZzApp.show_toolbar(self)
         if mode:
             self.zz_toolbar.show()
         else:
@@ -142,7 +140,7 @@ class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
         return self.zz_toolbar.isVisible()
 
     def show_tabbar(self, mode=True):
-        zzgui.ZzApp.show_tabbar(self)
+        zzapp.ZzApp.show_tabbar(self)
         if mode:
             self.zz_tabwidget.tabBar().show()
         else:
@@ -152,7 +150,7 @@ class ZzApp(zzgui.ZzApp, QMainWindow, ZzQtWindow):
         return self.zz_tabwidget.tabBar().isVisible()
 
     def show_statusbar(self, mode=True):
-        zzgui.ZzApp.show_statusbar(self)
+        zzapp.ZzApp.show_statusbar(self)
         if mode:
             self.statusBar().show()
         else:

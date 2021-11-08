@@ -39,15 +39,15 @@ class ZzTabWidget(QTabWidget):
         self.closeButton.setText("x")
         self.closeButton.clicked.connect(self.closeSubWindow)
         self.setCornerWidget(self.closeButton)
-        # self.currentChanged.connect(self._currentChanged)
+        self.currentChanged.connect(self._currentChanged)
 
         self.addTab()
         self.setCurrentIndex(0)
 
-    # def _currentChanged(self, index: int):
-    #     # bug path when subwindow in tab 0 lost focus if we close subwindow in other tab
-    #     if index == 0 and self.currentWidget().subWindowList():
-    #         self.currentWidget().subWindowList()[-1].setFocus()
+    def _currentChanged(self, index: int):
+        # bug path when subwindow in tab 0 lost focus if we close subwindow in other tab
+        if index == 0 and self.currentWidget().subWindowList():
+            self.currentWidget().subWindowList()[-1].setFocus()
 
     def closeSubWindow(self):
         currentTabIndex = self.currentIndex()

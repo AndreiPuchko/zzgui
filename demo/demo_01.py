@@ -7,6 +7,7 @@ if __name__ == "__main__":
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
 
+
 class Demo_app(ZzApp):
     def on_start(self):
         pass
@@ -35,7 +36,8 @@ class Demo_app(ZzApp):
 
     def first_form(self):
         form = ZzForm("First form ever")
-        form.add_control("p1","just label","label")
+        form.add_control("p1", "just label", "label")
+        form.add_control("name", "Enter your name", "line")
         form.show_form()
 
     def show_hide_menubar(self):
