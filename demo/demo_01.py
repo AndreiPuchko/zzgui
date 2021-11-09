@@ -5,14 +5,26 @@ if __name__ == "__main__":
 
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
-from zzgui.zz_qt5.widgets.label import label
+
+def zzMess(mess="", title="Message", html=1):
+    form = ZzForm(title)
+    form.add_control("mess", control="text", data=f"{mess}")
+
+    if form.add_control("/h"):
+        form.add_control("/s")
+        form.add_control(
+            "close",
+            "Ok",
+            control="button",
+            valid=form.close,
+        )
+        form.add_control("/s")
+        form.add_control("/")
+    form.show_form()
 
 
 class Demo_app(ZzApp):
     def on_start(self):
-        pass
-        # self.hide_toolbar()
-        # self.hide_menubar()
         self.first_form()
 
     def on_init(self):
@@ -36,6 +48,29 @@ class Demo_app(ZzApp):
 
     def first_form(self):
         form = ZzForm("First form ever")
+        if form.add_control("/h", "main window control"):
+            form.add_control(
+                label="Main menu on/off",
+                control="toolbutton",
+                valid=lambda: self.show_menubar(not self.is_menubar_visible()),
+            )
+            form.add_control(
+                label="Toolbar on/off",
+                control="toolbutton",
+                valid=lambda: self.show_toolbar(not self.is_toolbar_visible()),
+            )
+            form.add_control(
+                label="Tabbar on/off",
+                control="toolbutton",
+                valid=lambda: self.show_tabbar(not self.is_tabbar_visible()),
+            )
+            form.add_control(
+                label="Statusbar on/off",
+                control="toolbutton",
+                valid=self.show_hide_statusbar,
+            )
+        form.add_control("/")
+
         form.add_control(name="p1", label="just label", control="label")
         form.add_control(
             name="name",
@@ -44,9 +79,61 @@ class Demo_app(ZzApp):
             data="simple data",
         )
 
-        if form.add_control(name="/h", label="Frame"):
-            form.add_control(label="just label 1 in hor frame")
-            form.add_control(label="just label 2 in hor frame")
+        if form.add_control(name="/h", label="Horizontal frame"):
+
+            if form.add_control(name="/v", label="Vertical frame"):
+                form.add_control(label="just label 1")
+                form.add_control(label="just label 2")
+                form.add_control(
+                    "combo",
+                    label="combobox",
+                    control="combo",
+                    pic="item1;item2;item3",
+                )
+            form.add_control("/")
+
+            form.add_control("list1", "", pic="item1;item2;item3", control="list")
+
+            if form.add_control(name="/f", label="Form frame"):
+                form.add_control(
+                    "radio",
+                    "Radio buttn",
+                    pic="option 1;option 2;option 3",
+                    control="radio",
+                )
+                form.add_control(
+                    "check",
+                    label="checkbox",
+                    pic="checkbox text",
+                    control="check",
+                    data="*",
+                )
+
+                form.add_control("f1", label="F1", control="line")
+                form.add_control("f2", label="F2", control="line")
+            form.add_control("/")
+        form.add_control("/")
+
+        form.add_control(
+            name="text",
+            label="Enter big text",
+            control="text",
+            data="simple text<br>line2",
+        )
+
+        if form.add_control("/h", "buttons"):
+            form.add_control(
+                label="tool",
+                control="toolbutton",
+                valid=lambda: print(self.focusWidget().get_text()),
+            )
+            form.add_control("/s")
+            form.add_control(
+                label="Ok",
+                control="button",
+                valid=lambda: zzMess("3333333333333333"),
+            )
+            form.add_control(label="Cancel", control="button", valid=form.close)
 
         form.show_form()
 

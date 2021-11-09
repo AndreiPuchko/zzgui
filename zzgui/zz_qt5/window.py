@@ -47,17 +47,21 @@ def layout(arg="h"):
     layout.layout().setSpacing(0)
     return layout
 
+
 class ZzFrame(zzwindow.ZzFrame, QWidget):
     def set_mode(self, mode="v"):
         super().set_mode(mode=mode)
         if self.layout() is not None:
-            l= self.layout()
-            del l
-        print(self, mode)
+            return
+            # l = self.layout()
+            # del l
         self.setLayout(layout(mode))
 
     def insert_widget(self, pos=None, widget=None):
         self.layout().addWidget(widget)
+
+    def add_row(self, label=None, widget=None):
+        self.layout().addRow(label, widget)
 
 
 class ZzQtWindow(zzwindow.ZzWindow, ZzFrame):

@@ -8,12 +8,13 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QLabel
 import zzgui.zz_qt5.widget as zzwiddet
+from PyQt5.QtWidgets import QComboBox
 
 
-class label(QLabel, zzwiddet.ZzWidget):
+class combo(QComboBox, zzwiddet.ZzWidget):
     def __init__(self, meta):
         super().__init__()
         self.meta = meta
-        self.set_text(meta['label'])
+        for item in meta.get("pic", "").split(";"):
+            self.addItem(item)

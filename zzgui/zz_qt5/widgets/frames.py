@@ -17,4 +17,10 @@ class frame(QGroupBox, zzwiddet.ZzWidget, zzwindow.ZzFrame):
     def __init__(self, meta):
         if meta.get("name")[:2] == "/h":
             mode = "h"
+        elif meta.get("name")[:2] == "/v":
+            mode = "v"
+        elif meta.get("name")[:2] == "/f":
+            mode = "f"
         super().__init__(mode=mode)
+        if meta.get("label"):
+            self.setTitle(meta.get("label"))

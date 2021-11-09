@@ -29,6 +29,9 @@ class ZzFrame:
     def insert_widget(self, pos=None, widget=None):
         pass
 
+    def add_row(self, label=None, widget=None):
+        pass
+
     def swap_widgets(self, widget1, widget2):
         pass
 

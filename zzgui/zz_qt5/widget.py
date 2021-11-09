@@ -9,10 +9,13 @@ if __name__ == "__main__":
 
 
 from PyQt5.QtWidgets import QWidget
-from zzgui.zzwidget import ZzWidget
+
+from zzgui import zzwidget
 
 
-class ZzWidget(QWidget, ZzWidget):
+class ZzWidget(QWidget, zzwidget.ZzWidget):
+    # def __init__(self, meta):
+    #     super().__init__(meta)
     def set_readonly(self, arg):
         if arg:
             self.setEnabled(False)
@@ -29,7 +32,7 @@ class ZzWidget(QWidget, ZzWidget):
         if hasattr(self, "setText"):
             self.setText(text)
 
-    def get_text(self, text):
+    def get_text(self):
         if hasattr(self, "text"):
             return self.text()
         return ""

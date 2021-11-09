@@ -37,7 +37,8 @@ class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
 
     def show_form(self, form=None, modal="modal"):
         if modal == "super":  # real modal dialog
-            form.exec_()
+            form.setModal(True)
+            form.show()
         else:
             if "modal" in modal:  # mdiarea modal window
                 form.prev_form = self.zz_tabwidget.currentWidget().activeSubWindow()
@@ -121,6 +122,9 @@ class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
 
     def is_statusbar_visible(self):
         return self.statusBar().isVisible()
+
+    def focus_widget(self):
+        return QApplication.focusWidget()
 
     def run(self):
         super().run()

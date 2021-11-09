@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import QDialog
 class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
     def __init__(self, title=""):
         super().__init__(title=title)
+        # QDialog.__init__(self)
         self._widgets_package = __import__("zzgui.zz_qt5.widgets", None, None, [""])
 
     def restore_geometry(self, settings):
@@ -45,6 +46,10 @@ class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
         self.shown = True
         if event:
             event.accept()
+
+    def close(self):
+        super().close()
+        self.parent().close()
 
     def closeEvent(self, event=None):
         if self.prev_form:
