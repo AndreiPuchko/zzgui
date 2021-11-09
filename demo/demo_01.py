@@ -3,9 +3,9 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-# from zzgui.zzapp import *
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
+from zzgui.zz_qt5.widgets.label import label
 
 
 class Demo_app(ZzApp):
@@ -36,8 +36,18 @@ class Demo_app(ZzApp):
 
     def first_form(self):
         form = ZzForm("First form ever")
-        form.add_control("p1", "just label", "label")
-        form.add_control("name", "Enter your name", "line")
+        form.add_control(name="p1", label="just label", control="label")
+        form.add_control(
+            name="name",
+            label="Enter your name",
+            control="line",
+            data="simple data",
+        )
+
+        if form.add_control(name="/h", label="Frame"):
+            form.add_control(label="just label 1 in hor frame")
+            form.add_control(label="just label 2 in hor frame")
+
         form.show_form()
 
     def show_hide_menubar(self):

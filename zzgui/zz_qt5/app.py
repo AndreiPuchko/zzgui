@@ -1,7 +1,5 @@
-import sys
-
-
 if __name__ == "__main__":
+    import sys
 
     sys.path.insert(0, ".")
 
@@ -10,51 +8,16 @@ if __name__ == "__main__":
     demo()
 
 
-# from zzgui.zzgui import ZzWindow
-# import zzgui.zzapp as zzgui
 from zzgui.zz_qt5.window import ZzQtWindow
 import zzgui.zzapp as zzapp
 
 
 from PyQt5.QtWidgets import QApplication, QDialog, QWidget, QMainWindow, QToolButton
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QFormLayout
 from PyQt5.QtWidgets import QToolBar
-from PyQt5.QtCore import Qt
+
 
 from zzgui.zz_qt5.tab import ZzTabWidget
-
-zzAlign = {
-    "": Qt.AlignLeft | Qt.AlignTop,
-    "1": Qt.AlignLeft | Qt.AlignBottom,
-    "2": Qt.AlignHCenter | Qt.AlignBottom,
-    "3": Qt.AlignRight | Qt.AlignBottom,
-    "4": Qt.AlignLeft | Qt.AlignVCenter,
-    "5": Qt.AlignHCenter | Qt.AlignVCenter,
-    "6": Qt.AlignRight | Qt.AlignVCenter,
-    "7": Qt.AlignLeft | Qt.AlignTop,
-    "8": Qt.AlignHCenter | Qt.AlignTop,
-    "9": Qt.AlignRight | Qt.AlignTop,
-}
-
-
-def layout(arg="h"):
-    if arg.lower().startswith("v"):
-        layout = QVBoxLayout()
-        # layout = zzVBoxLayout()
-        layout.setAlignment(zzAlign["7"])
-    elif arg.lower().startswith("f"):
-        layout = QFormLayout()
-        layout.setLabelAlignment(Qt.AlignRight | Qt.AlignTop)
-    elif arg.lower().startswith("g"):
-        layout = QGridLayout()
-    else:
-        layout = QHBoxLayout()
-        # layout = zzHBoxLayout()
-        layout.setAlignment(zzAlign["7"])
-    layout.layout().setContentsMargins(0, 0, 0, 0)
-    layout.layout().setSpacing(0)
-    return layout
-
+from zzgui.zz_qt5.window import layout
 
 class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
     def __init__(self, title=""):

@@ -1,7 +1,5 @@
-import sys
-
-
 if __name__ == "__main__":
+    import sys
 
     sys.path.insert(0, ".")
 
@@ -9,37 +7,21 @@ if __name__ == "__main__":
 
     demo()
 
+import zzgui.zzapp as zzapp
 import zzgui.zzform as zzform
-from zzgui.zz_qt5.app import ZzQtWindow
 
-from zzgui.zz_qt5.widgets import *
+from zzgui.zz_qt5.app import ZzQtWindow
+from zzgui.utils import num
 
 from PyQt5.QtWidgets import QDialog
-from PyQt5.QtWidgets import QFormLayout
-import zzgui.zzapp as zzapp
-from zzgui.utils import num
+
+# from PyQt5.QtWidgets import QFormLayout
 
 
 class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
     def __init__(self, title=""):
         super().__init__(title=title)
-        self._widgets_package = __import__("zzgui.zz_qt5.widgets",None,None,[""])
-
-    def show_form(self, modal="modal"):
-        self.setLayout(zzapp.zz_app.zz_layout("v"))
-        layoutList = [self.layout()]
-        for meta in self.controls:
-            currentLayout = layoutList[-1]
-            label2add, widget2add = self.widget(meta)
-            if isinstance(currentLayout, QFormLayout):
-                currentLayout.addRow(label2add, widget2add)
-            else:
-                if label2add:
-                    currentLayout.addWidget(label2add)
-                if widget2add:
-                    currentLayout.addWidget(widget2add)
-
-        return super().show_form(modal=modal)
+        self._widgets_package = __import__("zzgui.zz_qt5.widgets", None, None, [""])
 
     def restore_geometry(self, settings):
         paw = self.parent()
@@ -65,6 +47,8 @@ class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
             event.accept()
 
     def closeEvent(self, event=None):
+        if self.prev_form:
+            self.prev_form.setEnabled(True)
         self.close()
         if event:
             event.accept()

@@ -1,7 +1,5 @@
-import sys
-
-
 if __name__ == "__main__":
+    import sys
 
     sys.path.insert(0, ".")
 
@@ -11,7 +9,34 @@ if __name__ == "__main__":
 
 from zzgui.utils import num
 
-class ZzWindow:
+
+class ZzFrame:
+    def __init__(self, mode="v"):
+        super().__init__()
+        self.frame_mode = mode
+        self.set_mode(self.frame_mode)
+        self.widgets = []
+
+    def set_mode(self, mode="v"):
+        self.frame_mode = mode
+
+    def add_widget(self, widget=None, label=None):
+        if widget is None:
+            return
+        if self.frame_mode in ["v", "h"]:
+            self.insert_widget(len(self.widgets), widget)
+
+    def insert_widget(self, pos=None, widget=None):
+        pass
+
+    def swap_widgets(self, widget1, widget2):
+        pass
+
+    def move_widget(self, widget, direction="up"):
+        pass
+
+
+class ZzWindow(ZzFrame):
     def __init__(self, title=""):
         super().__init__()
         self.window_title = ""
