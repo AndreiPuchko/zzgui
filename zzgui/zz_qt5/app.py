@@ -8,6 +8,7 @@ if __name__ == "__main__":
     demo()
 
 
+from zzgui import zzform
 from zzgui.zz_qt5.window import ZzQtWindow
 import zzgui.zzapp as zzapp
 
@@ -37,8 +38,11 @@ class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
 
     def show_form(self, form=None, modal="modal"):
         if modal == "super":  # real modal dialog
-            form.setModal(True)
-            form.show()
+            print (22222222222)
+            self.menuBar().setDisabled(True)
+            self.zz_tabwidget.tabBar().setDisabled(True)
+            self.zz_toolbar.setDisabled(True)
+            form.exec_()
         else:
             if "modal" in modal:  # mdiarea modal window
                 form.prev_form = self.zz_tabwidget.currentWidget().activeSubWindow()
@@ -48,9 +52,13 @@ class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
 
                 if form.prev_form:
                     form.prev_form.setDisabled(True)
+                print ([x for x in dir(form) if x.startswith("e")])
+                print (form.exec_)
                 # form.exec_()
                 # QDialog.exec_(form)
-                QDialog.show(form)
+                # QDialog.show(form)
+                # form.show()
+                print(11)
             else:  # mdiarea normal window
                 self.zz_tabwidget.currentWidget().addSubWindow(form)
                 form.show()

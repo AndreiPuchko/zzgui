@@ -20,12 +20,13 @@ def zzMess(mess="", title="Message", html=1):
         )
         form.add_control("/s")
         form.add_control("/")
-    form.show_form()
+    form.show_form("super")
 
 
 class Demo_app(ZzApp):
     def on_start(self):
         self.first_form()
+        # zzMess("122")
 
     def on_init(self):
         self.add_menu("File|First", self.first_form, toolbar="First")

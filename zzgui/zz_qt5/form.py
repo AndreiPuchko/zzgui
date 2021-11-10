@@ -18,10 +18,18 @@ from PyQt5.QtWidgets import QDialog
 # from PyQt5.QtWidgets import QFormLayout
 
 
-class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
+class zzDialog(QDialog):
+    def __init__(self, title=""):
+        super().__init__()
+        # self.setWindowTitle(title)
+        # self.exec_()
+        # print (123, [f"{x}" for x in dir(self) if x.startswith("e")])
+
+
+# class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
+class ZzForm(zzform.ZzForm, ZzQtWindow, zzDialog):
     def __init__(self, title=""):
         super().__init__(title=title)
-        # QDialog.__init__(self)
         self._widgets_package = __import__("zzgui.zz_qt5.widgets", None, None, [""])
 
     def restore_geometry(self, settings):
