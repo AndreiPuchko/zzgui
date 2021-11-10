@@ -56,24 +56,15 @@ class ZzSettings:
         self.config.set(section, key, value)
 
 
-class ZzApp(ZzWindow):
+class ZzApp:
     def __init__(self, title=""):
-        super().__init__()
+        zzapp.zz_app = self
         self.window_title = title
         self.settings = ZzSettings()
+        self.main_window = ZzMainWindow(title)
         self.menu_list = []
-        self._main_menu = {}
         self.on_init()
-
-        self.zz_toolbar = None
-        self.zz_tabwidget = None
-        zzapp.zz_app = self
-
-    def zz_layout(self):
-        pass
-
-    def show_form(self, form=None, modal="modal"):
-        pass
+        self.main_window.show()
 
     def add_menu(self, text="", worker=None, before=None, toolbar=None):
         if text.endswith("|"):
@@ -86,18 +77,6 @@ class ZzApp(ZzWindow):
 
     def build_menu(self):
         self.menu_list = self.reorder_menu(self.menu_list)
-
-    def show_menubar(self, mode=True):
-        pass
-
-    def hide_menubar(self, mode=True):
-        if mode:
-            self.show_menubar(False)
-        else:
-            self.show_menubar(True)
-
-    def is_menubar_visible(self):
-        pass
 
     def reorder_menu(self, menu):
         tmpList = [x["TEXT"] for x in menu]
@@ -119,6 +98,30 @@ class ZzApp(ZzWindow):
             else:
                 reOrderedList.append(x)
         return [tmpDict[x] for x in reOrderedList]
+
+    def close(self):
+        self.main_window.close()
+
+    def show_form(self, form=None, modal="modal"):
+        pass
+
+    def on_init(self):
+        pass
+
+    def on_start(self):
+        pass
+
+    def show_menubar(self, mode=True):
+        pass
+
+    def hide_menubar(self, mode=True):
+        if mode:
+            self.show_menubar(False)
+        else:
+            self.show_menubar(True)
+
+    def is_menubar_visible(self):
+        pass
 
     def show_toolbar(self, mode=True):
         pass
@@ -157,16 +160,42 @@ class ZzApp(ZzWindow):
         pass
 
     def run(self):
+        self.main_window.restore_geometry(self.settings)
+        self.on_start()
+        self.build_menu()
+        self.show_menubar(True)
+        pass
+
+
+class ZzMainWindow(ZzWindow):
+    def __init__(self, title=""):
+        super().__init__()
+        self.window_title = title
+        self.settings = ZzSettings()
+        self.menu_list = []
+        self._main_menu = {}
+        # self.on_init()
+
+        self.zz_toolbar = None
+        self.zz_tabwidget = None
+
+    def zz_layout(self):
+        pass
+
+    def _run(self):
         self.restore_geometry(self.settings)
         self.build_menu()
         self.show_menubar(True)
         self.on_start()
         return self
 
-    def close(self):
+    def show(self):
+        pass
+
+    def _close(self):
         self.save_geometry(self.settings)
 
-    def on_init(self):
+    def _on_init(self):
         pass
 
     def on_start(self):

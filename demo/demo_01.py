@@ -24,6 +24,7 @@ def zzMess(mess="", title="Message", html=1):
 
 
 class Demo_app(ZzApp):
+
     def on_start(self):
         self.first_form()
         # zzMess("122")

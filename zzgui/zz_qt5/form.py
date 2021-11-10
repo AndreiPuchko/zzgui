@@ -27,7 +27,7 @@ class zzDialog(QDialog):
 
 
 # class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
-class ZzForm(zzform.ZzForm, ZzQtWindow, zzDialog):
+class ZzForm(zzDialog, zzform.ZzForm, ZzQtWindow):
     def __init__(self, title=""):
         super().__init__(title=title)
         self._widgets_package = __import__("zzgui.zz_qt5.widgets", None, None, [""])

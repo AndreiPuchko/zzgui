@@ -20,54 +20,47 @@ from PyQt5.QtWidgets import QToolBar
 from zzgui.zz_qt5.tab import ZzTabWidget
 from zzgui.zz_qt5.window import layout
 
-class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
-    def __init__(self, title=""):
-        self._core_app = QApplication([])
-        super().__init__()
-        self.zz_toolbar = QToolBar()
-        self.zz_tabwidget = ZzTabWidget()
-        self.setCentralWidget(QWidget())
-        self.centralWidget().setLayout(layout("v"))
-        self.centralWidget().layout().addWidget(self.zz_toolbar)
-        self.centralWidget().layout().addWidget(self.zz_tabwidget)
-        self.statusBar().setVisible(True)
-        self.set_title(title)
 
-    def zz_layout(self, arg="h"):
-        return layout(arg)
+class ZzApp(zzapp.ZzApp, QApplication):
+    def __init__(self, title=""):
+        super().__init__(title)
+        QApplication.__init__(self, [])
+        self.main_window = ZzMainWindow(title)
 
     def show_form(self, form=None, modal="modal"):
         if modal == "super":  # real modal dialog
-            print (22222222222)
-            self.menuBar().setDisabled(True)
-            self.zz_tabwidget.tabBar().setDisabled(True)
-            self.zz_toolbar.setDisabled(True)
+            print(22222222222)
+            # self.menuBar().setDisabled(True)
+            # self.zz_tabwidget.tabBar().setDisabled(True)
+            # self.zz_toolbar.setDisabled(True)
             form.exec_()
         else:
             if "modal" in modal:  # mdiarea modal window
-                form.prev_form = self.zz_tabwidget.currentWidget().activeSubWindow()
+                form.prev_form = self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
                 # if form.prev_form:
                 #     form.prev_form._lastWidget = qApp.focusWidget()
-                self.zz_tabwidget.currentWidget().addSubWindow(form)
-
-                if form.prev_form:
-                    form.prev_form.setDisabled(True)
-                print ([x for x in dir(form) if x.startswith("e")])
-                print (form.exec_)
-                # form.exec_()
+                # form=QDialog()
+                # form.setFixedSize(600, 300)
+                self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
+                form.parent().move(50, 50)
+                # if form.prev_form:
+                #     form.prev_form.setDisabled(True)
+                # print([x for x in dir(form) if x.startswith("e")])
+                # print(hasattr(form, "exec_"))
+                form.exec_()
                 # QDialog.exec_(form)
-                # QDialog.show(form)
+                QDialog.show(form)
                 # form.show()
                 print(11)
             else:  # mdiarea normal window
-                self.zz_tabwidget.currentWidget().addSubWindow(form)
+                self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
                 form.show()
 
     def build_menu(self):
         self.menu_list = super().reorder_menu(self.menu_list)
         self._main_menu = {}
-        QMainWindow.menuBar(self).clear()
-        QMainWindow.menuBar(self).show()
+        QMainWindow.menuBar(self.main_window).clear()
+        QMainWindow.menuBar(self.main_window).show()
         for x in self.menu_list:
             _path = x["TEXT"]
             if _path == "" or _path in self._main_menu:
@@ -75,7 +68,7 @@ class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
             prevNode = "|".join(_path.split("|")[:-1])
             topic = _path.split("|")[-1]
             if _path.count("|") == 0:  # first in chain - menu bar
-                node = QMainWindow.menuBar(self)
+                node = QMainWindow.menuBar(self.main_window)
             else:
                 node = self._main_menu[prevNode]
             if _path.endswith("-"):
@@ -87,19 +80,19 @@ class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
                     button = QToolButton()
                     button.setText(topic)
                     button.setDefaultAction(self._main_menu[_path])
-                    self.zz_toolbar.addAction(self._main_menu[_path])
+                    self.main_window.zz_toolbar.addAction(self._main_menu[_path])
             else:
                 self._main_menu[_path] = node.addMenu(topic)
 
     def show_menubar(self, mode=True):
         zzapp.ZzApp.show_menubar(self)
         if mode:
-            QMainWindow.menuBar(self).show()
+            QMainWindow.menuBar(self.main_window).show()
         else:
-            QMainWindow.menuBar(self).hide()
+            QMainWindow.menuBar(self.main_window).hide()
 
     def is_menubar_visible(self):
-        return QMainWindow.menuBar(self).isVisible()
+        return QMainWindow.menuBar(self.main_window).isVisible()
 
     def show_toolbar(self, mode=True):
         zzapp.ZzApp.show_toolbar(self)
@@ -131,13 +124,38 @@ class ZzApp(zzapp.ZzApp, QMainWindow, ZzQtWindow):
     def is_statusbar_visible(self):
         return self.statusBar().isVisible()
 
+    def run(self):
+        self.main_window.show()
+        super().run()
+        self.exec_()
+
+
+class ZzMainWindow(zzapp.ZzMainWindow, QMainWindow, ZzQtWindow):
+    def __init__(self, title=""):
+        self._core_app = QApplication([])
+        super().__init__()
+        self.zz_toolbar = QToolBar()
+        self.zz_tabwidget = ZzTabWidget()
+        self.setCentralWidget(QWidget())
+        self.centralWidget().setLayout(layout("v"))
+        self.centralWidget().layout().addWidget(self.zz_toolbar)
+        self.centralWidget().layout().addWidget(self.zz_tabwidget)
+        self.statusBar().setVisible(True)
+        self.set_title(title)
+
+    def zz_layout(self, arg="h"):
+        return layout(arg)
+
     def focus_widget(self):
         return QApplication.focusWidget()
 
-    def run(self):
-        super().run()
-        self.show()
-        self._core_app.exec_()
+    def show(self):
+        QMainWindow.show(self)
+
+    # def run(self):
+    #     super().run()
+    #     self.show()
+    #     self._core_app.exec_()
 
     def closeEvent(self, e):
         self.close()
