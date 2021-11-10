@@ -18,6 +18,7 @@ class ZzForm(ZzWindow):
         self.controls = []
         self.widgets = {}
         self._widgets_package = None
+        self.prev_form = None
 
     def show_form(self, modal="modal"):
         frame_list = [self]

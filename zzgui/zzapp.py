@@ -16,6 +16,23 @@ import re
 
 zz_app = None
 
+def zzMess(mess="", title="Message", html=1):
+    form = ZzForm(title)
+    form.add_control("mess", control="text", data=f"{mess}")
+
+    if form.add_control("/h"):
+        form.add_control("/s")
+        form.add_control(
+            "close",
+            "Ok",
+            control="button",
+            valid=form.close,
+        )
+        form.add_control("/s")
+        form.add_control("/")
+    form.show_form("super")
+
+
 
 class ZzSettings:
     def __init__(self, filename="zzGui.ini"):
@@ -100,7 +117,9 @@ class ZzApp:
         return [tmpDict[x] for x in reOrderedList]
 
     def close(self):
+        self.main_window.save_geometry(self.settings)
         self.main_window.close()
+        sys.exit(0)
 
     def show_form(self, form=None, modal="modal"):
         pass
@@ -135,6 +154,15 @@ class ZzApp:
     def is_toolbar_visible(self):
         pass
 
+    def disable_toolbar(self, mode=True):
+        pass
+
+    def disable_menubar(self, mode=True):
+        pass
+
+    def disable_tabbar(self, mode=True):
+        pass
+
     def show_tabbar(self, mode=True):
         pass
 
@@ -161,10 +189,8 @@ class ZzApp:
 
     def run(self):
         self.main_window.restore_geometry(self.settings)
-        self.on_start()
         self.build_menu()
-        self.show_menubar(True)
-        pass
+        self.on_start()
 
 
 class ZzMainWindow(ZzWindow):

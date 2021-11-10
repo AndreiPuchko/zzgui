@@ -8,7 +8,7 @@ if __name__ == "__main__":
     demo()
 
 
-from zzgui import zzform
+# from zzgui import zzform
 from zzgui.zz_qt5.window import ZzQtWindow
 import zzgui.zzapp as zzapp
 
@@ -28,33 +28,30 @@ class ZzApp(zzapp.ZzApp, QApplication):
         self.main_window = ZzMainWindow(title)
 
     def show_form(self, form=None, modal="modal"):
-        if modal == "super":  # real modal dialog
-            print(22222222222)
-            # self.menuBar().setDisabled(True)
-            # self.zz_tabwidget.tabBar().setDisabled(True)
-            # self.zz_toolbar.setDisabled(True)
+        if modal == "": # mdiarea normal window
+            self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
+            form.show()
+        else: # mdiarea modal window
+            form.prev_form = self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
+            if form.prev_form:
+                form.prev_form._lastWidget = zzapp.zz_app.focusWidget()
+            self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
+            if form.prev_form:
+                form.prev_form.setDisabled(True)
+
+            if modal == "super":  # real modal dialog
+                self.disable_toolbar(True)
+                self.disable_menubar(True)
+                self.disable_tabbar(True)
+
             form.exec_()
-        else:
-            if "modal" in modal:  # mdiarea modal window
-                form.prev_form = self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
-                # if form.prev_form:
-                #     form.prev_form._lastWidget = qApp.focusWidget()
-                # form=QDialog()
-                # form.setFixedSize(600, 300)
-                self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
-                form.parent().move(50, 50)
-                # if form.prev_form:
-                #     form.prev_form.setDisabled(True)
-                # print([x for x in dir(form) if x.startswith("e")])
-                # print(hasattr(form, "exec_"))
-                form.exec_()
-                # QDialog.exec_(form)
-                QDialog.show(form)
-                # form.show()
-                print(11)
-            else:  # mdiarea normal window
-                self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
-                form.show()
+
+            if modal == "super":  # real modal dialog
+                self.disable_toolbar(False)
+                self.disable_menubar(False)
+                self.disable_tabbar(False)
+
+            print(11)
 
     def build_menu(self):
         self.menu_list = super().reorder_menu(self.menu_list)
@@ -97,32 +94,41 @@ class ZzApp(zzapp.ZzApp, QApplication):
     def show_toolbar(self, mode=True):
         zzapp.ZzApp.show_toolbar(self)
         if mode:
-            self.zz_toolbar.show()
+            self.main_window.zz_toolbar.show()
         else:
-            self.zz_toolbar.hide()
+            self.main_window.zz_toolbar.hide()
+
+    def disable_toolbar(self, mode=True):
+        self.main_window.zz_toolbar.setDisabled(True if mode else False)
+
+    def disable_menubar(self, mode=True):
+        QMainWindow.menuBar(self.main_window).setDisabled(True if mode else False)
+
+    def disable_tabbar(self, mode=True):
+        self.main_window.zz_tabwidget.tabBar().setDisabled(True if mode else False)
 
     def is_toolbar_visible(self):
-        return self.zz_toolbar.isVisible()
+        return self.main_window.zz_toolbar.isVisible()
 
     def show_tabbar(self, mode=True):
         zzapp.ZzApp.show_tabbar(self)
         if mode:
-            self.zz_tabwidget.tabBar().show()
+            self.main_window.zz_tabwidget.tabBar().show()
         else:
-            self.zz_tabwidget.tabBar().hide()
+            self.main_window.zz_tabwidget.tabBar().hide()
 
     def is_tabbar_visible(self):
-        return self.zz_tabwidget.tabBar().isVisible()
+        return self.main_window.zz_tabwidget.tabBar().isVisible()
 
     def show_statusbar(self, mode=True):
         zzapp.ZzApp.show_statusbar(self)
         if mode:
-            self.statusBar().show()
+            self.main_window.statusBar().show()
         else:
-            self.statusBar().hide()
+            self.main_window.statusBar().hide()
 
     def is_statusbar_visible(self):
-        return self.statusBar().isVisible()
+        return self.main_window.statusBar().isVisible()
 
     def run(self):
         self.main_window.show()
@@ -152,14 +158,9 @@ class ZzMainWindow(zzapp.ZzMainWindow, QMainWindow, ZzQtWindow):
     def show(self):
         QMainWindow.show(self)
 
-    # def run(self):
-    #     super().run()
-    #     self.show()
-    #     self._core_app.exec_()
-
     def closeEvent(self, e):
-        self.close()
-        e.accept()
+        zzapp.zz_app.close()
+        # e.accept()
 
     def close(self):
         super().close()

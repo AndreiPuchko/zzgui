@@ -80,8 +80,9 @@ class ZzWindow(ZzFrame):
         settings.set(self.window_title, "is_max", f"{self.is_maximized()}")
         if not self.is_maximized():
             pos = self.get_position()
-            settings.set(self.window_title, "left", pos[0])
-            settings.set(self.window_title, "top", pos[1])
+            if pos is not None:
+                settings.set(self.window_title, "left", pos[0])
+                settings.set(self.window_title, "top", pos[1])
             size = self.get_size()
             settings.set(self.window_title, "width", size[0])
             settings.set(self.window_title, "height", size[1])

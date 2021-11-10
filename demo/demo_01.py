@@ -6,6 +6,7 @@ if __name__ == "__main__":
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
 
+
 def zzMess(mess="", title="Message", html=1):
     form = ZzForm(title)
     form.add_control("mess", control="text", data=f"{mess}")
@@ -27,7 +28,7 @@ class Demo_app(ZzApp):
 
     def on_start(self):
         self.first_form()
-        # zzMess("122")
+        zzMess("122")
 
     def on_init(self):
         self.add_menu("File|First", self.first_form, toolbar="First")
