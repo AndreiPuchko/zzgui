@@ -71,11 +71,13 @@ class ZzQtWindow(zzwindow.ZzWindow, ZzFrame):
 
     def set_position(self, left, top):
         self.move(left, top)
+        # self.move(100, 100)
 
     def set_size(self, width, height):
         self.resize(width, height)
 
     def get_position(self):
+        print (self.pos())
         return (self.pos().x(), self.pos().y())
 
     def get_size(self):

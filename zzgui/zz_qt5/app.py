@@ -131,6 +131,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
         return self.main_window.statusBar().isVisible()
 
     def run(self):
+        self.main_window.restore_geometry(self.settings)
         self.main_window.show()
         super().run()
         self.exec_()
@@ -149,8 +150,8 @@ class ZzMainWindow(zzapp.ZzMainWindow, QMainWindow, ZzQtWindow):
         self.statusBar().setVisible(True)
         self.set_title(title)
 
-    def zz_layout(self, arg="h"):
-        return layout(arg)
+    # def zz_layout(self, arg="h"):
+    #     return layout(arg)
 
     def focus_widget(self):
         return QApplication.focusWidget()

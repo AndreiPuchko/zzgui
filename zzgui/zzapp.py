@@ -80,6 +80,7 @@ class ZzApp:
         self.settings = ZzSettings()
         self.main_window = ZzMainWindow(title)
         self.menu_list = []
+        self.main_window.restore_geometry(self.settings)
         self.on_init()
         self.main_window.show()
 
@@ -205,24 +206,24 @@ class ZzMainWindow(ZzWindow):
         self.zz_toolbar = None
         self.zz_tabwidget = None
 
-    def zz_layout(self):
-        pass
+    # def zz_layout(self):
+    #     pass
 
-    def _run(self):
-        self.restore_geometry(self.settings)
-        self.build_menu()
-        self.show_menubar(True)
-        self.on_start()
-        return self
+    # def _run(self):
+    #     self.restore_geometry(self.settings)
+    #     self.build_menu()
+    #     self.show_menubar(True)
+    #     self.on_start()
+    #     return self
 
     def show(self):
         pass
 
-    def _close(self):
-        self.save_geometry(self.settings)
+    # def _close(self):
+    #     self.save_geometry(self.settings)
 
-    def _on_init(self):
-        pass
+    # def _on_init(self):
+    #     pass
 
     def on_start(self):
         pass
