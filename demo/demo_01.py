@@ -5,30 +5,15 @@ if __name__ == "__main__":
 
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
+import zzgui.zzdialog
+
+zzgui.zzdialog.ZzForm = ZzForm
+from zzgui.zzdialog import zzMess
 
 
-def zzMess(mess="", title="Message", html=1):
-    form = ZzForm(title)
-    form.add_control("mess", control="text", data=f"{mess}")
-
-    if form.add_control("/h"):
-        form.add_control("/s")
-        form.add_control(
-            "close",
-            "Ok",
-            control="button",
-            valid=form.close,
-        )
-        form.add_control("/s")
-        form.add_control("/")
-    form.show_form("super")
-
-
-class Demo_app(ZzApp):
-
+class DemoApp(ZzApp):
     def on_start(self):
         self.first_form()
-        zzMess("122")
 
     def on_init(self):
         self.add_menu("File|First", self.first_form, toolbar="First")
@@ -47,7 +32,7 @@ class Demo_app(ZzApp):
         self.add_menu("File|-", None)
         self.add_menu("Documents|Personal", None)
         self.add_menu("Documents|Business", None)
-        self.add_menu("Help|About", None)
+        self.add_menu("Help|About", lambda: zzMess("About zzgui"))
 
     def first_form(self):
         form = ZzForm("First form ever")
@@ -112,8 +97,12 @@ class Demo_app(ZzApp):
                     data="*",
                 )
 
-                form.add_control("f1", label="F1", control="line")
-                form.add_control("f2", label="F2", control="line")
+                form.add_control(
+                    "f1", label="F1", control="line", data="f1 label content"
+                )
+                form.add_control(
+                    "f2", label="F2", control="line", data="f2 label content"
+                )
             form.add_control("/")
         form.add_control("/")
 
@@ -157,7 +146,7 @@ class Demo_app(ZzApp):
 
 
 def demo():
-    app = Demo_app("zzgui Demo application")
+    app = DemoApp("zzgui Demo application")
     app.run()
 
 

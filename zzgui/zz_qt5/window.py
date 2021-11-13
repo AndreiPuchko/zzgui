@@ -3,15 +3,13 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QGridLayout
 
 from PyQt5.QtCore import Qt
-
-# from zzgui.zzwindow import ZzWindow, ZzFrame
 
 from zzgui import zzwindow
 

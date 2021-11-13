@@ -4,7 +4,7 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
@@ -15,12 +15,7 @@ import zzgui.zz_qt5.window as zzwindow
 
 class frame(QGroupBox, zzwiddet.ZzWidget, zzwindow.ZzFrame):
     def __init__(self, meta):
-        if meta.get("name")[:2] == "/h":
-            mode = "h"
-        elif meta.get("name")[:2] == "/v":
-            mode = "v"
-        elif meta.get("name")[:2] == "/f":
-            mode = "f"
-        super().__init__(mode=mode)
+        super().__init__(meta)
+        zzwindow.ZzFrame.__init__(self, meta.get("name","/v")[1])
         if meta.get("label"):
             self.setTitle(meta.get("label"))

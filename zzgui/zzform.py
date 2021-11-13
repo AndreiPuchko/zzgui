@@ -3,7 +3,7 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
@@ -36,13 +36,14 @@ class ZzForm(ZzWindow):
                     current_frame.add_widget(label2add)
                 if widget2add:
                     current_frame.add_widget(widget2add)
+
             if meta.get("name", "") == ("/s"):
                 continue
-            if meta.get("name", "").startswith("/"):
-                if len(meta.get("name", "")) == 1:
+            elif meta.get("name", "") == "/":
+                if len(frame_list) > 1:
                     frame_list.pop()
-                else:
-                    frame_list.append(widget2add)
+            elif meta.get("name", "").startswith("/"):
+                frame_list.append(widget2add)
 
         zzapp.zz_app.show_form(self, modal)
 
@@ -88,11 +89,11 @@ class ZzForm(ZzWindow):
         """
         if class_name == "":
             class_name = module_name
-        return getattr(getattr(self._widgets_package, module_name), class_name)
-        # try:
-        #     return getattr(getattr(self._widgets_package, module_name), class_name)
-        # except Exception:
-        #     return getattr(getattr(self._widgets_package, "label"), "label")
+        # return getattr(getattr(self._widgets_package, module_name), class_name)
+        try:
+            return getattr(getattr(self._widgets_package, module_name), class_name)
+        except Exception:
+            return getattr(getattr(self._widgets_package, "label"), "label")
 
     def add_control(
         self,
@@ -102,6 +103,7 @@ class ZzForm(ZzWindow):
         pic="",
         data="",
         valid=None,
+        readonly=None,
         when=None,
     ):
         self.controls.append(
@@ -111,6 +113,7 @@ class ZzForm(ZzWindow):
                 "control": control,
                 "pic": pic,
                 "data": data,
+                "readonly": readonly,
                 "valid": valid,
                 "when": when,
             }

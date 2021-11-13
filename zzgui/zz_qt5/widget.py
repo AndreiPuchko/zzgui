@@ -14,19 +14,12 @@ from zzgui import zzwidget
 
 
 class ZzWidget(QWidget, zzwidget.ZzWidget):
-    # def __init__(self, meta):
-    #     super().__init__(meta)
-    def set_readonly(self, arg):
-        if arg:
-            self.setEnabled(False)
-        else:
-            self.setEnabled(True)
+    def __init__(self, meta):
+        super().__init__()
+        zzwidget.ZzWidget.__init__(self, meta)
 
     def set_enabled(self, arg=True):
-        if arg:
-            self.setEnabled(True)
-        else:
-            self.setEnabled(True)
+        self.setEnabled(True if arg else False)
 
     def set_text(self, text):
         if hasattr(self, "setText"):
@@ -36,3 +29,7 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         if hasattr(self, "text"):
             return self.text()
         return ""
+
+    def set_readonly(self, arg):
+        if hasattr(self, "setReadOnly"):
+            self.setReadOnly(True if arg else False)

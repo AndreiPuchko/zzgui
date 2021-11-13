@@ -16,12 +16,12 @@ from PyQt5.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QRadioButton, QSiz
 
 class radio(QFrame, zzwiddet.ZzWidget):
     def __init__(self, meta):
-        super().__init__()
+        super().__init__(meta)
         self.setLayout(QVBoxLayout() if "v" in meta.get("control") else QHBoxLayout())
         self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().setAlignment(zz_align["7"])
         self.button_list = []
-        self.meta = meta
+        # self.meta = meta
         for item in meta.get("pic", "").split(";"):
             self.button_list.append(QRadioButton(item))
             self.layout().addWidget(self.button_list[-1])

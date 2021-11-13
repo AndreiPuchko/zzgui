@@ -14,8 +14,9 @@ import zzgui.zz_qt5.widget as zzwiddet
 
 class space(QFrame, zzwiddet.ZzWidget):
     def __init__(self, meta):
-        super().__init__()
-        self.meta = meta
+        super().__init__(meta)
+        # zzwiddet.ZzWidget.__init__(self, meta)
+        # self.meta = meta
         self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         self.setLayout(QHBoxLayout())
         self.layout().addStretch()

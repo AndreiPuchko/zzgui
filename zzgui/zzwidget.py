@@ -14,6 +14,7 @@ class ZzWidget:
         self.form = None
         self.label = None
         self.check = None
+        # print("ddd", meta)
         if self.meta.get("readonly"):
             self.set_readonly(True)
         if self.meta.get("disabled"):

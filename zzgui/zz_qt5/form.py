@@ -21,12 +21,8 @@ from PyQt5.QtWidgets import QDialog
 class zzDialog(QDialog):
     def __init__(self, title=""):
         super().__init__()
-        # self.setWindowTitle(title)
-        # self.exec_()
-        # print (123, [f"{x}" for x in dir(self) if x.startswith("e")])
 
 
-# class ZzForm(zzform.ZzForm, ZzQtWindow, QDialog):
 class ZzForm(zzDialog, zzform.ZzForm, ZzQtWindow):
     def __init__(self, title=""):
         super().__init__()

@@ -16,24 +16,6 @@ import re
 
 zz_app = None
 
-def zzMess(mess="", title="Message", html=1):
-    form = ZzForm(title)
-    form.add_control("mess", control="text", data=f"{mess}")
-
-    if form.add_control("/h"):
-        form.add_control("/s")
-        form.add_control(
-            "close",
-            "Ok",
-            control="button",
-            valid=form.close,
-        )
-        form.add_control("/s")
-        form.add_control("/")
-    form.show_form("super")
-
-
-
 class ZzSettings:
     def __init__(self, filename="zzGui.ini"):
         self.filename = filename

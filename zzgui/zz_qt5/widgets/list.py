@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 
 class list(QListWidget, zzwiddet.ZzWidget):
     def __init__(self, meta):
-        super().__init__()
+        super().__init__(meta)
         self.meta = meta
         for item in meta.get("pic", "").split(";"):
             self.addItem(QListWidgetItem(item))

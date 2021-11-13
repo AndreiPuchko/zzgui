@@ -14,6 +14,6 @@ import zzgui.zz_qt5.widget as zzwiddet
 
 class line(QLineEdit, zzwiddet.ZzWidget):
     def __init__(self, meta):
-        super().__init__()
+        super().__init__(meta)
         self.meta = meta
         self.set_text(meta.get('data'))

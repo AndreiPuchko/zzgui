@@ -14,8 +14,8 @@ import zzgui.zz_qt5.widget as zzwiddet
 
 class check(QCheckBox, zzwiddet.ZzWidget):
     def __init__(self, meta):
-        super().__init__()
-        self.meta = meta
+        super().__init__(meta)
+        # self.meta = meta
         self.setText(meta['pic'])
 
     def set_text(self, text):
