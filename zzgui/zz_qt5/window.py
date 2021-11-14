@@ -51,8 +51,6 @@ class ZzFrame(zzwindow.ZzFrame, QWidget):
         super().set_mode(mode=mode)
         if self.layout() is not None:
             return
-            # l = self.layout()
-            # del l
         self.setLayout(layout(mode))
 
     def insert_widget(self, pos=None, widget=None):
@@ -75,7 +73,6 @@ class ZzQtWindow(zzwindow.ZzWindow, ZzFrame):
         self.resize(width, height)
 
     def get_position(self):
-        print (self.pos())
         return (self.pos().x(), self.pos().y())
 
     def get_size(self):

@@ -1,4 +1,5 @@
 *.pyc
+*.png
 __pycache__
 zzGui.ini
 temp/*

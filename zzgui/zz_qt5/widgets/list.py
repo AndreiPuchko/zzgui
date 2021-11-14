@@ -18,3 +18,5 @@ class list(QListWidget, zzwiddet.ZzWidget):
         self.meta = meta
         for item in meta.get("pic", "").split(";"):
             self.addItem(QListWidgetItem(item))
+    def get_text(self):
+        return self.currentItem().text()

@@ -5,9 +5,11 @@ if __name__ == "__main__":
 
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
+
 import zzgui.zzdialog
 
 zzgui.zzdialog.ZzForm = ZzForm
+
 from zzgui.zzdialog import zzMess
 
 
@@ -67,6 +69,31 @@ class DemoApp(ZzApp):
             data="simple data",
         )
 
+        if form.add_control("/t", "Tab1"):
+            form.add_control("/h")
+            form.add_control("", "11111111111111111111")
+            form.add_control("spin1", "Spinbox", control="spin")
+            form.add_control("/s")
+            form.add_control("", "5555555555555555555")
+        if form.add_control("/t", "Tab2"):
+            form.add_control("", "2222222222222222222")
+        form.add_control("/")
+        form.add_control("/")
+        form.add_control("", "44444444444444444444444")
+        
+
+        if form.add_control("/t", "Tab3"):
+            form.add_control("", "11111111111111111111")
+            form.add_control("/")
+        # form.add_control("/s")
+        #     form.add_control("spin1", "Spinbox", control="spin")
+        #     form.add_control("", "5555555555555555555")
+        # if form.add_control("/t", "Tab2"):
+        #     form.add_control("", "2222222222222222222")
+        # form.add_control("/")
+        # form.add_control("", "44444444444444444444444")
+
+
         if form.add_control(name="/h", label="Horizontal frame"):
 
             if form.add_control(name="/v", label="Vertical frame"):
@@ -103,6 +130,9 @@ class DemoApp(ZzApp):
                 form.add_control(
                     "f2", label="F2", control="line", data="f2 label content"
                 )
+                form.add_control(
+                    "bdate", label="Birthday", control="date", data="2011-01-15"
+                )
             form.add_control("/")
         form.add_control("/")
 
@@ -117,7 +147,9 @@ class DemoApp(ZzApp):
             form.add_control(
                 label="tool",
                 control="toolbutton",
-                valid=lambda: print(self.focusWidget().get_text()),
+                valid=lambda: print(
+                    f"{self.focusWidget()}!{self.focusWidget().get_text()}"
+                ),
             )
             form.add_control("/s")
             form.add_control(
@@ -126,8 +158,9 @@ class DemoApp(ZzApp):
                 valid=lambda: zzMess("3333333333333333"),
             )
             form.add_control(label="Cancel", control="button", valid=form.close)
+        form.add_control("/")
 
-        form.show_form()
+        form.show_dialog()
 
     def show_hide_menubar(self):
         self.show_menubar(not self.is_menubar_visible())

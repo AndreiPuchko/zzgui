@@ -28,11 +28,13 @@ class ZzApp(zzapp.ZzApp, QApplication):
         self.main_window = ZzMainWindow(title)
 
     def show_form(self, form=None, modal="modal"):
-        if modal == "": # mdiarea normal window
+        if modal == "":  # mdiarea normal window
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
             form.show()
-        else: # mdiarea modal window
-            form.prev_form = self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
+        else:  # mdiarea modal window
+            form.prev_form = (
+                self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
+            )
             if form.prev_form:
                 form.prev_form._lastWidget = zzapp.zz_app.focusWidget()
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
@@ -161,7 +163,6 @@ class ZzMainWindow(zzapp.ZzMainWindow, QMainWindow, ZzQtWindow):
 
     def closeEvent(self, e):
         zzapp.zz_app.close()
-        # e.accept()
 
     def close(self):
         super().close()

@@ -23,6 +23,16 @@ class radio(QFrame, zzwiddet.ZzWidget):
         self.button_list = []
         # self.meta = meta
         for item in meta.get("pic", "").split(";"):
-            self.button_list.append(QRadioButton(item))
+            self.button_list.append(zzRadioButton(item, self))
             self.layout().addWidget(self.button_list[-1])
         self.button_list[0].setChecked(True)
+
+
+class zzRadioButton(QRadioButton):
+    def __init__(self, text, radio: radio):
+        super().__init__(text)
+        self.radio = radio
+
+    def get_text(self):
+        return f"{self.radio.button_list.index(self)}"
+       

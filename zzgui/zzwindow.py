@@ -15,7 +15,7 @@ class ZzFrame:
         super().__init__()
         self.frame_mode = mode
         self.set_mode(self.frame_mode)
-        self.widgets = []
+        self._widgets_list = []
 
     def set_mode(self, mode="v"):
         self.frame_mode = mode
@@ -24,7 +24,7 @@ class ZzFrame:
         if widget is None:
             return
         if self.frame_mode in ["v", "h"]:
-            self.insert_widget(len(self.widgets), widget)
+            self.insert_widget(len(self._widgets_list), widget)
 
     def insert_widget(self, pos=None, widget=None):
         pass

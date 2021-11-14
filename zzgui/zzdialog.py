@@ -25,4 +25,4 @@ def zzMess(mess="", title="Message", html=1):
 
         form.add_control("/s")
         form.add_control("/")
-    form.show_form("super")
+    form.show_app_modal_dialog()

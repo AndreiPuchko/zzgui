@@ -23,8 +23,8 @@ class ZzWidget:
         #     self.setToolTip(self.meta.get("mess"))
         # if self.meta.get("zzForm"):
         #     self.zzForm = meta["zzForm"]
-        # if hasattr(self, "setText") and self.meta.get("data"):
-        #     self.setText(self.meta.get("data"))
+        if hasattr(self, "set_text") and self.meta.get("data"):
+            self.set_text(self.meta.get("data"))
 
     def set_readonly(self, arg):
         pass
