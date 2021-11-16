@@ -7,8 +7,6 @@ if __name__ == "__main__":
 
     demo()
 
-# from zzgui import zz_qt5
-from PyQt5.QtWidgets import QWidget
 import zzgui.zzapp as zzapp
 
 
@@ -17,6 +15,7 @@ class ZzForm:
         super().__init__()
         self.title = title
         self.controls = []
+        self.actions = zzapp.ZzAction()
         self.form_stack = []
 
     def close(self):
@@ -24,16 +23,24 @@ class ZzForm:
             form_window = self.form_stack.pop()
             form_window.close()
             print("close")
-        pass
 
-    def show_dialog(self, modal=""):
-        ZzFormWindow(self).show_form(modal=modal)
+    def show_dialog(self, title="", modal=""):
+        self.get_form_widget().show_form(title, modal)
+        # ZzFormWindow(self).show_form(modal=modal)
 
-    def show_mdi_modal_dialog(self):
-        ZzFormWindow(self).show_form("modal")
+    def show_mdi_modal_dialog(self, title=""):
+        self.get_form_widget().show_form(title, "modal")
+        # ZzFormWindow(self).show_form("modal")
 
-    def show_app_modal_dialog(self):
-        ZzFormWindow(self).show_form(modal="super")
+    def show_app_modal_dialog(self, title=""):
+        self.get_form_widget().show_form(title, modal="super")
+        # ZzFormWindow(self).show_form(title, modal="super")
+
+    def get_form_widget(self):
+        # Must to be copied into any child class
+        form_widget = ZzFormWindow(self)
+        form_widget.build_form()
+        return form_widget
 
     def add_control(
         self,
@@ -42,6 +49,7 @@ class ZzForm:
         control="",
         pic="",
         data="",
+        actions=[],
         valid=None,
         readonly=None,
         when=None,
@@ -53,6 +61,7 @@ class ZzForm:
                 "control": control,
                 "pic": pic,
                 "data": data,
+                "actions": actions,
                 "readonly": readonly,
                 "valid": valid,
                 "when": when,
@@ -76,7 +85,7 @@ class ZzFormWindow:
         self.mode = "form"
         self.prev_form = None
 
-    def show_form(self, modal="modal"):
+    def build_form(self):
         frame_stack = [self]
         tmp_frame = None
         for meta in self.zz_form.controls:
@@ -96,7 +105,7 @@ class ZzFormWindow:
                         current_frame.add_widget(label2add)
                     if widget2add is not None:
                         current_frame.add_widget(widget2add)
-
+            # If tabpage widget
             if meta.get("name", "") == ("/t"):
                 if self.tab_widget is None:
                     self.tab_widget = widget2add
@@ -118,10 +127,21 @@ class ZzFormWindow:
                         frame_stack.pop()
             elif meta.get("name", "").startswith("/"):
                 frame_stack.append(widget2add)
+        # Make it work never more 
+        self.build_form = lambda: None
 
+    def show_form(self, title="", modal="modal"):
+        self.build_form()
+        self.title = title if title else self.zz_form.title
+        zzapp.zz_app.set_tabbar_text(self.zz_form.title)
         zzapp.zz_app.show_form(self, modal)
 
     def close(self):
+        # print (self.prev_form)
+        if self.prev_form:
+            zzapp.zz_app.set_tabbar_text(self.prev_form.title)
+        else:
+            zzapp.zz_app.set_tabbar_text("=")
         self.save_geometry(zzapp.zz_app.settings)
 
     def widget(self, meta):
@@ -143,8 +163,10 @@ class ZzFormWindow:
             class_name = "frame"
         elif "/t" in name:
             control = "tab"
-        elif "radio" in name:
+        elif "radio" in control:
             control = "radio"
+        elif "toolbar" in control:
+            control = "toolbar"
         elif name == "/s":
             control = "space"
 

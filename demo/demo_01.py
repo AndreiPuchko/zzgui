@@ -5,12 +5,12 @@ if __name__ == "__main__":
 
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
+from zzgui.zzapp import ZzAction
 
 import zzgui.zzdialog
+from zzgui.zzdialog import zzMess
 
 zzgui.zzdialog.ZzForm = ZzForm
-
-from zzgui.zzdialog import zzMess
 
 
 class DemoApp(ZzApp):
@@ -37,7 +37,17 @@ class DemoApp(ZzApp):
         self.add_menu("Help|About", lambda: zzMess("About zzgui"))
 
     def first_form(self):
+        actions = ZzAction()
+        # actions.show_main_button = False
+        # actions.show_actions = False
+        actions.add_action("Action 1", lambda: zzMess("Action 1"))
+        actions.add_action("Action 2", lambda: zzMess("Action 2"))
+
         form = ZzForm("First form ever")
+        # form.add_control("/h", "main window control")
+        form.add_control("toolbar", "", actions=actions, control="toolbar")
+        # form.add_control("/")
+
         if form.add_control("/h", "main window control"):
             form.add_control(
                 label="Main menu on/off",
@@ -80,19 +90,17 @@ class DemoApp(ZzApp):
         form.add_control("/")
         form.add_control("/")
         form.add_control("", "44444444444444444444444")
-        
 
         if form.add_control("/t", "Tab3"):
             form.add_control("", "11111111111111111111")
             form.add_control("/")
-        # form.add_control("/s")
-        #     form.add_control("spin1", "Spinbox", control="spin")
-        #     form.add_control("", "5555555555555555555")
-        # if form.add_control("/t", "Tab2"):
-        #     form.add_control("", "2222222222222222222")
-        # form.add_control("/")
-        # form.add_control("", "44444444444444444444444")
-
+        form.add_control("/s")
+        # form.add_control("spin1", "Spinbox", control="spin")
+        # form.add_control("", "5555555555555555555")
+        if form.add_control("/t", "Tab2"):
+            form.add_control("", "2222222222222222222")
+        form.add_control("/")
+        form.add_control("", "44444444444444444444444")
 
         if form.add_control(name="/h", label="Horizontal frame"):
 
@@ -160,7 +168,7 @@ class DemoApp(ZzApp):
             form.add_control(label="Cancel", control="button", valid=form.close)
         form.add_control("/")
 
-        form.show_dialog()
+        form.show_mdi_modal_dialog()
 
     def show_hide_menubar(self):
         self.show_menubar(not self.is_menubar_visible())

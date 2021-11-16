@@ -4,7 +4,7 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
@@ -15,6 +15,40 @@ from zzgui.zzwindow import ZzWindow
 import re
 
 zz_app = None
+
+
+class ZzAction:
+    def __init__(self, action=None):
+        self.show_main_button = True
+        self.show_actions = True
+        if isinstance(action, list):
+            self.action_list = action[:]
+        else:
+            self.action_list = []
+
+    def add_action(self, text, worker=None, icon="", mess="", hotkey=""):
+        action = {}
+        action['text'] = text
+        action['worker'] = worker
+        action['icon'] = icon
+        action['mess'] = mess
+        action['hotkey'] = hotkey
+        self.action_list.append(action)
+        return True
+
+    # def insertAction(
+    #     self, before, text, worker=None, icon="", mess="", key="", **kvargs
+    # ):
+    #     for x in self.addAction.__code__.co_varnames:
+    #         if x not in ["kvargs", "self"]:
+    #             kvargs[x] = locals()[x]
+    #     self.action_list.insert(before, kvargs)
+
+    # def removeAction(self, text):
+    #     actionIndex = safe_index([x["text"] for x in self.action_list], text)
+    #     if actionIndex is not None:
+    #         self.action_list.pop(actionIndex)
+
 
 class ZzSettings:
     def __init__(self, filename="zzGui.ini"):
@@ -147,6 +181,9 @@ class ZzApp:
         pass
 
     def show_tabbar(self, mode=True):
+        pass
+
+    def set_tabbar_text(self, text=""):
         pass
 
     def hide_tabbar(self, mode=True):

@@ -3,7 +3,7 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
@@ -36,15 +36,21 @@ from PyQt5.QtCore import Qt
 class ZzForm(zzform.ZzForm):
     # def __init__(self, title=""):
     #     super().__init__(title=title)
-    def show_dialog(self, modal="modal"):
-        dialog = ZzFormWindow(self)
-        dialog.show_form(modal)
+    
+    # def show_dialog(self, title="", modal="modal"):
+    #     self.get_form_widget().show_form(title, modal)
 
-    def show_mdi_modal_dialog(self):
-        ZzFormWindow(self).show_form("modal")
+    # def show_mdi_modal_dialog(self, title=""):
+    #     self.get_form_widget().show_form(title, "modal")
 
-    def show_app_modal_dialog(self):
-        ZzFormWindow(self).show_form(modal="super")
+    # def show_app_modal_dialog(self, title=""):
+    #     self.get_form_widget().show_form(title, modal="super")
+
+    def get_form_widget(self):
+        form_widget = ZzFormWindow(self)
+        form_widget.build_form()
+        return form_widget
+
 
 
 class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
@@ -74,7 +80,32 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def showEvent(self, event=None):
         if self.shown:
             return
+
+        # mdi_height = (
+        #     self.parent().parent().parent().viewport().height()
+        #     - zzapp.zz_app.main_window.zz_tabwidget.tabBar().height()
+        # )
+        # mdi_width = self.parent().parent().parent().viewport().width()
+
+        # size_before = self.size()
         self.restore_geometry(zzapp.zz_app.settings)
+        # size_after = self.size()
+        # width_delta = (
+        #     0
+        #     if size_before.width() < size_after.width()
+        #     else size_before.width() - size_after.width()
+        # )
+        # height_delta = (
+        #     0
+        #     if size_before.height() < size_after.height()
+        #     else size_before.height() - size_after.height()
+        # )
+
+        # paw = self.parent()
+        # if width_delta or height_delta:
+        #     paw.resize(size_after.width() + width_delta, size_after.height() + height_delta)
+        # if self.parent().height() +self.parent().y() > mdi_height:
+        #     self.parent().move(self.parent().x(),  0)
         self.shown = True
         if event:
             event.accept()
@@ -115,9 +146,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             QDialog.close(self)
 
     def closeEvent(self, event=None):
-        print("close event")
+        # print("close event")
         if self.prev_form:
-            self.prev_form.setEnabled(True)
+            self.prev_form.parent().setEnabled(True)
         self.close()
         if event:
             event.accept()

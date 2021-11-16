@@ -1,0 +1,70 @@
+if __name__ == "__main__":
+    import sys
+
+    sys.path.insert(0, ".")
+
+from zzgui.zz_qt5.app import ZzApp as ZzApp
+from zzgui.zz_qt5.form import ZzForm as ZzForm
+from zzgui.zzapp import ZzAction
+
+import zzgui.zzdialog
+from zzgui.zzdialog import zzMess
+
+zzgui.zzdialog.ZzForm = ZzForm
+
+
+class DemoApp(ZzApp):
+    def on_start(self):
+        self.first_form()
+
+    def on_init(self):
+        self.add_menu("File|First", self.first_form, toolbar="First")
+        self.add_menu("File|Second", self.worker)
+        self.add_menu("File|Grid", self.worker)
+        self.add_menu("File|Complex", self.worker)
+        self.add_menu("File|-")
+        self.add_menu("File|Toogle toolbar", self.show_hide_toolbar, toolbar="tb")
+        self.add_menu("File|Toogle menubar", self.show_hide_menubar, toolbar="tb")
+        self.add_menu("File|Toogle tabbar", self.show_hide_tabbar, toolbar="tb")
+        self.add_menu(
+            "File|Toogle statusbar", self.show_hide_statusbar, toolbar="tb"
+        )
+        self.add_menu("File|-")
+        self.add_menu("File|Quit", self.close, toolbar="*")
+        self.add_menu("File|-")
+        self.add_menu("Documents|Personal")
+        self.add_menu("Documents|Business")
+        self.add_menu("Help|About", lambda: zzMess("About zzgui"))
+
+    def first_form(self):
+        form = ZzForm("First GRID form ever")
+        form.add_control("/f")
+        form.add_control("uid", "Uid", control="line")
+        form.add_control("name", "Name", control="line")
+        form.add_control("/")
+        # form.show_mdi_modal_dialog()
+        form.show_mdi_modal_dialog()
+
+    def show_hide_menubar(self):
+        self.show_menubar(not self.is_menubar_visible())
+
+    def show_hide_toolbar(self):
+        self.show_toolbar(not self.is_toolbar_visible())
+
+    def show_hide_tabbar(self):
+        self.show_tabbar(not self.is_tabbar_visible())
+
+    def show_hide_statusbar(self):
+        self.show_statusbar(not self.is_statusbar_visible())
+
+    def worker(self):
+        print(123)
+
+
+def demo():
+    app = DemoApp("zzgui Demo application")
+    app.run()
+
+
+if __name__ == "__main__":
+    demo()
