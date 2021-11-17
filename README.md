@@ -1,11 +1,10 @@
-if __name__ == "__main__":
-    import sys
+# The light Python GUI builder (currently based on PyQT5)
 
-    sys.path.insert(0, ".")
-
+# Less than 200 lines GUI app:
+ ---
+```python
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
-from zzgui.zz_qt5.widgets import toolbar
 
 import zzgui.zzdialog
 from zzgui.zzdialog import zzMess
@@ -15,24 +14,30 @@ zzgui.zzdialog.ZzForm = ZzForm
 
 class DemoApp(ZzApp):
     def on_start(self):
-        self.show_form4()
+        self.show_form3()
 
     def on_init(self):
-        self.add_menu("File|First", self.show_form1, toolbar="*")
-        self.add_menu("File|Second", self.show_form2, toolbar="*")
-        self.add_menu("File|Complex", self.show_form3, toolbar="*")
-        self.add_menu("File|Grid", self.show_form4, toolbar="*")
+        self.add_menu("File|First", self.show_form1, toolbar="First")
+        self.add_menu("File|Second", self.show_form2, toolbar="First")
+        self.add_menu("File|Complex", self.show_form3, toolbar="First")
+        self.add_menu("File|Grid", self.worker)
         self.add_menu("File|-")
-        self.add_menu("File|Options|Toogle toolbar", self.show_hide_toolbar)
-        self.add_menu("File|Options|Toogle menubar", self.show_hide_menubar)
-        self.add_menu("File|Options|Toogle tabbar", self.show_hide_tabbar)
-        self.add_menu("File|Options|Toogle statusbar", self.show_hide_statusbar)
+        self.add_menu(
+            "File|Options|Toogle toolbar", self.show_hide_toolbar, toolbar="tb"
+        )
+        self.add_menu(
+            "File|Options|Toogle menubar", self.show_hide_menubar, toolbar="tb"
+        )
+        self.add_menu("File|Options|Toogle tabbar", self.show_hide_tabbar, toolbar="tb")
+        self.add_menu(
+            "File|Options|Toogle statusbar", self.show_hide_statusbar, toolbar="tb"
+        )
         self.add_menu("File|-")
         self.add_menu("File|Quit", self.close, toolbar="*")
         self.add_menu("File|-")
         self.add_menu("Documents|Personal")
         self.add_menu("Documents|Business")
-        self.add_menu("Help|About", lambda: zzMess("About zzgui"), toolbar="*")
+        self.add_menu("Help|About", lambda: zzMess("About zzgui"))
 
     def describe_form1(self):
         form = ZzForm("First form")
@@ -55,7 +60,7 @@ class DemoApp(ZzApp):
 
     def show_form1(self):
         form = self.describe_form1()
-        form.show_mdi_modal_form()
+        form.get_form_widget().show_form()
         print(form.s.name)
 
     def describe_form2(self):
@@ -86,41 +91,24 @@ class DemoApp(ZzApp):
         return form
 
     def show_form2(self):
-        self.describe_form2().show_mdi_modal_form()
+        form = self.describe_form2()
+        form.get_form_widget().show_form()
+        print(form.s.name)
 
     def describe_form3(self):
         form = ZzForm("Complex form")
         form.add_control("/h")
-        form.add_control("", "1", widget=self.describe_form1())
+        form.add_control("", "1", control="form", widget=self.describe_form1())
         form.add_control("/v")
         f1 = self.describe_form2()
         f2 = self.describe_form2()
-        form.add_control("", "2", widget=f1)
-        form.add_control("", "3", widget=f2)
+        form.add_control("", "2", control="form", widget=f1)
+        form.add_control("", "3", control="form", widget=f2)
         return form
 
     def show_form3(self):
-        self.describe_form3().show_mdi_modal_form()
-
-    def describe_form4(self):
-        form = ZzForm("Grid form")
-        form.actions.add_action("New", lambda: zzMess("New"))
-        form.actions.add_action("Edit", lambda: zzMess("Edit"))
-        form.add_control("uid", "Uid", control="line")
-        form.add_control("name", "Name", control="line", data="First Name")
-        form.add_control("date", "Date of bith", control="date", data="1990-05-01")
-        return form
-
-    def show_form4(self):
-        data = [
-            {"uid": 1, "name": "Lorem Ipsum", "date": "2005-01-15"},
-            {"uid": 2, "name": "Dolor Sit", "date": "2005-01-15"},
-            {"uid": 3, "name": "Quis autem", "date": "2005-01-15"},
-            {"uid": 4, "name": "Iron nagel", "date": "2005-01-15"},
-        ]
-        form = self.describe_form4()
-        form.model.set_records(data)
-        form.show_mdi_modal_grid()
+        form = self.describe_form3()
+        form.get_form_widget().show_form()
 
     def show_hide_menubar(self):
         self.show_menubar(not self.is_menubar_visible())
@@ -134,6 +122,10 @@ class DemoApp(ZzApp):
     def show_hide_statusbar(self):
         self.show_statusbar(not self.is_statusbar_visible())
 
+    def worker(self):
+        print(self.main_window.menuBar().actions())
+        print(123)
+
 
 def demo():
     app = DemoApp("zzgui Demo application")
@@ -142,3 +134,5 @@ def demo():
 
 if __name__ == "__main__":
     demo()
+
+```

@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     demo()
 
-from zzgui.utils import num
+from zzgui.zzutils import num
 
 
 class ZzFrame:

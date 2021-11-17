@@ -168,7 +168,7 @@ class DemoApp(ZzApp):
             form.add_control(label="Cancel", control="button", valid=form.close)
         form.add_control("/")
 
-        form.show_mdi_modal_dialog()
+        form.show_mdi_modal_form()
 
     def show_hide_menubar(self):
         self.show_menubar(not self.is_menubar_visible())

@@ -13,8 +13,9 @@ from zzgui.zz_qt5.window import ZzQtWindow
 import zzgui.zzapp as zzapp
 
 
-from PyQt5.QtWidgets import QApplication, QDialog, QWidget, QMainWindow, QToolButton
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QToolButton
 from PyQt5.QtWidgets import QToolBar
+from PyQt5.QtCore import Qt
 
 
 from zzgui.zz_qt5.tab import ZzTabWidget
@@ -35,7 +36,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
             form.prev_form = (
                 self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
             )
-            form.prev_form=form.prev_form.widget() if form.prev_form else None
+            form.prev_form = form.prev_form.widget() if form.prev_form else None
             if form.prev_form:
                 form.prev_form._lastWidget = zzapp.zz_app.focusWidget()
                 form.prev_form.parent().setDisabled(True)
@@ -45,14 +46,14 @@ class ZzApp(zzapp.ZzApp, QApplication):
                 self.disable_toolbar(True)
                 self.disable_menubar(True)
                 self.disable_tabbar(True)
-            
+
             form.exec_()
 
             if modal == "super":  # real modal dialog
                 self.disable_toolbar(False)
                 self.disable_menubar(False)
                 self.disable_tabbar(False)
-            
+
     def build_menu(self):
         self.menu_list = super().reorder_menu(self.menu_list)
         self._main_menu = {}
@@ -80,6 +81,9 @@ class ZzApp(zzapp.ZzApp, QApplication):
                     self.main_window.zz_toolbar.addAction(self._main_menu[_path])
             else:
                 self._main_menu[_path] = node.addMenu(topic)
+        # Show as context menu
+        self.main_window.setContextMenuPolicy(Qt.ActionsContextMenu)
+        self.main_window.addActions(self.main_window.menuBar().actions())
 
     def show_menubar(self, mode=True):
         zzapp.ZzApp.show_menubar(self)
@@ -122,7 +126,8 @@ class ZzApp(zzapp.ZzApp, QApplication):
 
     def set_tabbar_text(self, text=""):
         self.main_window.zz_tabwidget.tabBar().setTabText(
-            self.main_window.zz_tabwidget.currentIndex(), text)
+            self.main_window.zz_tabwidget.currentIndex(), text
+        )
 
     def show_statusbar(self, mode=True):
         zzapp.ZzApp.show_statusbar(self)

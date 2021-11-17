@@ -11,12 +11,12 @@ import zzgui.zzapp as zzapp
 import zzgui.zzform as zzform
 
 from zzgui.zz_qt5.app import ZzQtWindow
-from zzgui.utils import num
+from zzgui.zzutils import num
 
-from PyQt5.QtWidgets import QDialog, QApplication
+from PyQt5.QtWidgets import QDialog, QMdiSubWindow
 from PyQt5.QtGui import QKeySequence
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QEvent, Qt
 
 # from PyQt5.QtWidgets import QFormLayout
 
@@ -36,7 +36,7 @@ from PyQt5.QtCore import Qt
 class ZzForm(zzform.ZzForm):
     # def __init__(self, title=""):
     #     super().__init__(title=title)
-    
+
     # def show_dialog(self, title="", modal="modal"):
     #     self.get_form_widget().show_form(title, modal)
 
@@ -47,10 +47,16 @@ class ZzForm(zzform.ZzForm):
     #     self.get_form_widget().show_form(title, modal="super")
 
     def get_form_widget(self):
+        # Must to be copied into any child class
         form_widget = ZzFormWindow(self)
         form_widget.build_form()
         return form_widget
 
+    def get_grid_widget(self):
+        # Must to be copied into any child class
+        grid_widget = ZzFormWindow(self)
+        grid_widget.build_grid()
+        return grid_widget
 
 
 class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
@@ -80,7 +86,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def showEvent(self, event=None):
         if self.shown:
             return
-
+        self.zz_form.form_stack.append(self)
+        if not isinstance(self.parent(), QMdiSubWindow):
+            self.escapeEnabled = False
         # mdi_height = (
         #     self.parent().parent().parent().viewport().height()
         #     - zzapp.zz_app.main_window.zz_tabwidget.tabBar().height()
@@ -117,6 +125,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         # if key==Qt.Key_Escape:
         #     print (self,self.escapeEnabled)
         if key == Qt.Key_Escape and self.escapeEnabled:
+            print ("form esc")
             self.close()
         # elif self.mode == "form" and key in (Qt.Key_Up,):
         #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.ShiftModifier))
@@ -136,19 +145,20 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         #             return wi.valid()
         # else:
         event.accept()
-        super().keyPressEvent(event)
+        # super().keyPressEvent(event)
 
     def close(self):
         super().close()
         if self.parent() is not None:
-            self.parent().close()
+            if isinstance(self.parent(), QMdiSubWindow):
+                self.parent().close()
         else:
             QDialog.close(self)
 
     def closeEvent(self, event=None):
-        # print("close event")
+        print("close event")
         if self.prev_form:
             self.prev_form.parent().setEnabled(True)
-        self.close()
+        self.zz_form.close()
         if event:
             event.accept()

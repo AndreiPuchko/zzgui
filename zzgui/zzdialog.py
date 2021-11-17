@@ -10,7 +10,7 @@ if __name__ == "__main__":
 from zzgui.zzform import ZzForm
 
 
-def zzMess(mess="", title="Message", html=1):
+def zzMess(mess="", title="Message"):
     form = ZzForm(title)
     form.add_control("mess", control="text", data=f"{mess}", readonly=True)
     if form.add_control("/h"):
@@ -25,4 +25,4 @@ def zzMess(mess="", title="Message", html=1):
 
         form.add_control("/s")
         form.add_control("/")
-    form.show_app_modal_dialog()
+    form.show_app_modal_form()
