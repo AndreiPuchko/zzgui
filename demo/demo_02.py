@@ -5,10 +5,10 @@ if __name__ == "__main__":
 
 from zzgui.zz_qt5.app import ZzApp as ZzApp
 from zzgui.zz_qt5.form import ZzForm as ZzForm
-from zzgui.zz_qt5.widgets import toolbar
 
 import zzgui.zzdialog
 from zzgui.zzdialog import zzMess
+from zzgui.zzutils import num
 
 zzgui.zzdialog.ZzForm = ZzForm
 
@@ -37,17 +37,31 @@ class DemoApp(ZzApp):
     def describe_form1(self):
         form = ZzForm("First form")
         form.add_control("/f")
-        form.add_control("uid", "Uid", control="line")
+        form.add_control("uid", "Uid", control="line", data=1)
+        if form.add_control("/h"):
+
+            def add_id():
+                form.s.uid = num(form.s.uid) + 1
+
+            def sub_id():
+                form.s.uid = num(form.s.uid) - 1
+
+            form.add_control("", "+", control="toolbutton", valid=add_id)
+            form.add_control("", "-", control="toolbutton", valid=sub_id)
+            form.add_control("/")
+
+        form.add_control("/s")
         form.add_control("name", "Name", control="line", data="First Name")
         form.add_control("birthdate", "", control="date", data="1990-05-01")
         form.add_control("/")
         form.add_control("/h")
         form.add_control("/s")
+
         form.add_control(
             "",
             "Greet me",
             control="button",
-            valid=lambda: zzMess(f"{form.s.name}-{form.s.birthdate}"),
+            valid=lambda: zzMess(f"{form.s.name}: {form.s.birthdate}"),
         )
         form.add_control("", "Close", control="button", valid=lambda: form.close())
         form.add_control("/")

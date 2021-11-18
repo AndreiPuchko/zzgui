@@ -13,7 +13,13 @@ from zzgui.zz_qt5.window import ZzQtWindow
 import zzgui.zzapp as zzapp
 
 
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QToolButton
+from PyQt5.QtWidgets import (
+    QApplication,
+    QWidget,
+    QMainWindow,
+    QToolButton,
+    qApp,
+)
 from PyQt5.QtWidgets import QToolBar
 from PyQt5.QtCore import Qt
 
@@ -33,14 +39,17 @@ class ZzApp(zzapp.ZzApp, QApplication):
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
             form.show()
         else:  # mdiarea modal window
-            form.prev_form = (
+            prev_focus_widget = qApp.focusWidget()
+            prev_mdi_window = (
                 self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
             )
-            form.prev_form = form.prev_form.widget() if form.prev_form else None
-            if form.prev_form:
-                form.prev_form._lastWidget = zzapp.zz_app.focusWidget()
-                form.prev_form.parent().setDisabled(True)
+            prev_tabbar_text = self.get_tabbar_text()
+
+            if prev_mdi_window:
+                prev_mdi_window.setDisabled(True)
+
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
+            self.set_tabbar_text(form.title)
 
             if modal == "super":  # real modal dialog
                 self.disable_toolbar(True)
@@ -53,6 +62,13 @@ class ZzApp(zzapp.ZzApp, QApplication):
                 self.disable_toolbar(False)
                 self.disable_menubar(False)
                 self.disable_tabbar(False)
+
+            if prev_mdi_window:
+                prev_mdi_window.setEnabled(True)
+
+            if prev_focus_widget:
+                prev_focus_widget.setFocus()
+            self.set_tabbar_text(prev_tabbar_text)
 
     def build_menu(self):
         self.menu_list = super().reorder_menu(self.menu_list)
@@ -124,6 +140,11 @@ class ZzApp(zzapp.ZzApp, QApplication):
     def is_tabbar_visible(self):
         return self.main_window.zz_tabwidget.tabBar().isVisible()
 
+    def get_tabbar_text(self):
+        return self.main_window.zz_tabwidget.tabBar().tabText(
+            self.main_window.zz_tabwidget.currentIndex()
+        )
+
     def set_tabbar_text(self, text=""):
         self.main_window.zz_tabwidget.tabBar().setTabText(
             self.main_window.zz_tabwidget.currentIndex(), text
@@ -159,11 +180,8 @@ class ZzMainWindow(zzapp.ZzMainWindow, QMainWindow, ZzQtWindow):
         self.statusBar().setVisible(True)
         self.set_title(title)
 
-    # def zz_layout(self, arg="h"):
-    #     return layout(arg)
-
-    def focus_widget(self):
-        return QApplication.focusWidget()
+    # def focus_widget(self):
+    #     return QApplication.focusWidget()
 
     def show(self):
         QMainWindow.show(self)

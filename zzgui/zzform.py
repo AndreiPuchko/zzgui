@@ -7,8 +7,6 @@ if __name__ == "__main__":
 
     demo()
 
-from zzgui.zz_qt5 import widget, widgets
-from zzgui.zz_qt5.widgets import toolbar
 import zzgui.zzapp as zzapp
 from zzgui.zzmodel import ZzModel
 
@@ -34,7 +32,6 @@ class ZzForm:
             if self.form_stack[-1].escapeEnabled:
                 self.last_closed_form = self.form_stack.pop()
                 self.last_closed_form.close()
-                print("close!")
         self._in_close_flag = False
 
     def show_form(self, title="", modal="modal"):
@@ -85,6 +82,7 @@ class ZzForm:
         readonly=None,
         when=None,
         widget=None,
+        tag="",
     ):
         self.controls.append(
             {
@@ -98,6 +96,7 @@ class ZzForm:
                 "valid": valid,
                 "when": when,
                 "widget": widget,
+                "tag": tag,
             }
         )
         return True
@@ -115,38 +114,33 @@ class ZzFormWindow:
         self._widgets_package = None
         self.escapeEnabled = True
         self.mode = "form"
-        self.prev_form = None
+        # self.prev_form = None
 
     def build_grid(self):
         # populate model with columns metadata
         for meta in self.zz_form.controls:
             self.zz_form.model.add_column(meta)
 
-        toolbar_widget = None
-        if self.zz_form.actions.action_list:
-            widget_class = self._get_widget("toolbar")
-            toolbar_widget = widget_class({"actions": self.zz_form.actions, "control": "toolbar"})
-            self.add_widget(toolbar_widget)
-        widget_class = self._get_widget("grid")
-        grid_widget = widget_class(self.zz_form)
-        self.add_widget(grid_widget)
+        gridForm = ZzForm()
+        gridForm.add_control("/vs", actions=self.zz_form.actions, tag="gridsplitter")
+        gridForm.add_control("toolbar", control="toolbar", actions=self.zz_form.actions)
+        gridForm.add_control("form__grid", control="grid")
 
-        if toolbar_widget:
-            toolbar_widget.set_context_menu(grid_widget)
+        self.build_form(gridForm.controls)
 
-        # Make it work never more
-        self.build_grid = lambda: None
-        self.build_form = lambda: None
+        return
 
-    def build_form(self):
+    def build_form(self, controls=[]):
         frame_stack = [self]
         tmp_frame = None
-        for meta in self.zz_form.controls:
+        if controls == []:
+            controls = self.zz_form.controls
+        for meta in controls:
             # print(frame_list)
             if meta.get("noform", ""):
                 continue
             current_frame = frame_stack[-1]
-            
+
             # do not add widget if it is not first tabpage on the form
             if not (meta.get("name", "") == ("/t") and self.tab_widget is not None):
                 label2add, widget2add = self.widget(meta)
@@ -157,7 +151,7 @@ class ZzFormWindow:
                         current_frame.add_widget(label2add)
                     if widget2add is not None:
                         current_frame.add_widget(widget2add)
-            # If tabpage widget
+            # If second and more tabpage widget
             if meta.get("name", "") == ("/t"):
                 if self.tab_widget is None:
                     self.tab_widget = widget2add
@@ -166,7 +160,7 @@ class ZzFormWindow:
                     if tmp_frame in frame_stack:
                         frame_stack = frame_stack[: frame_stack.index(tmp_frame)]
                 tmp_frame = self.widget({"name": "/v"})[1]
-                self.tab_widget.addTab(tmp_frame, meta.get("label", ""))
+                self.tab_widget.add_tab(tmp_frame, meta.get("label", ""))
                 frame_stack.append(tmp_frame)
             elif meta.get("name", "") == ("/s"):
                 continue
@@ -183,23 +177,57 @@ class ZzFormWindow:
         self.build_grid = lambda: None
         self.build_form = lambda: None
 
+    def get_splitters(self):
+        return [
+            x
+            for x in self.widgets.keys()
+            if hasattr(self.widgets[x], "splitter")
+            and self.widgets[x].splitter is not None
+        ]
+
     def show_form(self, title="", modal="modal"):
         self.build_form()
         self.title = title if title else self.zz_form.title
-        zzapp.zz_app.set_tabbar_text(self.zz_form.title)
+        # Restore splitters sizes
+        for x in self.get_splitters():
+            sizes = zzapp.zz_app.settings.get(
+                self.window_title,
+                f"splitter-{x}",
+                "",
+            )
+            self.widgets[x].splitter.set_sizes(sizes)
+        # Restore grid columns sizes
+        if "form__grid" in self.widgets:
+            col_settings = {}
+            for x in self.zz_form.model.headers:
+                data = zzapp.zz_app.settings.get(
+                    self.window_title, f"grid_column-'{x}'"
+                )
+                col_settings[x] = data
+            self.widgets["form__grid"].set_column_settings(col_settings)
+
         zzapp.zz_app.show_form(self, modal)
 
     def close(self):
-        # print (self.prev_form)
-        if self.prev_form:
-            zzapp.zz_app.set_tabbar_text(self.prev_form.title)
-        else:
-            zzapp.zz_app.set_tabbar_text("=")
+        # Splitters sizes
+        for x in self.get_splitters():
+            zzapp.zz_app.settings.set(
+                self.window_title,
+                f"splitter-{x}",
+                self.widgets[x].splitter.get_sizes(),
+            )
+        # Grid columns
+        if "form__grid" in self.widgets:
+            for x in self.widgets["form__grid"].get_columns_settings():
+                zzapp.zz_app.settings.set(
+                    self.window_title,
+                    f"grid_column-'{x['name']}'",
+                    x["data"],
+                )
         self.save_geometry(zzapp.zz_app.settings)
 
     def widget(self, meta):
-        """
-        """
+        """Widgets fabric"""
         if not meta.get("control"):
             if meta.get("widget"):
                 control = "widget"
@@ -225,30 +253,35 @@ class ZzFormWindow:
             else:
                 widget2add = meta.get("widget")
             return label2add, widget2add
-        # Special cases
-        if name[:2] in ("/h", "/v", "/f"):  # frames
-            control = "frames"
-            class_name = "frame"
-        elif "/" == name:
-            return None, None
-        elif "/t" in name:  # Tabpage
-            control = "tab"
-        elif "radio" in control:
-            control = "radio"
-        elif "toolbar" in control:
-            control = "toolbar"
-        elif name == "/s":
-            control = "space"
+        else:
+            # Special cases
+            if name[:2] in ("/h", "/v", "/f"):  # frames
+                control = "frames"
+                class_name = "frame"
+                label2add = None
+            elif "/" == name:
+                return None, None
+            elif "/t" in name:  # Tabpage
+                control = "tab"
+            elif "radio" in control:
+                control = "radio"
+            elif "toolbar" in control:
+                control = "toolbar"
+            elif name == "/s":
+                control = "space"
 
-        widget_class = self._get_widget(control, class_name)
+            widget_class = self._get_widget(control, class_name)
 
-        if widget_class:
-            widget2add = widget_class(meta)
+            if widget_class:
+                if control == "grid":
+                    widget2add = widget_class(self.zz_form)
+                else:
+                    widget2add = widget_class(meta)
 
-        if hasattr(widget2add, "label"):
-            widget2add.label = label2add
+            if hasattr(widget2add, "label"):
+                widget2add.label = label2add
 
-        self.widgets[name] = widget2add
+        self.widgets[meta.get("tag", "") if meta.get("tag", "") else name] = widget2add
         return label2add, widget2add
 
     def _get_widget(self, module_name, class_name=""):
@@ -263,18 +296,18 @@ class ZzFormWindow:
 
 
 class ZzFormData:
-    """Retrieving data from form"""
+    """Get and put data from/to form"""
 
     def __init__(self, zz_form: ZzForm):
         self.zz_form = zz_form
 
-    # def __setattr__(self, name, value):
-    #     if name != "form":
-    #         w = self.form.dialogForm.widgets.get(name)
-    #         if w:
-    #             w.setText(value)
-    #     else:
-    #         self.__dict__[name] = value
+    def __setattr__(self, name, value):
+        if name != "zz_form":
+            w = self.zz_form.form_stack[-1].widgets.get(name)
+            if w:
+                w.set_text(value)
+        else:
+            self.__dict__[name] = value
 
     def __getattr__(self, name):
         if self.zz_form.form_stack == []:
@@ -286,7 +319,3 @@ class ZzFormData:
             widget = self.zz_form.form_stack[-1].widgets.get(name)
         if widget is not None:
             return widget.get_text()
-        # else:
-        #     return self.__dict__.get(name, "")
-        # else:
-        #     return self.form.lastDialogData.get(name, "")

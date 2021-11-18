@@ -3,7 +3,7 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
@@ -23,7 +23,7 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
 
     def set_text(self, text):
         if hasattr(self, "setText"):
-            self.setText(text)
+            self.setText(f"{text}")
 
     def get_text(self):
         if hasattr(self, "text"):

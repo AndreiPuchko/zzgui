@@ -48,6 +48,7 @@ def layout(arg="h"):
 
 class ZzFrame(zzwindow.ZzFrame, QWidget):
     def set_mode(self, mode="v"):
+        self.splitter = None
         super().set_mode(mode=mode)
         if self.layout() is not None:
             return

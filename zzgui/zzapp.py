@@ -183,6 +183,9 @@ class ZzApp:
     def show_tabbar(self, mode=True):
         pass
 
+    def get_tabbar_text(self):
+        pass
+
     def set_tabbar_text(self, text=""):
         pass
 

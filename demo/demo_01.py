@@ -80,7 +80,7 @@ class DemoApp(ZzApp):
         )
 
         if form.add_control("/t", "Tab1"):
-            form.add_control("/h")
+            form.add_control("/hs")
             form.add_control("", "11111111111111111111")
             form.add_control("spin1", "Spinbox", control="spin")
             form.add_control("/s")
@@ -93,18 +93,16 @@ class DemoApp(ZzApp):
 
         if form.add_control("/t", "Tab3"):
             form.add_control("", "11111111111111111111")
-            form.add_control("/")
-        form.add_control("/s")
-        # form.add_control("spin1", "Spinbox", control="spin")
-        # form.add_control("", "5555555555555555555")
+        
         if form.add_control("/t", "Tab2"):
             form.add_control("", "2222222222222222222")
         form.add_control("/")
+        
         form.add_control("", "44444444444444444444444")
 
         if form.add_control(name="/h", label="Horizontal frame"):
 
-            if form.add_control(name="/v", label="Vertical frame"):
+            if form.add_control(name="/vs", label="Vertical frame"):
                 form.add_control(label="just label 1")
                 form.add_control(label="just label 2")
                 form.add_control(

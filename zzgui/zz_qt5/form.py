@@ -7,16 +7,15 @@ if __name__ == "__main__":
 
     demo()
 
+from PyQt5.QtWidgets import QDialog, QMdiSubWindow
+from PyQt5.QtCore import Qt
+
 import zzgui.zzapp as zzapp
 import zzgui.zzform as zzform
 
 from zzgui.zz_qt5.app import ZzQtWindow
 from zzgui.zzutils import num
 
-from PyQt5.QtWidgets import QDialog, QMdiSubWindow
-from PyQt5.QtGui import QKeySequence
-
-from PyQt5.QtCore import QEvent, Qt
 
 # from PyQt5.QtWidgets import QFormLayout
 
@@ -120,12 +119,11 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
     def keyPressEvent(self, event):
         key = event.key()
-        keyText = QKeySequence(event.modifiers() | event.key()).toString()
+        # keyText = QKeySequence(event.modifiers() | event.key()).toString()
         # print (f"{keyText}")
         # if key==Qt.Key_Escape:
         #     print (self,self.escapeEnabled)
         if key == Qt.Key_Escape and self.escapeEnabled:
-            print ("form esc")
             self.close()
         # elif self.mode == "form" and key in (Qt.Key_Up,):
         #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.ShiftModifier))
@@ -156,9 +154,8 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             QDialog.close(self)
 
     def closeEvent(self, event=None):
-        print("close event")
-        if self.prev_form:
-            self.prev_form.parent().setEnabled(True)
+        # if self.prev_form:
+        #     self.prev_form.parent().setEnabled(True)
         self.zz_form.close()
         if event:
             event.accept()

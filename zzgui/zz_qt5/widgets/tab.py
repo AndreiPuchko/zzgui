@@ -17,3 +17,6 @@ class tab(QTabWidget, zzwiddet.ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
         self.meta = meta
+
+    def add_tab(self, widget, text=""):
+        self.addTab(widget, text)
