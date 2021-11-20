@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt
 
 import zzgui.zzapp as zzapp
 import zzgui.zzform as zzform
+import zzgui.zz_qt5.widgets
 
 from zzgui.zz_qt5.app import ZzQtWindow
 from zzgui.zzutils import num
@@ -62,7 +63,8 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def __init__(self, zz_form: ZzForm):
         super().__init__(zz_form)
         ZzQtWindow.__init__(self, zz_form.title)
-        self._widgets_package = __import__("zzgui.zz_qt5.widgets", None, None, [""])
+        # self._widgets_package = __import__("zzgui.zz_qt5.widgets", None, None, [""])
+        self._widgets_package = zzgui.zz_qt5.widgets
 
     def restore_geometry(self, settings):
         paw = self.parent()
