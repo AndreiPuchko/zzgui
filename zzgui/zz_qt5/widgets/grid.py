@@ -125,6 +125,8 @@ class grid(QTableView):
     def set_column_settings(self, col_settings):
         headers = self.get_columns_headers()
         for x in col_settings:
+            if "," not in col_settings[x]:
+                continue
             column_pos = num(col_settings[x].split(",")[0])
             column_width = num(col_settings[x].split(",")[1])
             self.setColumnWidth(headers.get(x), column_width)
