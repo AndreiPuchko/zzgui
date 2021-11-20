@@ -6,7 +6,7 @@ authors = ["Andrei Puchko <andrei.puchko@gmx.de>"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = ">=3.6.2,<3.11"
 PyQt5 = "^5.15.6"
 QScintilla = "^2.13.1"
 
@@ -14,6 +14,7 @@ QScintilla = "^2.13.1"
 flake8 = "^4.0.1"
 black = "^21.10b0"
 pylint = "^2.11.1"
+pyinstaller = "^4.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

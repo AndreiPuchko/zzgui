@@ -3,3 +3,5 @@
 __pycache__
 zzGui.ini
 temp/*
+build
+dist
