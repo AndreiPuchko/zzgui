@@ -8,8 +8,7 @@ if __name__ == "__main__":
 
     demo()
 
-import zzgui.zz_qt5.widget as zzwiddet
-from zzgui.zz_qt5.window import zz_align
+
 from zzgui.zzapp import ZzAction
 
 from PyQt5.QtWidgets import (
@@ -23,8 +22,11 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 
+from zzgui.qt5.zzwidget import ZzWidget
+from zzgui.qt5.zzwindow import zz_align
 
-class toolbar(QFrame, zzwiddet.ZzWidget):
+
+class zztoolbar(QFrame, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
         self.setLayout(QVBoxLayout() if "v" in meta.get("control") else QHBoxLayout())
@@ -108,7 +110,9 @@ class toolbar(QFrame, zzwiddet.ZzWidget):
             self.toolBarButton.addActions(tool_bar_qt_actions.actions())
             for x in self.toolBarButton.actions():
                 if hasattr(self.toolBarButton.widgetForAction(x), "setPopupMode"):
-                    self.toolBarButton.widgetForAction(x).setPopupMode(QToolButton.InstantPopup)
+                    self.toolBarButton.widgetForAction(x).setPopupMode(
+                        QToolButton.InstantPopup
+                    )
 
             if actions.show_actions:
                 self.layout().addWidget(self.toolBarButton)

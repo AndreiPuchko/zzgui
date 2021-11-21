@@ -9,8 +9,8 @@ if __name__ == "__main__":
 
 
 # from zzgui import zzform
-from zzgui.zz_qt5.window import ZzQtWindow
-import zzgui.zzapp as zzapp
+
+import os
 
 
 from PyQt5.QtWidgets import (
@@ -18,14 +18,20 @@ from PyQt5.QtWidgets import (
     QWidget,
     QMainWindow,
     QToolButton,
+    QToolBar,
+    QTabWidget,
+    QTabBar,
+    QMdiArea,
+    QSizePolicy,
     qApp,
 )
-from PyQt5.QtWidgets import QToolBar
-from PyQt5.QtCore import Qt
+
+from PyQt5.QtCore import QEvent, Qt
 
 
-from zzgui.zz_qt5.tab import ZzTabWidget
-from zzgui.zz_qt5.window import layout
+from zzgui.qt5.zzwindow import ZzQtWindow
+from zzgui.qt5.zzwindow import layout
+import zzgui.zzapp as zzapp
 
 
 class ZzApp(zzapp.ZzApp, QApplication):
@@ -35,6 +41,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
         self.main_window = ZzMainWindow(title)
 
     def show_form(self, form=None, modal="modal"):
+        # form.setParent(zzapp.zz_app.main_window)
         if modal == "":  # mdiarea normal window
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
             form.show()
@@ -91,7 +98,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
                 self._main_menu[_path] = node.addAction(topic)
                 self._main_menu[_path].triggered.connect(x["WORKER"])
                 if x["TOOLBAR"]:
-                    button = QToolButton()
+                    button = QToolButton(self.main_window)
                     button.setText(topic)
                     button.setDefaultAction(self._main_menu[_path])
                     self.main_window.zz_toolbar.addAction(self._main_menu[_path])
@@ -167,13 +174,57 @@ class ZzApp(zzapp.ZzApp, QApplication):
         self.exec_()
 
 
-class ZzMainWindow(zzapp.ZzMainWindow, QMainWindow, ZzQtWindow):
+class ZzMainWindow(QMainWindow, zzapp.ZzMainWindow, ZzQtWindow):
+    class ZzTabWidget(QTabWidget):
+        def __init__(self, parent):
+            super().__init__(parent)
+            self.addTab(QWidget(parent), "")
+            self.setAttribute(Qt.WA_DeleteOnClose)
+            self.addTabButton = QToolButton(self)
+            self.addTabButton.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+            self.addTabButton.setText("+")
+            self.addTabButton.clicked.connect(self.addTab)
+            self.tabBar().setTabButton(0, QTabBar.RightSide, self.addTabButton)
+            self.tabBar().setTabEnabled(0, False)
+
+            self.closeButton = QToolButton(self)
+            self.closeButton.setText("x")
+            self.closeButton.clicked.connect(self.closeSubWindow)
+            self.setCornerWidget(self.closeButton)
+            self.currentChanged.connect(self._currentChanged)
+
+            self.addTab()
+            self.setCurrentIndex(0)
+
+        def _currentChanged(self, index: int):
+            # bug path when subwindow in tab 0 lost focus if we close subwindow in other tab
+            if index == 0 and self.currentWidget().subWindowList():
+                self.currentWidget().subWindowList()[-1].setFocus()
+
+        def closeSubWindow(self):
+            currentTabIndex = self.currentIndex()
+            if self.currentWidget().activeSubWindow():
+                self.currentWidget().activeSubWindow().close()
+            elif self.count() > 2:  # close tab if them >2
+                self.setCurrentIndex(currentTabIndex - 1)
+                self.removeTab(currentTabIndex)
+
+        def addTab(self, widget=None, label="="):
+            if not widget:
+                widget = QMdiArea(self)
+                widget.setOption(QMdiArea.DontMaximizeSubWindowOnActivation)
+                widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                widget.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+
+            self.insertTab(self.count() - 1, widget, label)
+            self.setCurrentIndex(self.count() - 2)
+
     def __init__(self, title=""):
         self._core_app = QApplication([])
         super().__init__()
-        self.zz_toolbar = QToolBar()
-        self.zz_tabwidget = ZzTabWidget()
-        self.setCentralWidget(QWidget())
+        self.zz_toolbar = QToolBar(self)
+        self.zz_tabwidget = self.ZzTabWidget(self)
+        self.setCentralWidget(QWidget(self))
         self.centralWidget().setLayout(layout("v"))
         self.centralWidget().layout().addWidget(self.zz_toolbar)
         self.centralWidget().layout().addWidget(self.zz_tabwidget)
@@ -186,9 +237,11 @@ class ZzMainWindow(zzapp.ZzMainWindow, QMainWindow, ZzQtWindow):
     def show(self):
         QMainWindow.show(self)
 
-    def closeEvent(self, e):
+    def closeEvent(self, event: QEvent):
+        event.accept()
         zzapp.zz_app.close()
 
     def close(self):
-        super().close()
         QMainWindow.close(self)
+        super().close()
+        os._exit(0)

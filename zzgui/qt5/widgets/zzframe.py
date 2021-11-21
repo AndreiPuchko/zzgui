@@ -11,18 +11,20 @@ if __name__ == "__main__":
 from PyQt5.QtWidgets import QGroupBox, QSplitter, QSizePolicy
 from PyQt5.QtCore import Qt
 
-from zzgui.zzutils import num
-import zzgui.zz_qt5.widget as zzwiddet
-import zzgui.zz_qt5.window as zzwindow
+# from zzgui.zzutils import num
+
+from zzgui.qt5.zzwindow import ZzFrame
+
+from zzgui.qt5.zzwidget import ZzWidget
 
 
-class frame(QGroupBox, zzwiddet.ZzWidget, zzwindow.ZzFrame):
+class zzframe(QGroupBox, ZzWidget, ZzFrame):
     def __init__(self, meta):
         super().__init__(meta)
-        zzwindow.ZzFrame.__init__(self, meta.get("name", "/v")[1])
+        ZzFrame.__init__(self, meta.get("name", "/v")[1])
         self.splitter = None
         if meta.get("name", "")[2:3] == "s":  # Splitter!
-            self.splitter = splitter()
+            self.splitter = zzsplitter()
             if meta.get("name").startswith("/v"):
                 self.splitter.setOrientation(Qt.Orientation.Vertical)
             self.layout().addWidget(self.splitter)
@@ -39,7 +41,7 @@ class frame(QGroupBox, zzwiddet.ZzWidget, zzwindow.ZzFrame):
             return super().add_widget(widget=widget, label=label)
 
 
-class splitter(QSplitter):
+class zzsplitter(QSplitter):
     def __init__(self):
         super().__init__()
         self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))

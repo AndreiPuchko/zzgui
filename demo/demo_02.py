@@ -3,8 +3,8 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-from zzgui.zz_qt5.app import ZzApp as ZzApp
-from zzgui.zz_qt5.form import ZzForm as ZzForm
+from zzgui.qt5.zzapp import ZzApp as ZzApp
+from zzgui.qt5.zzform import ZzForm as ZzForm
 
 import zzgui.zzdialog
 from zzgui.zzdialog import zzMess

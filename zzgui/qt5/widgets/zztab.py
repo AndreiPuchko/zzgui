@@ -4,16 +4,17 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
-from PyQt5.QtWidgets import QTabWidget, QWidget
-from zzgui.zz_qt5.window import ZzFrame
-import zzgui.zz_qt5.widget as zzwiddet
+from PyQt5.QtWidgets import QTabWidget
+
+from zzgui.qt5.zzwindow import ZzFrame
+from zzgui.qt5.zzwidget import ZzWidget
 
 
-class tab(QTabWidget, zzwiddet.ZzWidget):
+class zztab(QTabWidget, ZzWidget, ZzFrame):
     def __init__(self, meta):
         super().__init__(meta)
         self.meta = meta

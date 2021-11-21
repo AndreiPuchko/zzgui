@@ -10,6 +10,18 @@ poetry install
 python3 demo/demo.py
 ```
 
+# Build standalone executable 
+(The resulting executable file will appear in the folder  dist/)
+## One file
+```bash
+pyinstaller -F demo/demo.py
+```
+
+## One directory
+```bash
+pyinstaller -D demo/demo.py
+```
+
 # Less than 200 lines GUI app:
  ---
 ```python

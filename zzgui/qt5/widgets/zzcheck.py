@@ -9,10 +9,10 @@ if __name__ == "__main__":
     demo()
 
 from PyQt5.QtWidgets import QCheckBox
-import zzgui.zz_qt5.widget as zzwiddet
 
+from zzgui.qt5.zzwidget import ZzWidget
 
-class check(QCheckBox, zzwiddet.ZzWidget):
+class zzcheck(QCheckBox, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
         self.setText(meta['label'])

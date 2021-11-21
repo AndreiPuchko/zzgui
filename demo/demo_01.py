@@ -3,8 +3,8 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-from zzgui.zz_qt5.app import ZzApp as ZzApp
-from zzgui.zz_qt5.form import ZzForm as ZzForm
+from zzgui.qt5.zzapp import ZzApp as ZzApp
+from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.zzapp import ZzAction
 
 import zzgui.zzdialog
@@ -93,11 +93,11 @@ class DemoApp(ZzApp):
 
         if form.add_control("/t", "Tab3"):
             form.add_control("", "11111111111111111111")
-        
+
         if form.add_control("/t", "Tab2"):
             form.add_control("", "2222222222222222222")
         form.add_control("/")
-        
+
         form.add_control("", "44444444444444444444444")
 
         if form.add_control(name="/h", label="Horizontal frame"):

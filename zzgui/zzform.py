@@ -20,6 +20,8 @@ class ZzForm:
         self.actions = zzapp.ZzAction()
         self.model = ZzModel()
         self.s = ZzFormData(self)
+        # Must be defined in any subclass
+        self._ZzFormWindow_class = None
 
         self._in_close_flag = False
         self.last_closed_form = None
@@ -59,14 +61,12 @@ class ZzForm:
         self.get_grid_widget().show_form(title, modal="superl")
 
     def get_form_widget(self):
-        # Must to be copied into any child class
-        form_widget = ZzFormWindow(self)
+        form_widget = self._ZzFormWindow_class(self)
         form_widget.build_form()
         return form_widget
 
     def get_grid_widget(self):
-        # Must to be copied into any child class
-        grid_widget = ZzFormWindow(self)
+        grid_widget = self._ZzFormWindow_class(self)
         grid_widget.build_grid()
         return grid_widget
 
@@ -108,13 +108,11 @@ class ZzFormWindow:
         self.shown = False
         self.zz_form = zz_form
         self.title = ""
-        # self.meta = {}  # used when form_widget is a part of complex form
         self.widgets = {}
         self.tab_widget = None
         self._widgets_package = None
         self.escapeEnabled = True
         self.mode = "form"
-        # self.prev_form = None
 
     def build_grid(self):
         # populate model with columns metadata
@@ -255,8 +253,8 @@ class ZzFormWindow:
             return label2add, widget2add
         else:
             # Special cases
-            if name[:2] in ("/h", "/v", "/f"):  # frames
-                control = "frames"
+            if name[:2] in ("/h", "/v", "/f"):  # frame
+                control = "frame"
                 class_name = "frame"
                 label2add = None
             elif "/" == name:
@@ -289,10 +287,12 @@ class ZzFormWindow:
         if class_name == "":
             class_name = module_name
         # return getattr(getattr(self._widgets_package, module_name), class_name)
+        module_name = f"zz{module_name}"
+        class_name = f"zz{class_name}"
         try:
             return getattr(getattr(self._widgets_package, module_name), class_name)
         except Exception:
-            return getattr(getattr(self._widgets_package, "label"), "label")
+            return getattr(getattr(self._widgets_package, "zzlabel"), "zzlabel")
 
 
 class ZzFormData:

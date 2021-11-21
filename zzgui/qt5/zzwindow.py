@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QGri
 
 from PyQt5.QtCore import Qt
 
-from zzgui import zzwindow
+from zzgui import zzapp, zzwindow
 
 zz_align = {
     "": Qt.AlignLeft | Qt.AlignTop,

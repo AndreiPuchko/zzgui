@@ -12,9 +12,9 @@ from PyQt5.QtCore import Qt
 
 import zzgui.zzapp as zzapp
 import zzgui.zzform as zzform
-import zzgui.zz_qt5.widgets
+import zzgui.qt5.widgets
 
-from zzgui.zz_qt5.app import ZzQtWindow
+from zzgui.qt5.zzapp import ZzQtWindow
 from zzgui.zzutils import num
 
 
@@ -34,37 +34,16 @@ from zzgui.zzutils import num
 
 
 class ZzForm(zzform.ZzForm):
-    # def __init__(self, title=""):
-    #     super().__init__(title=title)
-
-    # def show_dialog(self, title="", modal="modal"):
-    #     self.get_form_widget().show_form(title, modal)
-
-    # def show_mdi_modal_dialog(self, title=""):
-    #     self.get_form_widget().show_form(title, "modal")
-
-    # def show_app_modal_dialog(self, title=""):
-    #     self.get_form_widget().show_form(title, modal="super")
-
-    def get_form_widget(self):
-        # Must to be copied into any child class
-        form_widget = ZzFormWindow(self)
-        form_widget.build_form()
-        return form_widget
-
-    def get_grid_widget(self):
-        # Must to be copied into any child class
-        grid_widget = ZzFormWindow(self)
-        grid_widget.build_grid()
-        return grid_widget
+    def __init__(self, title=""):
+        super().__init__(title=title)
+        self._ZzFormWindow_class = ZzFormWindow
 
 
 class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def __init__(self, zz_form: ZzForm):
         super().__init__(zz_form)
         ZzQtWindow.__init__(self, zz_form.title)
-        # self._widgets_package = __import__("zzgui.zz_qt5.widgets", None, None, [""])
-        self._widgets_package = zzgui.zz_qt5.widgets
+        self._widgets_package = zzgui.qt5.widgets
 
     def restore_geometry(self, settings):
         paw = self.parent()
@@ -80,9 +59,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         #     paw.showMaximized()
 
     def get_position(self):
-        paw = self.parent()
-        if paw is not None:
-            return (paw.pos().x(), paw.pos().y())
+        parent_mdi_sub_window = self.parent()
+        if parent_mdi_sub_window is not None:
+            return (parent_mdi_sub_window.pos().x(), parent_mdi_sub_window.pos().y())
 
     def showEvent(self, event=None):
         if self.shown:
@@ -156,8 +135,6 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             QDialog.close(self)
 
     def closeEvent(self, event=None):
-        # if self.prev_form:
-        #     self.prev_form.parent().setEnabled(True)
         self.zz_form.close()
         if event:
             event.accept()

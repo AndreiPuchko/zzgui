@@ -4,16 +4,17 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
 from PyQt5.QtWidgets import QSpinBox
-import zzgui.zz_qt5.widget as zzwiddet
+
+from zzgui.qt5.zzwidget import ZzWidget
 
 
-class spin(QSpinBox, zzwiddet.ZzWidget):
+class zzspin(QSpinBox, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
         self.meta = meta
-        self.set_text(meta.get('data'))
+        self.set_text(meta.get("data"))

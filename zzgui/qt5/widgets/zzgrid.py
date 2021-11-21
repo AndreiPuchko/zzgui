@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QPalette
 from PyQt5.QtCore import pyqtSignal, Qt, QAbstractTableModel, QVariant
 
-from zzgui.zz_qt5.window import zz_align
+from zzgui.qt5.zzwindow import zz_align
 from zzgui.zzutils import num
 
 
@@ -33,7 +33,7 @@ class zzDelegate(QStyledItemDelegate):
         super().paint(painter, option, index)
 
 
-class grid(QTableView):
+class zzgrid(QTableView):
     class ZzTableModel(QAbstractTableModel):
         def __init__(self, zz_model):
             super().__init__(parent=None)

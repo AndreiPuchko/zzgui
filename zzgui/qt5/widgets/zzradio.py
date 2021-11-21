@@ -4,17 +4,18 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-    from demo.demo_01 import demo
+    from demo.demo import demo
 
     demo()
 
-import zzgui.zz_qt5.widget as zzwiddet
-from zzgui.zz_qt5.window import zz_align
+from zzgui.qt5.zzwindow import zz_align
 
 from PyQt5.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QRadioButton, QSizePolicy
 
+from zzgui.qt5.zzwidget import ZzWidget
 
-class radio(QFrame, zzwiddet.ZzWidget):
+
+class zzradio(QFrame, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
         self.setLayout(QVBoxLayout() if "v" in meta.get("control") else QHBoxLayout())
@@ -29,10 +30,9 @@ class radio(QFrame, zzwiddet.ZzWidget):
 
 
 class zzRadioButton(QRadioButton):
-    def __init__(self, text, radio: radio):
+    def __init__(self, text, radio: zzradio):
         super().__init__(text)
         self.radio = radio
 
     def get_text(self):
         return f"{self.radio.button_list.index(self)}"
-       
