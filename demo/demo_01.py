@@ -5,7 +5,7 @@ if __name__ == "__main__":
 
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
-from zzgui.zzapp import ZzAction
+from zzgui.zzapp import ZzActions
 
 import zzgui.zzdialog
 from zzgui.zzdialog import zzMess
@@ -37,7 +37,7 @@ class DemoApp(ZzApp):
         self.add_menu("Help|About", lambda: zzMess("About zzgui"))
 
     def first_form(self):
-        actions = ZzAction()
+        actions = ZzActions()
         # actions.show_main_button = False
         # actions.show_actions = False
         actions.add_action("Action 1", lambda: zzMess("Action 1"))

@@ -56,7 +56,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
                 prev_mdi_window.setDisabled(True)
 
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
-            self.set_tabbar_text(form.title)
+            self.set_tabbar_text(form.window_title)
 
             if modal == "super":  # real modal dialog
                 self.disable_toolbar(True)

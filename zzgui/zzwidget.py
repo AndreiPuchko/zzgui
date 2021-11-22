@@ -34,6 +34,8 @@ class ZzWidget:
 
     def set_enabled(self, arg=True):
         pass
+    def is_enabled(self):
+        pass
 
     def set_text(self, text):
         pass

@@ -33,3 +33,6 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
     def set_readonly(self, arg):
         if hasattr(self, "setReadOnly"):
             self.setReadOnly(True if arg else False)
+    
+    def is_enabled(self):
+        return self.isEnabled()

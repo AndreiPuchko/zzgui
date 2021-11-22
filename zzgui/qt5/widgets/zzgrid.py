@@ -85,6 +85,29 @@ class zzgrid(QTableView):
         self.currentCellChangedSignal.emit(current.row(), current.column())
         super().currentChanged(current, previous)
         self.model().dataChanged.emit(current, previous)
+        self.zz_form.grid_index_changed(
+            self.currentIndex().row(), self.currentIndex().column()
+        )
+
+    def current_index(self):
+        return self.currentIndex().row(), self.currentIndex().column()
+
+    def row_count(self):
+        return self.model().rowCount()
+
+    def column_count(self):
+        return self.model().columnCount()
+
+    def set_index(self, row, col):
+        if row < 0:
+            row = 0
+        elif row > self.row_count() - 1:
+            row = self.row_count() - 1
+        if col < 0:
+            col = 0
+        elif col > self.column_count() - 1:
+            col = self.column_count() - 1
+        self.setCurrentIndex(self.model().index(row, col))
 
     def keyPressEvent(self, event):
         event.accept()

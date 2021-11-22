@@ -8,7 +8,9 @@ if __name__ == "__main__":
     demo()
 
 from PyQt5.QtWidgets import QDialog, QMdiSubWindow
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QEvent, Qt
+from PyQt5.QtGui import QKeySequence
+
 
 import zzgui.zzapp as zzapp
 import zzgui.zzform as zzform
@@ -18,21 +20,6 @@ from zzgui.qt5.zzapp import ZzQtWindow
 from zzgui.zzutils import num
 
 
-# from PyQt5.QtWidgets import QFormLayout
-
-
-# class zzDialog(QDialog):
-#     def __init__(self, zz_form=""):
-#         super().__init__(zz_form)
-#     def closeEvent(self, event=None):
-#         print("close event")
-#         if self.prev_form:
-#             self.prev_form.setEnabled(True)
-#         self.close()
-#         if event:
-#             event.accept()
-
-
 class ZzForm(zzform.ZzForm):
     def __init__(self, title=""):
         super().__init__(title=title)
@@ -40,9 +27,10 @@ class ZzForm(zzform.ZzForm):
 
 
 class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
-    def __init__(self, zz_form: ZzForm):
+    def __init__(self, zz_form: ZzForm, title=""):
         super().__init__(zz_form)
-        ZzQtWindow.__init__(self, zz_form.title)
+        title = title if title else zz_form.title
+        ZzQtWindow.__init__(self, title)
         self._widgets_package = zzgui.qt5.widgets
 
     def restore_geometry(self, settings):
@@ -98,9 +86,11 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         if event:
             event.accept()
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QEvent):
         key = event.key()
-        # keyText = QKeySequence(event.modifiers() | event.key()).toString()
+        keyText = QKeySequence(event.modifiers() | event.key()).toString()
+        # keyText = f"{event.key()}"
+        # print(modifierText, "!!!",keyText, "!!")
         # print (f"{keyText}")
         # if key==Qt.Key_Escape:
         #     print (self,self.escapeEnabled)
@@ -112,16 +102,23 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, event.modifiers()))
         # elif self.mode == "grid" and key in (Qt.Key_Return,):
         #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Enter, event.modifiers()))
-        # elif self.mode == "form" and keyText in self.hotKeyWidgets:  # is it form hotkey
+        
+        elif keyText in self.hotkey_widgets:  # is it form hotkey
+            for widget in self.hotkey_widgets[keyText]:
+                if widget.is_enabled():
+                    widget.valid()
+                    return
+                    # validate only not hotkeyed widget
+                    # if wi != qApp.focusWidget() and \
+                    #         hasattr(qApp.focusWidget(), "meta") and \
+                    #         qApp.focusWidget().meta.get("key"):
+                    #     if qApp.focusWidget().valid() is False:
+                    #         return
+                    # return wi.valid()
+
+        
         #     for wi in self.hotKeyWidgets[keyText]:
         #         if wi.isEnabled():
-        #             # validate only not hotkeyed widget
-        #             if wi != qApp.focusWidget() and \
-        #                     hasattr(qApp.focusWidget(), "meta") and \
-        #                     qApp.focusWidget().meta.get("key"):
-        #                 if qApp.focusWidget().valid() is False:
-        #                     return
-        #             return wi.valid()
         # else:
         event.accept()
         # super().keyPressEvent(event)

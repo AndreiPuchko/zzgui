@@ -17,7 +17,7 @@ import re
 zz_app = None
 
 
-class ZzAction:
+class ZzActions:
     def __init__(self, action=None):
         self.show_main_button = True
         self.show_actions = True
@@ -28,11 +28,11 @@ class ZzAction:
 
     def add_action(self, text, worker=None, icon="", mess="", hotkey=""):
         action = {}
-        action['text'] = text
-        action['worker'] = worker
-        action['icon'] = icon
-        action['mess'] = mess
-        action['hotkey'] = hotkey
+        action["text"] = text
+        action["worker"] = worker
+        action["icon"] = icon
+        action["mess"] = mess
+        action["hotkey"] = hotkey
         self.action_list.append(action)
         return True
 
@@ -48,6 +48,63 @@ class ZzAction:
     #     actionIndex = safe_index([x["text"] for x in self.action_list], text)
     #     if actionIndex is not None:
     #         self.action_list.pop(actionIndex)
+
+
+class ZzControls:
+    class _C:
+        def __init__(self, controls):
+            self.controls = controls
+
+        def __getattr__(self, name):
+            for line in self.controls.controls:
+                if line.get("name") == name or line.get("tag") == name:
+                    return line
+            return {}
+
+    def __init__(self):
+        self.controls = []
+        self.c = self._C(self)
+
+    def add_control(
+        self,
+        name="",
+        label="",
+        control="",
+        pic="",
+        data="",
+        actions=[],
+        valid=None,
+        readonly=None,
+        disabled=None,
+        form_only=None,
+        grid_only=None,
+        when=None,
+        widget=None,
+        mess="",
+        tag="",
+        hotkey="",
+    ):
+        self.controls.append(
+            {
+                "name": name,
+                "label": label,
+                "control": control,
+                "pic": pic,
+                "data": data,
+                "actions": actions,
+                "readonly": readonly,
+                "disabled": disabled,
+                "form_only": form_only,
+                "grid_only": grid_only,
+                "valid": valid,
+                "when": when,
+                "widget": widget,
+                "mess": mess,
+                "tag": tag,
+                "hotkey": hotkey,
+            }
+        )
+        return True
 
 
 class ZzSettings:
@@ -113,25 +170,27 @@ class ZzApp:
         self.menu_list = self.reorder_menu(self.menu_list)
 
     def reorder_menu(self, menu):
-        tmpList = [x["TEXT"] for x in menu]
-        tmpDict = {x["TEXT"]: x for x in menu}
-        reOrderedList = []
-        for x in tmpList:
+        tmp_list = [x["TEXT"] for x in menu]
+        tmp_dict = {x["TEXT"]: x for x in menu}
+        re_ordered_list = []
+        for x in tmp_list:
             # add node element for menu
             menu_node = "|".join(x.split("|")[:-1])
-            if menu_node not in reOrderedList:
-                reOrderedList.append(menu_node)
-                tmpDict[menu_node] = {
+            if menu_node not in re_ordered_list:
+                re_ordered_list.append(menu_node)
+                tmp_dict[menu_node] = {
                     "TEXT": menu_node,
                     "WORKER": None,
                     "BEFORE": None,
                     "TOOLBAR": None,
                 }
-            if tmpDict[x].get("BEFORE") in reOrderedList:
-                reOrderedList.insert(reOrderedList.index(tmpDict[x].get("BEFORE")), x)
+            if tmp_dict[x].get("BEFORE") in re_ordered_list:
+                re_ordered_list.insert(
+                    re_ordered_list.index(tmp_dict[x].get("BEFORE")), x
+                )
             else:
-                reOrderedList.append(x)
-        return [tmpDict[x] for x in reOrderedList]
+                re_ordered_list.append(x)
+        return [tmp_dict[x] for x in re_ordered_list]
 
     def close(self):
         self.main_window.save_geometry(self.settings)

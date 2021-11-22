@@ -119,7 +119,10 @@ class DemoApp(ZzApp):
     def describe_form4(self):
         form = ZzForm("Grid form")
         form.actions.add_action("New", lambda: zzMess("New"))
-        form.actions.add_action("Edit", lambda: zzMess("Edit"))
+        form.actions.add_action("Edit|1", lambda: zzMess("Edit"))
+        form.actions.add_action("Edit|2", lambda: zzMess("Edit"))
+        form.actions.add_action("Nt", lambda: zzMess("Nt"))
+        form.actions.add_action("Edit|3", lambda: zzMess("Edit"))
         form.add_control("uid", "Uid", control="line")
         form.add_control("name", "Name", control="line", data="First Name")
         form.add_control("date", "Date of bith", control="date", data="1990-05-01")
