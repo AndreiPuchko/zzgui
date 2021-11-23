@@ -27,6 +27,8 @@ class ZzActions:
             self.action_list = []
 
     def add_action(self, text, worker=None, icon="", mess="", hotkey="", tag=""):
+        """ "/view", "/crud"
+        """
         action = {}
         action["text"] = text
         action["worker"] = worker

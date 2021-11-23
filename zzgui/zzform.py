@@ -112,24 +112,28 @@ class ZzForm:
             hotkey="PgDown",
         )
         crud_form_buttons.add_control("/s")
-        crud_form_buttons.add_control(
-            "_edit_button",
-            "edit",
-            control="button",
-            mess="enable editing",
-            valid=self.crud_view_to_edit,
-            disabled=True if mode is not VIEW else False,
-        )
-        crud_form_buttons.add_control("/s")
-        crud_form_buttons.add_control(
-            "_ok_button",
-            "Ok",
-            control="button",
-            mess="save data",
-            disabled=True if mode is VIEW else False,
-            hotkey="PgDown",
-            valid=self.crud_save,
-        )
+
+        if self.a.tag("edit"):
+            crud_form_buttons.add_control(
+                "_edit_button",
+                "edit",
+                control="button",
+                mess="enable editing",
+                valid=self.crud_view_to_edit,
+                disabled=True if mode is not VIEW else False,
+            )
+            crud_form_buttons.add_control("/s")
+
+            crud_form_buttons.add_control(
+                "_ok_button",
+                "Ok",
+                control="button",
+                mess="save data",
+                disabled=True if mode is VIEW else False,
+                hotkey="PgDown",
+                valid=self.crud_save,
+            )
+        
         crud_form_buttons.add_control(
             "_cancel_button",
             "Cancel",
@@ -391,7 +395,7 @@ class ZzFormWindow:
             and self.widgets[x].splitter is not None
         ]
 
-    def show_form(self, title="", modal="modal"):
+    def show_form(self, modal="modal"):
         self.build_form()
         # Restore splitters sizes
         for x in self.get_splitters():
