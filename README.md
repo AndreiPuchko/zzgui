@@ -22,4 +22,4 @@ pyinstaller -F demo/demo.py
 pyinstaller -D demo/demo.py
 ```
 
-![Alt text](https://github.com/AndreiPuchko/zzgui/tree/main/docs/screenshot.png)
+![Alt text](https://andreipuchko.github.io/zzgui/screenshot.png)
