@@ -51,6 +51,8 @@ class zztoolbar(QFrame, ZzWidget):
         cascade_action = {"": tool_bar_qt_actions}
 
         for act in action_list:
+            if act.get("text", "").startswith("/"):
+                continue
             worker = act.get("worker", None)
             action_text_list = act["text"].split("|")
             for x in range(len(action_text_list)):

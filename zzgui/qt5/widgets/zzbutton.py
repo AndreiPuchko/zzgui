@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
 
 from PyQt5.QtWidgets import QPushButton, QSizePolicy
-
+from PyQt5.QtCore import Qt
 from zzgui.qt5.zzwidget import ZzWidget
 
 
@@ -22,3 +22,10 @@ class zzbutton(QPushButton, ZzWidget):
         self.set_text(meta.get("label"))
         if self.meta.get("valid"):
             self.clicked.connect(self.valid)
+
+    def keyPressEvent(self, ev):
+        if ev.key() in [Qt.Key_Enter, Qt.Key_Return] and not self.meta.get("eat_enter"):
+            ev.accept()
+            self.focusNextChild()
+        else:
+            super().keyPressEvent(ev)

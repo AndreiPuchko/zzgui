@@ -7,29 +7,48 @@ if __name__ == "__main__":
 
     demo()
 
-from zzgui.zzutils import num
-import datetime
+# from zzgui.zzutils import num
+# import datetime
 
 
 class ZzModel:
-    def __init__(self):
+    def __init__(self, zz_form):
+        self.zz_form = zz_form
         self.columns = []
         self.headers = []
         self.alignments = []
         self.records = []
+        self.meta = []
+        self.editable = False
+
+    def insert(self, record: dict):
+        record
+        pass
+
+    def update(self, record: dict):
+        record
+        pass
+
+    def delete(self, record: dict):
+        record
+        pass
 
     def set_records(self, records):
         self.records = records
 
-    def build(self, controls):
-        for meta in controls:
-            print (meta)
+    def build(self):
+        for meta in self.zz_form.controls.controls:
+            if meta.get("name", "").startswith("/") or meta.get("formonly"):
+                continue
+            if meta.get("control", "") in ["button", "widget", "form"]:
+                continue
+            self.zz_form.model.add_column(meta)
 
     def add_column(self, meta):
         self.columns.append(meta["name"])
         self.headers.append(meta["label" if meta.get("saygrid") else "label"])
         self.alignments.append(meta.get("align", "7"))
-        # self.meta.append(meta)
+        self.meta.append(meta)
 
     def refresh(self, row=None):
         pass

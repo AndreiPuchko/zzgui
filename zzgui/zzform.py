@@ -23,17 +23,21 @@ class ZzForm:
         self.form_stack = []
         self.actions = zzapp.ZzActions()
         self.controls = zzapp.ZzControls()
-        self.model = ZzModel()
+        self.model = ZzModel(self)
         self.s = ZzFormData(self)
         self.w = ZzFormWidget(self)
-        # Must be defined in any subclass
-        self._ZzFormWindow_class = None
+        self.a = ZzFormAction(self)
+        # Must be redefined in any subclass
+        self._ZzFormWindow_class = ZzFormWindow
+        self._zzdialogs = None
 
         self._in_close_flag = False
         self.last_closed_form = None
 
         self.crud_form = None
+
         self.grid_form = None
+
         self.current_row = 0
         self.current_column = 0
 
@@ -80,6 +84,8 @@ class ZzForm:
 
     def get_grid_widget(self, title=""):
         self.grid_form = self._ZzFormWindow_class(self, title)
+        self.model.build()
+        self.get_grid_crud_actions(self.grid_form.create_grid_navigation_actions())
         self.grid_form.build_grid()
         return self.grid_form
 
@@ -144,6 +150,49 @@ class ZzForm:
         self.grid_form.move_grid_index(mode)
         self.set_crud_form_data()
 
+    def get_grid_crud_actions(self, grid_navi_actions: zzapp.ZzActions):
+        is_view = self.a.__getattr__("/view")
+        is_crud = self.a.__getattr__("/crud")
+
+        tmp_actions = zzapp.ZzActions()
+        if is_view or is_crud:
+            tmp_actions.add_action(
+                text="View",
+                worker=lambda: self.show_crud_form(VIEW),
+                hotkey="F12",
+                tag="view",
+            )
+        if is_crud and self.model.editable:
+            tmp_actions.add_action(
+                text="New", worker=lambda: self.show_crud_form(NEW), hotkey="Ins"
+            )
+            tmp_actions.add_action(
+                text="Copy", worker=lambda: self.show_crud_form(COPY), hotkey="Ctrl+Ins"
+            )
+            tmp_actions.add_action(
+                text="Edit",
+                worker=lambda: self.show_crud_form(EDIT),
+                hotkey="Spacebar",
+                tag="edit",
+            )
+            tmp_actions.add_action(text="-")
+            tmp_actions.add_action(
+                text="Remove", worker=self.crud_delete, hotkey="Delete"
+            )
+            tmp_actions.add_action(text="-")
+
+        for x in self.actions.action_list:
+            if x.get("text").startswith("/"):
+                continue
+            tmp_actions.action_list.append(x)
+        for x in grid_navi_actions.action_list:
+            tmp_actions.action_list.append(x)
+
+        self.actions = tmp_actions
+
+    def crud_delete(self):
+        print(self._zzdialogs.zzAskYN(123))
+
     def crud_save(self):
         print("save")
         pass
@@ -156,7 +205,9 @@ class ZzForm:
         crud_form_buttons = self.prepare_crud_form_buttons(mode)
         self.crud_form = self._ZzFormWindow_class(self, f"{self.title}.[{mode}]")
         self.crud_form.build_form(self.controls.controls, crud_form_buttons.controls)
+
         self.set_crud_form_data()
+
         self.crud_form.show_form()
 
     def set_crud_form_data(self):
@@ -169,6 +220,13 @@ class ZzForm:
     def grid_index_changed(self, row, column):
         self.current_row = row
         self.current_column = column
+
+    def grid_double_clicked(self):
+        for tag in ("select", "view", "edit"):
+            action = self.a.tag(tag)
+            if action and action.get("worker"):
+                action.get("worker")()
+                break
 
     def set_grid_index(self, row_number=0):
         self.grid_form.self.grid_widget(row_number)
@@ -183,7 +241,10 @@ class ZzForm:
         actions=[],
         valid=None,
         readonly=None,
+        disabled=None,
+        hotkey="",
         when=None,
+        eat_enter=None,
         widget=None,
         tag="",
     ):
@@ -196,9 +257,12 @@ class ZzForm:
             actions,
             valid,
             readonly,
-            when,
-            widget,
-            tag,
+            hotkey=hotkey,
+            disabled=disabled,
+            when=when,
+            eat_enter=eat_enter,
+            widget=widget,
+            tag=tag,
         )
         return True
 
@@ -216,43 +280,27 @@ class ZzFormWindow:
         self.escapeEnabled = True
         self.mode = "form"
         self.hotkey_widgets = {}
+        self.grid_actions = zzapp.ZzActions()
 
     def create_grid_navigation_actions(self):
         """returns standard actions for the grid"""
         actions = zzapp.ZzActions()
         actions.add_action(text="-")
-        actions.add_action(text="<<", worker=lambda: self.move_grid_index(7))
+        actions.add_action(
+            text="<<", worker=lambda: self.move_grid_index(7), hotkey="Ctrl+Up"
+        )
         actions.add_action(text="🡸", worker=lambda: self.move_grid_index(8))
         actions.add_action(text="↺", worker=lambda: None, hotkey="F5")
         actions.add_action(text="🡺", worker=lambda: self.move_grid_index(2))
-        actions.add_action(text=">>", worker=lambda: self.move_grid_index(1))
-        return actions
-
-    def create_grid_crud_actions(self):
-        """returns standard actions for the grid"""
-        actions = zzapp.ZzActions()
+        actions.add_action(
+            text=">>", worker=lambda: self.move_grid_index(1), hotkey="Ctrl+Down"
+        )
         actions.add_action(text="-")
-        actions.add_action(
-            text="View", worker=lambda: self.zz_form.show_crud_form(VIEW), hotkey="F12"
-        )
-        actions.add_action(
-            text="New", worker=lambda: self.zz_form.show_crud_form(NEW), hotkey="Ins"
-        )
-        actions.add_action(
-            text="Copy",
-            worker=lambda: self.zz_form.show_crud_form(COPY),
-            hotkey="Ctrl+Ins",
-        )
-        actions.add_action(
-            text="Edit",
-            worker=lambda: self.zz_form.show_crud_form(EDIT),
-            hotkey="Spacebar",
-        )
-        actions.add_action(text="Remove", worker=lambda: None, hotkey="Delete")
-        actions.add_action(text="-")
+        actions.add_action(text="Close", worker=self.close, hotkey="Esc")
         return actions
 
     def move_grid_index(self, direction=None):
+        """Directions - look at numpad to get the idea"""
         if direction == 7:  # Top
             self.set_grid_index(0, self.get_grid_index()[1])
         elif direction == 8:  # Up
@@ -274,26 +322,12 @@ class ZzFormWindow:
     def build_grid(self):
         # populate model with columns metadata
         self.mode = "grid"
-        for meta in self.zz_form.controls.controls:
-            if meta.get("name", "").startswith("/"):
-                continue
-            self.zz_form.model.add_column(meta)
-
-        actions = [
-            self.create_grid_crud_actions(),
-            self.zz_form.actions,
-            self.create_grid_navigation_actions(),
-        ]
-
         gridForm = ZzForm()
         gridForm.add_control("/vs", tag="gridsplitter")
-        gridForm.add_control("toolbar", control="toolbar", actions=actions)
+        gridForm.add_control("toolbar", control="toolbar", actions=self.zz_form.actions)
         gridForm.add_control("form__grid", control="grid")
-
         self.build_form(gridForm.controls.controls)
-        # print (self.widgets.keys())
         self.move_grid_index(7)
-
         return
 
     def build_form(self, controls=[], extra_controls=[]):
@@ -318,7 +352,7 @@ class ZzFormWindow:
                         current_frame.add_widget(label2add)
                     if widget2add is not None:
                         current_frame.add_widget(widget2add)
-            # Hotkeys 
+            # Hotkeys
             if meta.get("hotkey") and meta.get("valid"):
                 if meta.get("hotkey") not in self.hotkey_widgets:
                     self.hotkey_widgets[meta.get("hotkey")] = []
@@ -511,3 +545,21 @@ class ZzFormWidget:
             widget = self.zz_form.form_stack[-1].widgets.get(name)
         if widget is not None:
             return widget
+
+
+class ZzFormAction:
+    def __init__(self, zz_form):
+        self.zz_form: ZzForm = zz_form
+
+    def tag(self, tag=""):
+        if tag:
+            for act in self.zz_form.actions.action_list:
+                if act.get("tag") == tag:
+                    return act
+        return {}
+
+    def __getattr__(self, name):
+        for act in self.zz_form.actions.action_list:
+            if act.get("text") == name:
+                return act
+        return {}

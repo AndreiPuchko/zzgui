@@ -7,9 +7,9 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QDialog, QMdiSubWindow
-from PyQt5.QtCore import QEvent, Qt
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QDialog, QMdiSubWindow, QApplication
+from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtGui import QKeySequence, QKeyEvent
 
 
 import zzgui.zzapp as zzapp
@@ -19,11 +19,15 @@ import zzgui.qt5.widgets
 from zzgui.qt5.zzapp import ZzQtWindow
 from zzgui.zzutils import num
 
+import zzgui.zzdialogs
+from zzgui.zzdialogs import zzMess
+
 
 class ZzForm(zzform.ZzForm):
     def __init__(self, title=""):
         super().__init__(title=title)
         self._ZzFormWindow_class = ZzFormWindow
+        self._zzdialogs = zzgui.zzdialogs
 
 
 class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
@@ -57,6 +61,16 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         self.zz_form.form_stack.append(self)
         if not isinstance(self.parent(), QMdiSubWindow):
             self.escapeEnabled = False
+
+        first_widget = self.widgets[list(self.widgets.keys())[0]]
+        while (
+            not first_widget.isEnabled()
+            or (hasattr(first_widget, "isReadOnly") and first_widget.isReadOnly())
+            or first_widget.focusPolicy() == Qt.NoFocus
+        ):
+            first_widget = first_widget.nextInFocusChain()
+        first_widget.setFocus()
+
         # mdi_height = (
         #     self.parent().parent().parent().viewport().height()
         #     - zzapp.zz_app.main_window.zz_tabwidget.tabBar().height()
@@ -89,23 +103,21 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def keyPressEvent(self, event: QEvent):
         key = event.key()
         keyText = QKeySequence(event.modifiers() | event.key()).toString()
-        # keyText = f"{event.key()}"
-        # print(modifierText, "!!!",keyText, "!!")
-        # print (f"{keyText}")
-        # if key==Qt.Key_Escape:
-        #     print (self,self.escapeEnabled)
         if key == Qt.Key_Escape and self.escapeEnabled:
             self.close()
-        # elif self.mode == "form" and key in (Qt.Key_Up,):
-        #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.ShiftModifier))
-        # elif self.mode == "form" and key in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Down):
-        #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, event.modifiers()))
+        elif self.mode == "form" and key in (Qt.Key_Up,):
+            QApplication.sendEvent(
+                self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.ShiftModifier)
+            )
+        elif self.mode == "form" and key in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Down):
+            QApplication.sendEvent(
+                self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, event.modifiers())
+            )
         # elif self.mode == "grid" and key in (Qt.Key_Return,):
         #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Enter, event.modifiers()))
-        
         elif keyText in self.hotkey_widgets:  # is it form hotkey
             for widget in self.hotkey_widgets[keyText]:
-                if widget.is_enabled():
+                if widget.is_enabled() and hasattr(widget, "valid"):
                     widget.valid()
                     return
                     # validate only not hotkeyed widget
@@ -116,12 +128,10 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
                     #         return
                     # return wi.valid()
 
-        
         #     for wi in self.hotKeyWidgets[keyText]:
         #         if wi.isEnabled():
         # else:
         event.accept()
-        # super().keyPressEvent(event)
 
     def close(self):
         super().close()
@@ -135,3 +145,8 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         self.zz_form.close()
         if event:
             event.accept()
+
+
+# Tells the module which engine to use
+zzgui.zzdialogs.ZzForm = ZzForm
+zzMess

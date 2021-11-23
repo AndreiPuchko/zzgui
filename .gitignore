@@ -1,5 +1,4 @@
 *.pyc
-*.png
 *.spec
 __pycache__
 zzGui.ini
