@@ -11,11 +11,7 @@ import os
 
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
-
-import zzgui.zzdialog
-from zzgui.zzdialog import zzMess
-
-zzgui.zzdialog.ZzForm = ZzForm
+from zzgui.qt5.zzform import zzMess
 
 
 class DemoApp(ZzApp):
@@ -29,6 +25,7 @@ class DemoApp(ZzApp):
         self.add_menu("Help|About", lambda: zzMess("About zzgui"), toolbar="*")
 
     def describe_grid_form(self):
+        # load some CSV data from ...
         file_name = "temp/electronic-card-transactions-october-2021-csv-tables.csv"
         if not os.path.isfile(file_name):
             url = (
@@ -43,17 +40,18 @@ class DemoApp(ZzApp):
             zip_file: ZipFile = ZipFile(mem_zip_file_data)
             csv_data = TextIOWrapper(zip_file.open(zip_file.namelist()[0]))
             csv_dict = csv.DictReader(csv_data)
-
         else:
             csv_dict = csv.DictReader(open(file_name))
-
+        # Define form
         form = ZzForm("Grid form")
-        form.add_control("/f")
-        for x in csv_dict.fieldnames:  # Populate form with the columns froom csv
+        # Define layout
+        form.add_control("/f", "Frame with form layout")
+        # Populate it with the columns from csv
+        for x in csv_dict.fieldnames:
             form.add_control(x, x, control="line")
-
+        # Assign data source
         form.model.set_records([x for x in csv_dict])
-
+        form.actions.add_action(text="/crud")
         return form
 
     def show_grid_form(self):

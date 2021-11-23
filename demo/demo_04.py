@@ -17,10 +17,10 @@ from zzdb.db import ZzDb
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 
-import zzgui.zzdialog
-from zzgui.zzdialog import zzMess
+import zzgui.zzdialogs
+from zzgui.zzdialogs import zzMess
 
-zzgui.zzdialog.ZzForm = ZzForm
+zzgui.zzdialogs.ZzForm = ZzForm
 
 
 class DemoApp(ZzApp):

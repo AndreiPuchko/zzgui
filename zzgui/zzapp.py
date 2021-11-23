@@ -26,13 +26,14 @@ class ZzActions:
         else:
             self.action_list = []
 
-    def add_action(self, text, worker=None, icon="", mess="", hotkey=""):
+    def add_action(self, text, worker=None, icon="", mess="", hotkey="", tag=""):
         action = {}
         action["text"] = text
         action["worker"] = worker
         action["icon"] = icon
         action["mess"] = mess
         action["hotkey"] = hotkey
+        action["tag"] = tag
         self.action_list.append(action)
         return True
 
@@ -82,6 +83,7 @@ class ZzControls:
         widget=None,
         mess="",
         tag="",
+        eat_enter=None,
         hotkey="",
     ):
         self.controls.append(
@@ -100,6 +102,7 @@ class ZzControls:
                 "when": when,
                 "widget": widget,
                 "mess": mess,
+                "eat_enter": eat_enter,
                 "tag": tag,
                 "hotkey": hotkey,
             }

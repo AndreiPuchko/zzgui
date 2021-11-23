@@ -19,15 +19,17 @@ from PyQt5.QtCore import pyqtSignal, Qt, QAbstractTableModel, QVariant
 
 from zzgui.qt5.zzwindow import zz_align
 from zzgui.zzutils import num
+from zzgui.zzform import ZzForm
+from zzgui.zzmodel import ZzModel
 
 
 class zzDelegate(QStyledItemDelegate):
-    def displayText(self, value, locale):
-        return super().displayText(value, locale)
+    # def displayText(self, value, locale):
+    #     return super().displayText(value, locale)
 
     def paint(self, painter, option, index):
         if self.parent().currentIndex().column() == index.column():
-            color = option.palette.color(QPalette.AlternateBase).darker(200)
+            color = option.palette.color(QPalette.AlternateBase).darker(900)
             color.setAlpha(color.alpha() / 10)
             painter.fillRect(option.rect, color)
         super().paint(painter, option, index)
@@ -37,7 +39,7 @@ class zzgrid(QTableView):
     class ZzTableModel(QAbstractTableModel):
         def __init__(self, zz_model):
             super().__init__(parent=None)
-            self.zz_model = zz_model
+            self.zz_model: ZzModel = zz_model
 
         def rowCount(self, parent=None):
             return self.zz_model.row_count()
@@ -67,7 +69,7 @@ class zzgrid(QTableView):
 
     currentCellChangedSignal = pyqtSignal(int, int)
 
-    def __init__(self, zz_form):
+    def __init__(self, zz_form: ZzForm):
         super().__init__()
         self.zz_form = zz_form
         self.setModel(self.ZzTableModel(self.zz_form.model))
@@ -80,6 +82,7 @@ class zzgrid(QTableView):
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.horizontalHeader().setDefaultAlignment(zz_align["7"])
+        self.doubleClicked.connect(self.zz_form.grid_double_clicked)
 
     def currentChanged(self, current, previous):
         self.currentCellChangedSignal.emit(current.row(), current.column())

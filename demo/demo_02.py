@@ -5,12 +5,9 @@ if __name__ == "__main__":
 
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
+from zzgui.qt5.zzform import zzMess
 
-import zzgui.zzdialog
-from zzgui.zzdialog import zzMess
 from zzgui.zzutils import num
-
-zzgui.zzdialog.ZzForm = ZzForm
 
 
 class DemoApp(ZzApp):
