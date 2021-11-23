@@ -51,7 +51,7 @@ class DemoApp(ZzApp):
             form.add_control(x, x, control="line")
         # Assign data source
         form.model.set_records([x for x in csv_dict])
-        form.actions.add_action(text="/view")
+        form.actions.add_action(text="/edit")
         return form
 
     def show_grid_form(self):
