@@ -11,4 +11,8 @@ if __name__ == "__main__":
 from zzgui import zzmodel
 
 class ZzModel(zzmodel.ZzModel):
-    pass
+    def refresh(self):
+        self.beginResetModel()
+        self.endResetModel()
+        return super().refresh()
+

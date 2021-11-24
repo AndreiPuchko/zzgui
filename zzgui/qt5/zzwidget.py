@@ -18,6 +18,9 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         super().__init__()
         zzwidget.ZzWidget.__init__(self, meta)
 
+    def set_disabled(self, arg=True):
+        self.setEnabled(True if not arg else False)
+
     def set_enabled(self, arg=True):
         self.setEnabled(True if arg else False)
 
@@ -40,3 +43,6 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
     def is_readonly(self):
         if hasattr(self, "isReadOnly"):
             return self.isReadOnly()
+
+    def set_focus(self):
+        self.setFocus()

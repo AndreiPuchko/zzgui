@@ -34,6 +34,10 @@ class ZzWidget:
 
     def set_enabled(self, arg=True):
         pass
+
+    def set_focus(self):
+        pass
+
     def is_enabled(self):
         pass
 

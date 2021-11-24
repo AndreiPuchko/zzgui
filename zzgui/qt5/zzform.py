@@ -58,7 +58,12 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def showEvent(self, event=None):
         if self.shown:
             return
+
         self.zz_form.form_stack.append(self)
+
+        if self.zz_form.before_form_show() is False:
+            self.zz_form.close()
+            
         if not isinstance(self.parent(), QMdiSubWindow):
             self.escapeEnabled = False
 
@@ -113,8 +118,8 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             QApplication.sendEvent(
                 self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, event.modifiers())
             )
-        # elif self.mode == "grid" and key in (Qt.Key_Return,):
-        #     QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Enter, event.modifiers()))
+        elif self.mode == "grid" and key in (Qt.Key_Return,):
+            self.zz_form.grid_double_clicked()
         elif keyText in self.hotkey_widgets:  # is it form hotkey
             for widget in self.hotkey_widgets[keyText]:
                 if widget.is_enabled() and hasattr(widget, "valid"):

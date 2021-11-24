@@ -40,6 +40,10 @@ class zzgrid(QTableView):
         def __init__(self, zz_model):
             super().__init__(parent=None)
             self.zz_model: ZzModel = zz_model
+            self.zz_model.refresh = self.refresh
+
+        def set_order(self, column):
+            self.zz_model.order_column(column)
 
         def rowCount(self, parent=None):
             return self.zz_model.row_count()
@@ -83,6 +87,7 @@ class zzgrid(QTableView):
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.horizontalHeader().setDefaultAlignment(zz_align["7"])
         self.doubleClicked.connect(self.zz_form.grid_double_clicked)
+        self.horizontalHeader().sectionClicked.connect(self.model().set_order)
 
     def currentChanged(self, current, previous):
         self.currentCellChangedSignal.emit(current.row(), current.column())

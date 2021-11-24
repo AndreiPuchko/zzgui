@@ -7,13 +7,17 @@ if __name__ == "__main__":
 
     demo()
 
+from os import name
 import zzgui.zzapp as zzapp
 from zzgui.zzmodel import ZzModel
+from zzgui.zzutils import int_
 
 VIEW = "VIEW"
 NEW = "NEW"
 COPY = "COPY"
 EDIT = "EDIT"
+NO_DATA_WIDGETS = ("button", "toolbutton", "frame", "label")
+NO_LABEL_WIDGETS = ("button", "toolbutton", "frame", "label", "check")
 
 
 class ZzForm:
@@ -23,10 +27,13 @@ class ZzForm:
         self.form_stack = []
         self.actions = zzapp.ZzActions()
         self.controls = zzapp.ZzControls()
+        self.final_controls = zzapp.ZzControls()
         self.model = ZzModel(self)
-        self.s = ZzFormData(self)
-        self.w = ZzFormWidget(self)
-        self.a = ZzFormAction(self)
+        # Shortcuts to get
+        self.s = ZzFormData(self)  # widgets data by name
+        self.w = ZzFormWidget(self)  # widgets by name
+        self.a = ZzFormAction(self)  # Actions by text
+
         # Must be redefined in any subclass
         self._ZzFormWindow_class = ZzFormWindow
         self._zzdialogs = None
@@ -35,11 +42,24 @@ class ZzForm:
         self.last_closed_form = None
 
         self.crud_form = None
+        self.crud_mode = ""
 
         self.grid_form = None
 
         self.current_row = 0
         self.current_column = 0
+
+    def refresh(self):
+        pass
+
+    def widgets(self):
+        return self.form_stack[-1].widgets
+
+    def widgets_list(self):
+        return [self.form_stack[-1].widgets[x] for x in self.form_stack[-1].widgets]
+
+    def set_model(self, model):
+        self.model = model
 
     def close(self):
         if self._in_close_flag:
@@ -89,59 +109,87 @@ class ZzForm:
         self.grid_form.build_grid()
         return self.grid_form
 
-    def prepare_crud_form_buttons(self, mode):
-        crud_form_buttons = zzapp.ZzControls()
-        crud_form_buttons.add_control("/")
-        crud_form_buttons.add_control("/h", "")
-        crud_form_buttons.add_control(
-            "_prev_button",
-            "<",
+    def _valid(self):
+        if self.valid() is False:
+            return
+        self.close()
+
+    def add_ok_cancel_buttons(self):
+        buttons = zzapp.ZzControls()
+        buttons.add_control("/")
+        buttons.add_control("/h", "")
+        buttons.add_control("/s")
+
+        buttons.add_control(
+            name="_ok_button",
+            label="Ok",
+            control="button",
+            hotkey="PgDown",
+            valid=self._valid,
+        )
+        buttons.add_control(
+            name="_cancel_button",
+            label="Cancel",
+            control="button",
+            mess="Do not save data",
+            valid=self.close,
+        )
+
+        self.final_controls = buttons
+
+    def add_crud_buttons(self, mode):
+        buttons = zzapp.ZzControls()
+        buttons.add_control("/")
+        buttons.add_control("/h", "")
+        buttons.add_control(
+            name="_prev_button",
+            label="<",
             control="button",
             mess="prev record",
             valid=lambda: self.move_crud_view(8),
             disabled=True if mode is not VIEW else False,
             hotkey="PgUp",
         )
-        crud_form_buttons.add_control(
-            "_next_button",
-            ">",
+        buttons.add_control(
+            name="_next_button",
+            label=">",
             control="button",
             mess="prev record",
             valid=lambda: self.move_crud_view(2),
             disabled=True if mode is not VIEW else False,
             hotkey="PgDown",
         )
-        crud_form_buttons.add_control("/s")
+        buttons.add_control("/s")
 
         if self.a.tag("edit"):
-            crud_form_buttons.add_control(
-                "_edit_button",
-                "edit",
+            buttons.add_control(
+                name="_edit_button",
+                label="edit",
                 control="button",
                 mess="enable editing",
                 valid=self.crud_view_to_edit,
                 disabled=True if mode is not VIEW else False,
             )
-            crud_form_buttons.add_control("/s")
+            buttons.add_control("/s")
 
-            crud_form_buttons.add_control(
-                "_ok_button",
-                "Ok",
+            buttons.add_control(
+                name="_ok_button",
+                label="Ok",
                 control="button",
                 mess="save data",
                 disabled=True if mode is VIEW else False,
                 hotkey="PgDown",
                 valid=self.crud_save,
             )
-        
-        crud_form_buttons.add_control(
-            "_cancel_button",
-            "Cancel",
+
+        buttons.add_control(
+            name="_cancel_button",
+            label="Cancel",
             control="button",
             mess="Do not save data",
             valid=self.crud_close,
         )
-        return crud_form_buttons
+        self.final_controls = buttons
 
     def crud_view_to_edit(self):
         self.crud_form.set_title(f"{self.title}.[EDIT]")
@@ -151,6 +199,10 @@ class ZzForm:
         self.w._edit_button.set_enabled(False)
 
     def move_crud_view(self, mode):
+        """move current grid record
+        up (mode=8) or down (mode=2) - look at numpad to understand why
+        and update values in crud_form
+        """
         self.grid_form.move_grid_index(mode)
         self.set_crud_form_data()
 
@@ -198,23 +250,38 @@ class ZzForm:
         print(self._zzdialogs.zzAskYN(123))
 
     def crud_save(self):
-        print("save")
-        pass
+        self.crud_mode
+        crud_data = {}
+        for x in self.crud_form.widgets:
+            widget = self.crud_form.widgets[x]
+            if widget.meta.get("control") in NO_DATA_WIDGETS:
+                continue
+            if hasattr(widget, "text"):
+                crud_data[x] = widget.text()
+        if self.crud_mode == "EDIT":
+            rez = self.model.update(crud_data)
+        else:
+            rez = self.model.insert(crud_data)
+        if rez is False:
+            pass
+        else:
+            self.close()
 
     def crud_close(self):
         self.crud_form.close()
         pass
 
     def show_crud_form(self, mode):
-        crud_form_buttons = self.prepare_crud_form_buttons(mode)
+        """mode - VIEW, NEW, COPY, EDIT"""
+        self.crud_mode = mode
+        self.add_crud_buttons(mode)
         self.crud_form = self._ZzFormWindow_class(self, f"{self.title}.[{mode}]")
-        self.crud_form.build_form(self.controls.controls, crud_form_buttons.controls)
-
+        self.crud_form.build_form()
         self.set_crud_form_data()
-
         self.crud_form.show_form()
 
     def set_crud_form_data(self):
+        """set current record's value in crud_form"""
         data = self.model.get_record(self.current_row)
         for x in data:
             if x not in self.crud_form.widgets:
@@ -235,35 +302,49 @@ class ZzForm:
     def set_grid_index(self, row_number=0):
         self.grid_form.self.grid_widget(row_number)
 
+    def get_controls(self):
+        return self.controls.controls + self.final_controls.controls
+
+    def when(self):
+        pass
+
+    def valid(self):
+        pass
+
+    def before_form_show(self):
+        pass
+
     def add_control(
         self,
         name="",
         label="",
+        gridlabel="",
         control="",
         pic="",
         data="",
         actions=[],
         valid=None,
+        when=None,
         readonly=None,
         disabled=None,
         hotkey="",
-        when=None,
         eat_enter=None,
         widget=None,
         tag="",
     ):
         self.controls.add_control(
-            name,
-            label,
-            control,
-            pic,
-            data,
-            actions,
-            valid,
-            readonly,
+            name=name,
+            label=label,
+            gridlabel=gridlabel,
+            control=control,
+            pic=pic,
+            data=data,
+            actions=actions,
+            valid=valid,
+            when=when,
+            readonly=readonly,
             hotkey=hotkey,
             disabled=disabled,
-            when=when,
             eat_enter=eat_enter,
             widget=widget,
             tag=tag,
@@ -330,22 +411,19 @@ class ZzFormWindow:
         gridForm.add_control("/vs", tag="gridsplitter")
         gridForm.add_control("toolbar", control="toolbar", actions=self.zz_form.actions)
         gridForm.add_control("form__grid", control="grid")
-        self.build_form(gridForm.controls.controls)
+        self.build_form(gridForm.get_controls())
         self.move_grid_index(7)
-        return
 
-    def build_form(self, controls=[], extra_controls=[]):
+    def build_form(self, controls=[]):
         frame_stack = [self]
         tmp_frame = None
 
         if controls == []:
-            controls = self.zz_form.controls.controls
-        for meta in controls + extra_controls:
-            # print(frame_list)
+            controls = self.zz_form.get_controls()
+        for meta in controls:
             if meta.get("noform", ""):
                 continue
             current_frame = frame_stack[-1]
-
             # do not add widget if it is not first tabpage on the form
             if not (meta.get("name", "") == ("/t") and self.tab_widget is not None):
                 label2add, widget2add = self.widget(meta)
@@ -451,17 +529,16 @@ class ZzFormWindow:
         class_name = ""
 
         widget2add = None
-        if label and control not in ("button", "toolbutton", "frame", "label", "check"):
+        if label and control not in NO_LABEL_WIDGETS:
             label2add = self._get_widget("label")(meta)
         else:
             label2add = None
-        # Forms and widgets
+        # Form or widget
         if control == "widget":
             if isinstance(meta.get("widget"), ZzForm):
                 widget2add = meta.get("widget").get_form_widget()
             else:
                 widget2add = meta.get("widget")
-            return label2add, widget2add
         else:
             # Special cases
             if name[:2] in ("/h", "/v", "/f"):  # frame
@@ -489,6 +566,11 @@ class ZzFormWindow:
 
             if hasattr(widget2add, "label"):
                 widget2add.label = label2add
+        if meta.get("check"):  # has checkbox
+            label2add = self._get_widget("check", "check")({"label": meta["label"]})
+            label2add.add_managed_widget(widget2add)
+            if not meta.get("data"):
+                widget2add.set_disabled()
 
         self.widgets[meta.get("tag", "") if meta.get("tag", "") else name] = widget2add
         return label2add, widget2add
@@ -538,15 +620,21 @@ class ZzFormWidget:
     def __init__(self, zz_form: ZzForm):
         self.zz_form = zz_form
 
-    def __getattr__(self, name):
+    def __getattr__(self, attrname):
         widget = None
         if self.zz_form.form_stack == []:
             if self.zz_form.last_closed_form is None:
                 return None
             else:
-                widget = self.zz_form.last_closed_form.widgets.get(name)
+                widgets = self.zz_form.last_closed_form.widgets
         else:
-            widget = self.zz_form.form_stack[-1].widgets.get(name)
+            widgets = self.zz_form.form_stack[-1].widgets
+        if attrname.startswith("_") and attrname.endswith("_"):
+            pos = int_(attrname.replace("_", ""))
+            if pos < len(widgets):
+                widget = widgets.get(list(widgets)[pos])
+        else:
+            widget = widgets.get(attrname)
         if widget is not None:
             return widget
 
