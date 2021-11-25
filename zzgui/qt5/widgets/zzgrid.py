@@ -87,7 +87,7 @@ class zzgrid(QTableView):
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.horizontalHeader().setDefaultAlignment(zz_align["7"])
         self.doubleClicked.connect(self.zz_form.grid_double_clicked)
-        self.horizontalHeader().sectionClicked.connect(self.model().set_order)
+        self.horizontalHeader().sectionClicked.connect(self.zz_form.grid_header_clicked)
 
     def currentChanged(self, current, previous):
         self.currentCellChangedSignal.emit(current.row(), current.column())

@@ -28,11 +28,12 @@ class ZzForm:
         self.actions = zzapp.ZzActions()
         self.controls = zzapp.ZzControls()
         self.final_controls = zzapp.ZzControls()
-        self.model = ZzModel(self)
+        self.model: ZzModel = self.set_model(ZzModel())
         # Shortcuts to get
         self.s = ZzFormData(self)  # widgets data by name
         self.w = ZzFormWidget(self)  # widgets by name
         self.a = ZzFormAction(self)  # Actions by text
+        self.r = ZzModelData(self)  # Grid data by name
 
         # Must be redefined in any subclass
         self._ZzFormWindow_class = ZzFormWindow
@@ -49,6 +50,11 @@ class ZzForm:
         self.current_row = 0
         self.current_column = 0
 
+    def set_model(self, model):
+        self.model: ZzModel = model
+        self.model.zz_form = self
+        return self.model
+
     def refresh(self):
         pass
 
@@ -57,9 +63,6 @@ class ZzForm:
 
     def widgets_list(self):
         return [self.form_stack[-1].widgets[x] for x in self.form_stack[-1].widgets]
-
-    def set_model(self, model):
-        self.model = model
 
     def close(self):
         if self._in_close_flag:
@@ -76,7 +79,7 @@ class ZzForm:
 
     def show_mdi_form(self, title=""):
         z = self.get_form_widget(title)
-        z.show_form()
+        z.show_form(modal="")
 
     def show_mdi_modal_form(self, title=""):
         form_widget = self.get_form_widget(title)
@@ -108,6 +111,55 @@ class ZzForm:
         self.get_grid_crud_actions(self.grid_form.create_grid_navigation_actions())
         self.grid_form.build_grid()
         return self.grid_form
+
+    def build_grid_view_auto_form(self):
+        # Define layout
+        if self.model.records:
+            self.add_control("/f", "Frame with form layout")
+            # Populate it with the columns from csv
+            for x in self.model.records[0]:
+                self.add_control(x, x, control="line")
+            # Assign data source
+            self.model.readonly = True
+            self.actions.add_action(text="/view")
+
+            if self.model.filterable:
+                def run_filter_data_form():
+                    filter_form = self.__class__("Filter Conditions")
+                    # Populate form with columns
+                    for x in self.controls.controls:
+                        filter_form.controls.add_control(
+                            name=x["name"],
+                            label=x["label"],
+                            control=x["control"],
+                            check=False if x["name"].startswith("/") else True,
+                        )
+
+                    def before_form_show():
+                        # put previous filter conditions to form
+                        for x in self.model.get_where().split(" and "):
+                            if "' in " not in x:
+                                continue
+                            column_name = x.split(" in ")[1].strip()
+                            column_value = x.split(" in ")[0].strip()[1:-1]
+                            filter_form.w.__getattr__(column_name).set_text(column_value)
+                            filter_form.w.__getattr__(column_name).check.set_checked()
+
+                    def valid():
+                        # apply new filter to grid
+                        filter_list = []
+                        for x in filter_form.widgets_list():
+                            if x.check and x.check.is_checked():
+                                filter_list.append(f"'{x.get_text()}' in {x.meta['name']}")
+                        filter_string = " and ".join(filter_list)
+                        self.model.set_where(filter_string)
+
+                    filter_form.before_form_show = before_form_show
+                    filter_form.valid = valid
+                    filter_form.add_ok_cancel_buttons()
+                    filter_form.show_mdi_modal_form()
+
+                self.actions.add_action("Filter", worker=run_filter_data_form, hotkey="F9")
 
     def _valid(self):
         if self.valid() is False:
@@ -218,7 +270,7 @@ class ZzForm:
                 hotkey="F12",
                 tag="view",
             )
-        if is_crud and self.model.editable:
+        if is_crud and self.model.readonly:
             tmp_actions.add_action(
                 text="New", worker=lambda: self.show_crud_form(NEW), hotkey="Ins"
             )
@@ -291,6 +343,9 @@ class ZzForm:
     def grid_index_changed(self, row, column):
         self.current_row = row
         self.current_column = column
+
+    def grid_header_clicked(self, column):
+        self._zzdialogs.zzWait(lambda: self.model.set_order(column))
 
     def grid_double_clicked(self):
         for tag in ("select", "view", "edit"):
@@ -655,3 +710,13 @@ class ZzFormAction:
             if act.get("text") == name:
                 return act
         return {}
+
+
+class ZzModelData:
+
+    def __init__(self, zz_form: ZzForm):
+        self.zz_form = zz_form
+
+    def __getattr__(self, name):
+        datadic = self.zz_form.model.get_record(self.zz_form.current_row)
+        return datadic.get(name, "")

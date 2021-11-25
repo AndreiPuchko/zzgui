@@ -26,11 +26,10 @@ class DemoApp(ZzApp):
             "File|Toogle statusbar", self.show_hide_statusbar, toolbar="spr_cln"
         )
         self.add_menu("File|-", None)
-        self.add_menu("File|Quit", self.close, toolbar="*")
-        self.add_menu("File|-", None)
         self.add_menu("Documents|Personal", None)
         self.add_menu("Documents|Business", None)
         self.add_menu("Help|About", lambda: zzMess("About zzgui"))
+        self.add_menu("File|Quit", self.close, toolbar="*")
 
     def first_form(self):
         actions = ZzActions()

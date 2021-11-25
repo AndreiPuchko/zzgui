@@ -20,7 +20,7 @@ from zzgui.qt5.zzapp import ZzQtWindow
 from zzgui.zzutils import num
 
 import zzgui.zzdialogs
-from zzgui.zzdialogs import zzMess
+from zzgui.zzdialogs import zzMess, zzWait, zzAskYN
 
 
 class ZzForm(zzform.ZzForm):
@@ -50,6 +50,16 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         # if num(settings.get(self.window_title, "is_max", "0")):
         #     paw.showMaximized()
 
+    def set_position(self, left, top):
+        paw = self.parent()
+        if paw is not None:
+            paw.move(left, top)
+
+    def set_size(self, w, h):
+        paw = self.parent()
+        if paw is not None:
+            paw.resize(w, h)
+
     def get_position(self):
         parent_mdi_sub_window = self.parent()
         if parent_mdi_sub_window is not None:
@@ -63,7 +73,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
         if self.zz_form.before_form_show() is False:
             self.zz_form.close()
-            
+
         if not isinstance(self.parent(), QMdiSubWindow):
             self.escapeEnabled = False
 

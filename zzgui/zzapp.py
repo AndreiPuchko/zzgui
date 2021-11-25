@@ -209,6 +209,15 @@ class ZzApp:
     def show_form(self, form=None, modal="modal"):
         pass
 
+    def lock(self):
+        pass
+
+    def unlock(self):
+        pass
+
+    def process_events(self):
+        pass
+
     def on_init(self):
         pass
 

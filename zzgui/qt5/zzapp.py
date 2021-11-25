@@ -41,7 +41,6 @@ class ZzApp(zzapp.ZzApp, QApplication):
         self.main_window = ZzMainWindow(title)
 
     def show_form(self, form=None, modal="modal"):
-        # form.setParent(zzapp.zz_app.main_window)
         if modal == "":  # mdiarea normal window
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
             form.show()
@@ -107,6 +106,19 @@ class ZzApp(zzapp.ZzApp, QApplication):
         # Show as context menu
         self.main_window.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.main_window.addActions(self.main_window.menuBar().actions())
+
+    def lock(self):
+        self.main_window.menuBar().setDisabled(True)
+        self.main_window.zz_toolbar.setDisabled(True)
+        self.main_window.zz_tabwidget.setDisabled(True)
+
+    def unlock(self):
+        self.main_window.menuBar().setDisabled(False)
+        self.main_window.zz_toolbar.setDisabled(False)
+        self.main_window.zz_tabwidget.setDisabled(False)
+
+    def process_events(self):
+        self.processEvents()
 
     def show_menubar(self, mode=True):
         zzapp.ZzApp.show_menubar(self)

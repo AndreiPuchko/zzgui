@@ -25,11 +25,10 @@ class DemoApp(ZzApp):
         self.add_menu("File|Options|Toogle tabbar", self.show_hide_tabbar)
         self.add_menu("File|Options|Toogle statusbar", self.show_hide_statusbar)
         self.add_menu("File|-")
-        self.add_menu("File|Quit", self.close, toolbar="*")
-        self.add_menu("File|-")
         self.add_menu("Documents|Personal")
         self.add_menu("Documents|Business")
         self.add_menu("Help|About", lambda: zzMess("About zzgui"), toolbar="*")
+        self.add_menu("File|Quit", self.close, toolbar="*")
 
     def describe_form1(self):
         form = ZzForm("First form")
