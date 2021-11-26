@@ -26,7 +26,7 @@ class ZzForm:
         self.form_stack = []
         self.actions = zzapp.ZzActions()
         self.controls = zzapp.ZzControls()
-        self.final_controls = zzapp.ZzControls()
+        self.system_controls = zzapp.ZzControls()
         self.model: ZzModel = self.set_model(ZzModel())
         # Shortcuts to get
         self.s = ZzFormData(self)  # widgets data by name
@@ -64,6 +64,9 @@ class ZzForm:
 
     def widgets_list(self):
         return [self.form_stack[-1].widgets[x] for x in self.form_stack[-1].widgets]
+
+    def focus_widget(self):
+        return zzapp.zz_app.focus_widget()
 
     def close(self):
         if self._in_close_flag:
@@ -195,7 +198,7 @@ class ZzForm:
             valid=self.close,
         )
 
-        self.final_controls = buttons
+        self.system_controls = buttons
 
     def add_crud_buttons(self, mode):
         buttons = zzapp.ZzControls()
@@ -249,7 +252,7 @@ class ZzForm:
             mess="Do not save data",
             valid=self.crud_close,
         )
-        self.final_controls = buttons
+        self.system_controls = buttons
 
     def crud_view_to_edit(self):
         self.crud_form.set_title(f"{self.title}.[EDIT]")
@@ -379,7 +382,7 @@ class ZzForm:
         self.grid_form.move_grid_index(mode)
 
     def get_controls(self):
-        return self.controls.controls + self.final_controls.controls
+        return self.controls.controls + self.system_controls.controls
 
     def when(self):
         pass

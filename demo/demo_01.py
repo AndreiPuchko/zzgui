@@ -1,3 +1,8 @@
+"""shows
+defining the main menu and toolbar shortcuts
+the possibilities for creating complex user interface forms
+managing main window appearance
+"""
 if __name__ == "__main__":
     import sys
 
@@ -7,6 +12,7 @@ from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.qt5.zzform import zzMess
 from zzgui.zzapp import ZzActions
+from zzgui.zzdialogs import zzAskYN
 
 
 class DemoApp(ZzApp):
@@ -32,17 +38,33 @@ class DemoApp(ZzApp):
         self.add_menu("File|Quit", self.close, toolbar="*")
 
     def first_form(self):
+        form = ZzForm("First form ever")
+
         actions = ZzActions()
         # actions.show_main_button = False
         # actions.show_actions = False
-        actions.add_action("Action 1", lambda: zzMess("Action 1"))
-        actions.add_action("Action 2", lambda: zzMess("Action 2"))
+        actions.add_action(
+            "Action 1",
+            lambda: zzMess(
+                "I am the Action 1.<br><br>"
+                "<font color=red>You can reach me also with </font>"
+                "<font size=+5 color=darkblue>mouse <b>left click</b>!</font>"
+            ),
+        )
 
-        form = ZzForm("First form ever")
-        # form.add_control("/h", "main window control")
+        def action2():
+            form.s.name = form.s.name + "+0"
+            form.w.name.set_focus()
+            zzMess(
+                "Ich bin <b>Action zwei</b><br><br>"
+                "<font size=+2 color green>Look,"
+                "I have changed 'Enter your name' field</b></font><br>"
+                "and set focus to it"
+            )
+
+        actions.add_action("Action 2", worker=action2)
+
         form.add_control("toolbar", "", actions=actions, control="toolbar")
-        # form.add_control("/")
-
         if form.add_control("/h", "main window control"):
             form.add_control(
                 label="Main menu on/off",
@@ -71,33 +93,37 @@ class DemoApp(ZzApp):
             name="name",
             label="Enter your name",
             control="line",
-            data="simple data",
+            data="FirstName LastName",
         )
 
         if form.add_control("/t", "Tab1"):
             form.add_control("/hs")
-            form.add_control("", "11111111111111111111")
+            form.add_control(
+                "",
+                "Just a multiline label on tab1.<br>"
+                "<b>Look</b>,"
+                "This tab has a splitter! <b><br>"
+                "And it has a <font color=red>memory!</b>",
+            )
             form.add_control("spin1", "Spinbox", control="spin")
             form.add_control("/s")
-            form.add_control("", "5555555555555555555")
+            form.add_control(name="z1", label="Enter smths", control="line")
+
         if form.add_control("/t", "Tab2"):
-            form.add_control("", "2222222222222222222")
+            form.add_control("", "Just label on Tab2")
         form.add_control("/")
         form.add_control("/")
-        form.add_control("", "44444444444444444444444")
 
         if form.add_control("/t", "Tab3"):
-            form.add_control("", "11111111111111111111")
+            form.add_control("", "Label on tab3")
 
-        if form.add_control("/t", "Tab2"):
+        if form.add_control("/t", "Tab4"):
             form.add_control("", "2222222222222222222")
         form.add_control("/")
-
-        form.add_control("", "44444444444444444444444")
 
         if form.add_control(name="/h", label="Horizontal frame"):
 
-            if form.add_control(name="/vs", label="Vertical frame"):
+            if form.add_control(name="/vs", label="Vertical frame has a splitter too"):
                 form.add_control(label="just label 1")
                 form.add_control(label="just label 2")
                 form.add_control(
@@ -113,7 +139,7 @@ class DemoApp(ZzApp):
             if form.add_control(name="/f", label="Form frame"):
                 form.add_control(
                     "radio",
-                    "Radio buttn",
+                    "Radio buttons",
                     pic="option 1;option 2;option 3",
                     control="radio",
                 )
@@ -141,24 +167,38 @@ class DemoApp(ZzApp):
             name="text",
             label="Enter big text",
             control="text",
-            data="simple text<br>line2",
+            data="simple <b>text<br>line2",
         )
 
-        if form.add_control("/h", "buttons"):
+        if form.add_control("/h", "ToolButtons"):
             form.add_control(
-                label="tool",
+                label="toolbutton \ni can show focus widget value",
                 control="toolbutton",
-                valid=lambda: print(
-                    f"{self.focusWidget()}!{self.focusWidget().get_text()}"
-                ),
+                valid=lambda: zzMess(f"{self.focus_widget().get_text()}"),
+            )
+
+            def close_form():
+                if zzAskYN("<b><font size=+3 color=darkred>Are you sure?") == 2:
+                    form.close()
+
+            form.add_control(
+                label="I can close the form",
+                control="toolbutton",
+                valid=close_form,
             )
             form.add_control("/s")
-            form.add_control(
-                label="Ok",
-                control="button",
-                valid=lambda: zzMess("3333333333333333"),
+            form.add_ok_cancel_buttons()
+            form.system_controls.c._ok_button[
+                "label"
+            ] = "I am a system button,\ni have been renamed"
+
+            form.valid = (
+                lambda: zzAskYN(
+                    "<font color=yellow size=+4>" "Are you really want to close ME?"
+                )
+                == 2
             )
-            form.add_control(label="Cancel", control="button", valid=form.close)
+
         form.add_control("/")
 
         form.show_mdi_modal_form()

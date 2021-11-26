@@ -107,6 +107,10 @@ class ZzApp(zzapp.ZzApp, QApplication):
         self.main_window.setContextMenuPolicy(Qt.ActionsContextMenu)
         self.main_window.addActions(self.main_window.menuBar().actions())
 
+    def focus_widget(self):
+        return qApp.focusWidget()
+
+
     def lock(self):
         self.main_window.menuBar().setDisabled(True)
         self.main_window.zz_toolbar.setDisabled(True)

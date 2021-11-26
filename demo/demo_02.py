@@ -1,3 +1,5 @@
+"""Shows the possibilities of combining several forms into one
+"""
 if __name__ == "__main__":
     import sys
 
@@ -12,13 +14,13 @@ from zzgui.zzutils import num
 
 class DemoApp(ZzApp):
     def on_start(self):
-        self.show_form4()
+        self.show_complex_form()
 
     def on_init(self):
         self.add_menu("File|First", self.show_form1, toolbar="*")
         self.add_menu("File|Second", self.show_form2, toolbar="*")
-        self.add_menu("File|Complex", self.show_form3, toolbar="*")
-        self.add_menu("File|Grid", self.show_form4, toolbar="*")
+        self.add_menu("File|Grid", self.show_grid_form, toolbar="*")
+        self.add_menu("File|Complex", self.show_complex_form, toolbar="*")
         self.add_menu("File|-")
         self.add_menu("File|Options|Toogle toolbar", self.show_hide_toolbar)
         self.add_menu("File|Options|Toogle menubar", self.show_hide_menubar)
@@ -98,7 +100,7 @@ class DemoApp(ZzApp):
     def show_form2(self):
         self.describe_form2().show_mdi_modal_form()
 
-    def describe_form3(self):
+    def describe_complex_form(self):
         form = ZzForm("Complex form")
         form.add_control("/h")
         form.add_control("", "1", widget=self.describe_form1())
@@ -107,10 +109,14 @@ class DemoApp(ZzApp):
         f2 = self.describe_form2()
         form.add_control("", "2", widget=f1)
         form.add_control("", "3", widget=f2)
+        form.add_control("/")
+        form.add_control("/")
+        form.add_control("", "4", widget=self.describe_grid_form().get_grid_widget())
+
         return form
 
-    def show_form3(self):
-        self.describe_form3().show_mdi_modal_form()
+    def show_complex_form(self):
+        self.describe_complex_form().show_mdi_modal_form()
 
     def describe_form4(self):
         form = ZzForm("Grid form")
@@ -124,7 +130,7 @@ class DemoApp(ZzApp):
         form.add_control("date", "Date of bith", control="date", data="1990-05-01")
         return form
 
-    def show_form4(self):
+    def describe_grid_form(self):
         data = [
             {"uid": 1, "name": "Lorem Ipsum", "date": "2005-01-15"},
             {"uid": 2, "name": "Dolor Sit", "date": "2005-01-15"},
@@ -133,6 +139,10 @@ class DemoApp(ZzApp):
         ]
         form = self.describe_form4()
         form.model.set_records(data)
+        return form
+
+    def show_grid_form(self):
+        form = self.describe_grid_form()
         form.show_mdi_modal_grid()
 
     def show_hide_menubar(self):

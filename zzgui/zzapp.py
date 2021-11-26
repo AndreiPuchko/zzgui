@@ -62,7 +62,7 @@ class ZzControls:
             for line in self.controls.controls:
                 if line.get("name") == name or line.get("tag") == name:
                     return line
-            return {}
+            return [line['name'] for line in self.controls.controls]
 
     def __init__(self):
         self.controls = []
@@ -207,6 +207,9 @@ class ZzApp:
         sys.exit(0)
 
     def show_form(self, form=None, modal="modal"):
+        pass
+
+    def focus_widget(self):
         pass
 
     def lock(self):
