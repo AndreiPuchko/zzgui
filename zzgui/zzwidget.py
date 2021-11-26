@@ -19,6 +19,8 @@ class ZzWidget:
             self.set_readonly(True)
         if self.meta.get("disabled"):
             self.set_disabled(True)
+        if self.meta.get("mess"):
+            self.set_tooltip(self.meta.get("mess"))
         # if hasattr(self, "setToolTip") and self.meta.get("mess"):
         #     self.setToolTip(self.meta.get("mess"))
         # if self.meta.get("zzForm"):
@@ -35,6 +37,9 @@ class ZzWidget:
     def set_enabled(self, arg=True):
         pass
 
+    def set_tooltip(self, mess):
+        pass
+
     def set_focus(self):
         pass
 
@@ -48,7 +53,10 @@ class ZzWidget:
         pass
 
     def valid(self):
-        return self.meta.get("valid", lambda: True)()
+        if self.meta.get("valid") is not None:
+            return self.meta.get("valid")()
+        else:
+            return True
 
     def when(self):
         return self.meta.get("when", lambda: True)()

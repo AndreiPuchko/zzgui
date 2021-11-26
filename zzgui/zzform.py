@@ -34,7 +34,8 @@ class ZzForm:
         self.a = ZzFormAction(self)  # Actions by text
         self.r = ZzModelData(self)  # Grid data by name
 
-        self.show_grid_action_top =True
+        self.show_grid_action_top = True
+        self.do_not_save_geometry = False
 
         # Must be redefined in any subclass
         self._ZzFormWindow_class = ZzFormWindow
@@ -404,6 +405,7 @@ class ZzForm:
         actions=[],
         valid=None,
         when=None,
+        mess="",
         readonly=None,
         disabled=None,
         hotkey="",
@@ -421,6 +423,7 @@ class ZzForm:
             actions=actions,
             valid=valid,
             when=when,
+            mess=mess,
             readonly=readonly,
             hotkey=hotkey,
             disabled=disabled,
@@ -490,13 +493,13 @@ class ZzFormWindow:
         gridForm.add_control("/vs", tag="gridsplitter")
         gridForm.add_control("toolbar", control="toolbar", actions=self.zz_form.actions)
         gridForm.add_control("form__grid", control="grid")
-        
+
         if self.zz_form.show_app_modal_form is False:
             gridForm.controls.controls[-1], gridForm.controls.controls[-2] = (
                 gridForm.controls.controls[-2],
                 gridForm.controls.controls[-1],
             )
-        
+
         self.build_form(gridForm.get_controls())
         self.move_grid_index(7)
 
@@ -634,6 +637,7 @@ class ZzFormWindow:
             elif "/" == name:
                 return None, None
             elif "/t" in name:  # Tabpage
+                label2add = None
                 control = "tab"
             elif "radio" in control:
                 control = "radio"
@@ -665,7 +669,6 @@ class ZzFormWindow:
         """For given name returns class from current GUI engine module"""
         if class_name == "":
             class_name = module_name
-        # return getattr(getattr(self._widgets_package, module_name), class_name)
         module_name = f"zz{module_name}"
         class_name = f"zz{class_name}"
         try:

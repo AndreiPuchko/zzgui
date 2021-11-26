@@ -18,6 +18,9 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         super().__init__()
         zzwidget.ZzWidget.__init__(self, meta)
 
+    def set_tooltip(self, mess):
+        self.setToolTip(mess)
+
     def set_disabled(self, arg=True):
         self.setEnabled(True if not arg else False)
 

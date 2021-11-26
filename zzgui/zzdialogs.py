@@ -10,11 +10,17 @@ if __name__ == "__main__":
 from threading import Thread
 from zzgui.zzform import ZzForm
 import zzgui.zzapp as zzapp
-import time
+
+
+def center_window(form: ZzForm):
+    w, h = zzapp.zz_app.main_window.get_size()
+    form.form_stack[0].set_size(w * 0.33, h * 0.5)
+    form.form_stack[0].set_position(w * 0.33, h * 0.15)
 
 
 def zzMess(mess="", title="Message"):
     form = ZzForm(title)
+    form.do_not_save_geometry = True
     form.add_control("mess", control="text", data=f"{mess}", readonly=True)
     if form.add_control("/h"):
         form.add_control("/s")
@@ -30,11 +36,14 @@ def zzMess(mess="", title="Message"):
 
         form.add_control("/s")
         form.add_control("/")
+
+    form.before_form_show = lambda: center_window(form)
     form.show_app_modal_form()
 
 
 def zzAskYN(mess, title="Ask"):
     form = ZzForm(title)
+    form.do_not_save_geometry = True
     form.choice = 0
     form.add_control("/")
 
@@ -67,6 +76,7 @@ def zzAskYN(mess, title="Ask"):
         )
         form.add_control("/s")
         form.add_control("/")
+    form.before_form_show = lambda: center_window(form)
     form.show_app_modal_form()
     return form.choice
 

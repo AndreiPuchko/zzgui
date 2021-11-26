@@ -66,6 +66,8 @@ class zztoolbar(QFrame, ZzWidget):
                         act["engineAction"] = cascade_action[action_key].addAction(
                             action_text
                         )
+                        act["engineAction"].setToolTip(act.get("mess", ""))
+                        act["engineAction"].setStatusTip(act.get("mess", ""))
                         if worker:
                             act["engineAction"].triggered.connect(worker)
                         elif (
@@ -90,7 +92,7 @@ class zztoolbar(QFrame, ZzWidget):
                                 return rd
 
                             act["engineAction"].triggered.connect(getChildForm(act))
-                        
+
                         act["engineAction"].setShortcut(
                             act["hotkey"]
                             if not act["hotkey"] == "Spacebar"
@@ -110,6 +112,7 @@ class zztoolbar(QFrame, ZzWidget):
 
         self.main_button = QToolBar()
         self.main_button_action = self.main_button.addAction("☰")
+        self.main_button_action.setToolTip(self.meta.get("mess", ""))
         self.main_button_action.setMenu(tool_bar_qt_actions)
         self.main_button.widgetForAction(self.main_button_action).setPopupMode(
             QToolButton.InstantPopup

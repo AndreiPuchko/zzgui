@@ -36,8 +36,8 @@ import zzgui.zzapp as zzapp
 
 class ZzApp(zzapp.ZzApp, QApplication):
     def __init__(self, title=""):
-        super().__init__(title)
         QApplication.__init__(self, [])
+        super().__init__(title)
         self.main_window = ZzMainWindow(title)
 
     def show_form(self, form=None, modal="modal"):
@@ -110,6 +110,13 @@ class ZzApp(zzapp.ZzApp, QApplication):
     def focus_widget(self):
         return qApp.focusWidget()
 
+    def set_style(self):
+        if os.path.isfile(self.style_file):
+            try:
+                with open(self.style_file) as style_data:
+                    self.setStyleSheet(style_data.read())
+            except Exception:
+                print (f"File {self.style_file} reading error...")
 
     def lock(self):
         self.main_window.menuBar().setDisabled(True)
@@ -167,6 +174,9 @@ class ZzApp(zzapp.ZzApp, QApplication):
         return self.main_window.zz_tabwidget.tabBar().tabText(
             self.main_window.zz_tabwidget.currentIndex()
         )
+
+    def show_statusbar_mess(self, text=""):
+        self.main_window.statusBar().showMessage(text)
 
     def set_tabbar_text(self, text=""):
         self.main_window.zz_tabwidget.tabBar().setTabText(

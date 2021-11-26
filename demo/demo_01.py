@@ -8,6 +8,7 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
+from zzgui import zzapp
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.qt5.zzform import zzMess
@@ -20,16 +21,13 @@ class DemoApp(ZzApp):
         self.first_form()
 
     def on_init(self):
-        self.add_menu("File|First", self.first_form, toolbar="First")
-        self.add_menu("File|Second", self.worker)
-        self.add_menu("File|Grid", self.worker)
-        self.add_menu("File|Complex", self.worker)
+        self.add_menu("File|First", self.first_form, toolbar="*")
         self.add_menu("File|-", None)
-        self.add_menu("File|Toogle toolbar", self.show_hide_toolbar, toolbar="spr_cln")
-        self.add_menu("File|Toogle menubar", self.show_hide_menubar, toolbar="spr_cln")
-        self.add_menu("File|Toogle tabbar", self.show_hide_tabbar, toolbar="spr_cln")
+        self.add_menu("File|Toogle toolbar", self.show_hide_toolbar, toolbar="*")
+        self.add_menu("File|Toogle menubar", self.show_hide_menubar, toolbar="*")
+        self.add_menu("File|Toogle tabbar", self.show_hide_tabbar, toolbar="*")
         self.add_menu(
-            "File|Toogle statusbar", self.show_hide_statusbar, toolbar="spr_cln"
+            "File|Toogle statusbar", self.show_hide_statusbar, toolbar="*"
         )
         self.add_menu("File|-", None)
         self.add_menu("Documents|Personal", None)
@@ -41,30 +39,35 @@ class DemoApp(ZzApp):
         form = ZzForm("First form ever")
 
         actions = ZzActions()
-        # actions.show_main_button = False
+        # # actions.show_main_button = False
         # actions.show_actions = False
         actions.add_action(
-            "Action 1",
-            lambda: zzMess(
+            text="Action 1",
+            worker=lambda: zzMess(
                 "I am the Action 1.<br><br>"
                 "<font color=red>You can reach me also with </font>"
                 "<font size=+5 color=darkblue>mouse <b>left click</b>!</font>"
             ),
+            mess="I am the Action! Click Me",
         )
 
         def action2():
             form.s.name = form.s.name + "+0"
             form.w.name.set_focus()
+            zzapp.zz_app.show_statusbar_mess("Text in status bar")
             zzMess(
                 "Ich bin <b>Action zwei</b><br><br>"
-                "<font size=+2 color green>Look,"
+                "<font size=+2 color=green>Look,"
                 "I have changed 'Enter your name' field</b></font><br>"
-                "and set focus to it"
+                "and set focus to it<br>"
+                "And there is a text in the statusbar"
             )
 
         actions.add_action("Action 2", worker=action2)
 
-        form.add_control("toolbar", "", actions=actions, control="toolbar")
+        form.add_control(
+            "toolbar", "", actions=actions, control="toolbar", mess="Form's actions"
+        )
         if form.add_control("/h", "main window control"):
             form.add_control(
                 label="Main menu on/off",
@@ -94,6 +97,7 @@ class DemoApp(ZzApp):
             label="Enter your name",
             control="line",
             data="FirstName LastName",
+            mess="You can do it!",
         )
 
         if form.add_control("/t", "Tab1"):
@@ -103,7 +107,7 @@ class DemoApp(ZzApp):
                 "Just a multiline label on tab1.<br>"
                 "<b>Look</b>,"
                 "This tab has a splitter! <b><br>"
-                "And it has a <font color=red>memory!</b>",
+                "The splitter has a <font color=red>memory!</b>",
             )
             form.add_control("spin1", "Spinbox", control="spin")
             form.add_control("/s")
@@ -168,11 +172,15 @@ class DemoApp(ZzApp):
             label="Enter big text",
             control="text",
             data="simple <b>text<br>line2",
+            mess="Input for big amount of text<br>"
+            "Like <b><font color=red>War</font> and"
+            " <font color=green>Peace</font></b>,"
+            "<br> for example",
         )
 
         if form.add_control("/h", "ToolButtons"):
             form.add_control(
-                label="toolbutton \ni can show focus widget value",
+                label="toolbutton\nI can show value of focus widget",
                 control="toolbutton",
                 valid=lambda: zzMess(f"{self.focus_widget().get_text()}"),
             )
@@ -194,7 +202,7 @@ class DemoApp(ZzApp):
 
             form.valid = (
                 lambda: zzAskYN(
-                    "<font color=yellow size=+4>" "Are you really want to close ME?"
+                    "<font color=darkcyan size=+4>" "Are you really want to close ME?"
                 )
                 == 2
             )

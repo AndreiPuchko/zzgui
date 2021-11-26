@@ -93,7 +93,8 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         # mdi_width = self.parent().parent().parent().viewport().width()
 
         # size_before = self.size()
-        self.restore_geometry(zzapp.zz_app.settings)
+        if self.zz_form.do_not_save_geometry is False:
+            self.restore_geometry(zzapp.zz_app.settings)
         # size_after = self.size()
         # width_delta = (
         #     0

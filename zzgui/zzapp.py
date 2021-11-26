@@ -1,4 +1,7 @@
 import sys
+import os
+
+from PyQt5.QtWidgets import QMainWindow
 
 if __name__ == "__main__":
 
@@ -27,8 +30,7 @@ class ZzActions:
             self.action_list = []
 
     def add_action(self, text, worker=None, icon="", mess="", hotkey="", tag=""):
-        """ "/view", "/crud"
-        """
+        """ "/view", "/crud" """
         action = {}
         action["text"] = text
         action["worker"] = worker
@@ -62,7 +64,7 @@ class ZzControls:
             for line in self.controls.controls:
                 if line.get("name") == name or line.get("tag") == name:
                     return line
-            return [line['name'] for line in self.controls.controls]
+            return [line["name"] for line in self.controls.controls]
 
     def __init__(self):
         self.controls = []
@@ -117,8 +119,8 @@ class ZzControls:
 
 
 class ZzSettings:
-    def __init__(self, filename="zzGui.ini"):
-        self.filename = filename
+    def __init__(self, filename=""):
+        self.filename = filename if filename else "zzGui.ini"
         self.config = ConfigParser()
         self.read()
 
@@ -159,12 +161,35 @@ class ZzApp:
     def __init__(self, title=""):
         zzapp.zz_app = self
         self.window_title = title
-        self.settings = ZzSettings()
+
+        self.style_file = ""
+        self.settings_file = ""
+
+        self.style_file = self.get_argv("style")
+        if self.style_file == "":
+            self.style_file = "zzGui.css"
+        self.settings_file = self.get_argv("ini")
+
+        self.set_style()
+
+        self.settings = ZzSettings(self.settings_file)
         self.main_window = ZzMainWindow(title)
         self.menu_list = []
         self.main_window.restore_geometry(self.settings)
         self.on_init()
+
         self.main_window.show()
+    
+    def set_style(self):
+        pass
+
+    def get_argv(self, argtext: str):
+        for x in sys.argv:
+            if x.startswith(f"/{argtext}:") or x.startswith(f"-{argtext}:"):
+                file_name = x[(len(argtext) + 2) :]
+                print(file_name)
+                return file_name
+        return ""
 
     def add_menu(self, text="", worker=None, before=None, toolbar=None):
         if text.endswith("|"):
@@ -205,6 +230,9 @@ class ZzApp:
         self.main_window.save_geometry(self.settings)
         self.main_window.close()
         sys.exit(0)
+
+    def show_statusbar_mess(self, text=""):
+        pass
 
     def show_form(self, form=None, modal="modal"):
         pass
