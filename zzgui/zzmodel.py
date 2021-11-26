@@ -29,20 +29,21 @@ class ZzModel:
 
         self.readonly = True
         self.filterable = False
+        self.data_changed = False
 
         self.order_text = ""
         self.where_text = ""
 
-    def insert(self, record: dict):
+    def insert(self, record: dict, current_row=0):
         print(record)
         return True
 
-    def update(self, record: dict):
+    def update(self, record: dict, current_row=0):
         print(record)
         return True
 
-    def delete(self, record: dict):
-        print(record)
+    def delete(self, current_row=0):
+        print(current_row)
         return True
 
     def set_where(self, where_text=""):
@@ -147,6 +148,7 @@ class ZzModel:
     def column_count(self):
         return len(self.columns)
 
+
 class ZzCsvModel(ZzModel):
     def __init__(self, zz_form=None, csv_file_object=None):
         super().__init__(zz_form=zz_form)
@@ -154,11 +156,29 @@ class ZzCsvModel(ZzModel):
 
         csv_dict = csv.DictReader(csv_file_object)
         # If there are names with space -  replace spaces in columns names
-        if [filename for filename in csv_dict.fieldnames if ' ' in filename]:
+        if [filename for filename in csv_dict.fieldnames if " " in filename]:
             fieldnames = [x.replace(" ", "_") for x in csv_dict.fieldnames]
             csv_dict = csv.DictReader(csv_file_object, fieldnames)
         self.set_records([x for x in csv_dict])
         self.filterable = True
+
+    def update(self, record: dict, current_row):
+        self.records[current_row] = record
+        self.data_changed = True
+        self.refresh()
+        return True
+
+    def insert(self, record: dict, current_row):
+        self.records.append(record)
+        self.data_changed = True
+        self.refresh()
+        return True
+
+    def delete(self, row_number):
+        self.records.pop(row_number)
+        self.data_changed = True
+        self.refresh()
+        return True
 
     def set_where(self, where_text=""):
         self.where_text = where_text

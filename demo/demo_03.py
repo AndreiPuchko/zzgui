@@ -1,3 +1,8 @@
+"""Downloads CSV file (from local folder or from web)
+Uses build_grid_view_auto_form to create UI
+Shows it's content in the editable grid
+Functionality "save data to disk" not implemented.
+"""
 if __name__ == "__main__":
     import sys
 
@@ -44,10 +49,11 @@ class DemoApp(ZzApp):
         # Define form
         form = ZzForm("Grid form")
         form.set_model(ZzCsvModel(csv_file_object=csv_file_object))
+        form.actions.add_action("/crud")
         form.build_grid_view_auto_form()
 
         form.actions.add_action(
-            "Show Period", worker=lambda: zzMess(f"{form.r.Period}"), hotkey="F4"
+            "Show Period value", worker=lambda: zzMess(f"{form.r.Period}"), hotkey="F4"
         )
         form.show_mdi_modal_grid()
 

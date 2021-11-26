@@ -1,3 +1,7 @@
+"""Parses webpage and shows list of downloadable files (ZIP with CSV inside)
+Uses build_grid_view_auto_form method to create UI
+Then downloads selected file and shows it in grid
+"""
 if __name__ == "__main__":
     import sys
 

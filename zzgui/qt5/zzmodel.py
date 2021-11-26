@@ -15,4 +15,3 @@ class ZzModel(zzmodel.ZzModel):
         self.beginResetModel()
         self.endResetModel()
         return super().refresh()
-

@@ -7,7 +7,6 @@ if __name__ == "__main__":
 
     demo()
 
-from os import name
 import zzgui.zzapp as zzapp
 from zzgui.zzmodel import ZzModel
 from zzgui.zzutils import int_
@@ -34,6 +33,8 @@ class ZzForm:
         self.w = ZzFormWidget(self)  # widgets by name
         self.a = ZzFormAction(self)  # Actions by text
         self.r = ZzModelData(self)  # Grid data by name
+
+        self.show_grid_action_top =True
 
         # Must be redefined in any subclass
         self._ZzFormWindow_class = ZzFormWindow
@@ -124,6 +125,7 @@ class ZzForm:
             self.actions.add_action(text="/view")
 
             if self.model.filterable:
+
                 def run_filter_data_form():
                     filter_form = self.__class__("Filter Conditions")
                     # Populate form with columns
@@ -142,7 +144,9 @@ class ZzForm:
                                 continue
                             column_name = x.split(" in ")[1].strip()
                             column_value = x.split(" in ")[0].strip()[1:-1]
-                            filter_form.w.__getattr__(column_name).set_text(column_value)
+                            filter_form.w.__getattr__(column_name).set_text(
+                                column_value
+                            )
                             filter_form.w.__getattr__(column_name).check.set_checked()
 
                     def valid():
@@ -150,7 +154,9 @@ class ZzForm:
                         filter_list = []
                         for x in filter_form.widgets_list():
                             if x.check and x.check.is_checked():
-                                filter_list.append(f"'{x.get_text()}' in {x.meta['name']}")
+                                filter_list.append(
+                                    f"'{x.get_text()}' in {x.meta['name']}"
+                                )
                         filter_string = " and ".join(filter_list)
                         self.model.set_where(filter_string)
 
@@ -159,7 +165,9 @@ class ZzForm:
                     filter_form.add_ok_cancel_buttons()
                     filter_form.show_mdi_modal_form()
 
-                self.actions.add_action("Filter", worker=run_filter_data_form, hotkey="F9")
+                self.actions.add_action(
+                    "Filter", worker=run_filter_data_form, hotkey="F9"
+                )
 
     def _valid(self):
         if self.valid() is False:
@@ -255,7 +263,7 @@ class ZzForm:
         up (mode=8) or down (mode=2) - look at numpad to understand why
         and update values in crud_form
         """
-        self.grid_form.move_grid_index(mode)
+        self.move_grid_index(mode)
         self.set_crud_form_data()
 
     def get_grid_crud_actions(self, grid_navi_actions: zzapp.ZzActions):
@@ -299,10 +307,24 @@ class ZzForm:
         self.actions = tmp_actions
 
     def crud_delete(self):
-        print(self._zzdialogs.zzAskYN(123))
+        if self._zzdialogs.zzAskYN("a u sure?"):
+            self.model.delete(self.current_row)
+            self.set_grid_index(self.current_row)
 
     def crud_save(self):
-        self.crud_mode
+        crud_data = self.get_crud_form_data()
+        if self.crud_mode in [EDIT, VIEW]:
+            rez = self.model.update(crud_data, self.current_row)
+            self.set_grid_index(self.current_row)
+        else:
+            rez = self.model.insert(crud_data, self.current_row)
+            self.move_grid_index(1)
+        if rez is False:
+            pass
+        else:
+            self.close()
+
+    def get_crud_form_data(self):
         crud_data = {}
         for x in self.crud_form.widgets:
             widget = self.crud_form.widgets[x]
@@ -310,14 +332,7 @@ class ZzForm:
                 continue
             if hasattr(widget, "text"):
                 crud_data[x] = widget.text()
-        if self.crud_mode == "EDIT":
-            rez = self.model.update(crud_data)
-        else:
-            rez = self.model.insert(crud_data)
-        if rez is False:
-            pass
-        else:
-            self.close()
+        return crud_data
 
     def crud_close(self):
         self.crud_form.close()
@@ -329,16 +344,19 @@ class ZzForm:
         self.add_crud_buttons(mode)
         self.crud_form = self._ZzFormWindow_class(self, f"{self.title}.[{mode}]")
         self.crud_form.build_form()
-        self.set_crud_form_data()
+        self.set_crud_form_data(mode)
         self.crud_form.show_form()
 
-    def set_crud_form_data(self):
+    def set_crud_form_data(self, mode=EDIT):
         """set current record's value in crud_form"""
         data = self.model.get_record(self.current_row)
         for x in data:
             if x not in self.crud_form.widgets:
                 continue
-            self.crud_form.widgets[x].set_text(data[x])
+            if mode == NEW:
+                self.crud_form.widgets[x].set_text("")
+            else:
+                self.crud_form.widgets[x].set_text(data[x])
 
     def grid_index_changed(self, row, column):
         self.current_row = row
@@ -355,7 +373,10 @@ class ZzForm:
                 break
 
     def set_grid_index(self, row_number=0):
-        self.grid_form.self.grid_widget(row_number)
+        self.grid_form.set_grid_index(row_number)
+
+    def move_grid_index(self, mode):
+        self.grid_form.move_grid_index(mode)
 
     def get_controls(self):
         return self.controls.controls + self.final_controls.controls
@@ -466,6 +487,13 @@ class ZzFormWindow:
         gridForm.add_control("/vs", tag="gridsplitter")
         gridForm.add_control("toolbar", control="toolbar", actions=self.zz_form.actions)
         gridForm.add_control("form__grid", control="grid")
+        
+        if self.zz_form.show_app_modal_form is False:
+            gridForm.controls.controls[-1], gridForm.controls.controls[-2] = (
+                gridForm.controls.controls[-2],
+                gridForm.controls.controls[-1],
+            )
+        
         self.build_form(gridForm.get_controls())
         self.move_grid_index(7)
 
@@ -713,7 +741,6 @@ class ZzFormAction:
 
 
 class ZzModelData:
-
     def __init__(self, zz_form: ZzForm):
         self.zz_form = zz_form
 
