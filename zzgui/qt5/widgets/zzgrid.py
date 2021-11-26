@@ -100,6 +100,9 @@ class zzgrid(QTableView):
     def current_index(self):
         return self.currentIndex().row(), self.currentIndex().column()
 
+    def set_focus(self):
+        self.setFocus()
+
     def row_count(self):
         return self.model().rowCount()
 

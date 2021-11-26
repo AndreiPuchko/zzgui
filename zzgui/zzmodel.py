@@ -154,7 +154,6 @@ class ZzCsvModel(ZzModel):
         super().__init__(zz_form=zz_form)
         csv_dict = csv.DictReader(csv_file_object)
 
-        csv_dict = csv.DictReader(csv_file_object)
         # If there are names with space -  replace spaces in columns names
         if [filename for filename in csv_dict.fieldnames if " " in filename]:
             fieldnames = [x.replace(" ", "_") for x in csv_dict.fieldnames]
@@ -192,7 +191,7 @@ class ZzCsvModel(ZzModel):
             self.use_proxy = False
         self.refresh()
 
-    def set_order(self, order_data=""):
+    def set_order1(self, order_data=""):
         super().set_order(order_data=order_data)
         colname = self.order_text
         if self.proxy_records:
@@ -227,6 +226,38 @@ class ZzCsvModel(ZzModel):
                         start = middlepos
                     else:
                         end = middlepos
+        self.proxy_records = tmp_proxy_records
+        self.use_proxy = True
+        self.refresh()
+
+    def set_order(self, order_data=""):
+        super().set_order(order_data=order_data)
+
+        colname = self.order_text
+
+        if self.proxy_records:
+            sort_records = {}
+            for x in range(len(self.proxy_records)):
+                value = self.records[self.proxy_records[x]][colname]
+                if value not in sort_records:
+                    sort_records[value] = [self.proxy_records[x]]
+                else:
+                    sort_records[value].append(self.proxy_records[x])
+        else:
+            sort_records = {}
+            for x in range(len(self.records)):
+                if self.records[x][colname] not in sort_records:
+                    sort_records[self.records[x][colname]] = [x]
+                else:
+                    sort_records[self.records[x][colname]].append(x)
+
+        sorted_keys = sorted([x for x in sort_records.keys()])
+        # sorted_keys.sort()
+        tmp_proxy_records = []
+        for x in sorted_keys:
+            for y in sort_records[x]:
+                tmp_proxy_records.append(y)
+
         self.proxy_records = tmp_proxy_records
         self.use_proxy = True
         self.refresh()

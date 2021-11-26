@@ -95,13 +95,14 @@ class ZzThread(Thread):
 def zzWait(worker, mess=""):
     t = ZzThread(target=worker)
     t.start()
+    last_focus_widget = zzapp.zz_app.focus_widget()
     wait_window = ZzForm("Wait...")
     wait_window.add_control("/s")
-    # wait_window.add_control("/h")
-    # wait_window.add_control("/s")
-    # wait_window.add_control("", label=mess, control="label")
-    # wait_window.add_control("/s")
-    # wait_window.add_control("/")
+    wait_window.add_control("/h")
+    wait_window.add_control("/s")
+    wait_window.add_control("", label=mess, control="label")
+    wait_window.add_control("/s")
+    wait_window.add_control("/")
     wait_window.add_control("pb", mess, control="progressbar")
     wait_window.add_control("/s")
     # wait_window.add_control("", label="Stop", control="button")
@@ -113,7 +114,8 @@ def zzWait(worker, mess=""):
     while t.is_alive():
         # wait_window.s.wa = wait_window.s.wa + " 1"
         zzapp.zz_app.processEvents()
-        # time.sleep(0.5)
     zzapp.zz_app.unlock()
     wait_window.close()
+    if last_focus_widget:
+        last_focus_widget.set_focus()
     return t._return
