@@ -1,6 +1,6 @@
-"""Parses webpage and shows list of downloadable files (ZIP with CSV inside)
+about = """Parses webpage and shows list of downloadable files (ZIP with CSV inside)
 Uses build_grid_view_auto_form method to create UI
-Then downloads selected file and shows it in grid
+Then downloads selected file and shows it in the grid (sortable and filterable)
 """
 if __name__ == "__main__":
     import sys
@@ -19,26 +19,24 @@ from zzgui.qt5.zzform import zzMess, zzWait
 
 class DemoApp(ZzApp):
     def on_start(self):
-        self.show_grid_form()
+        self.file_select_form()
 
     def on_init(self):
-        self.add_menu("File|Grid", self.show_grid_form, toolbar="*")
+        self.add_menu("File|Links", self.file_select_form, toolbar="*")
         self.add_menu("File|-")
-        self.add_menu("Help|About", lambda: zzMess("About zzgui"), toolbar="*")
+        self.add_menu("Help|About", lambda: zzMess(about), toolbar="*")
         self.add_menu("File|Quit", self.close, toolbar=1)
 
-    def describe_grid_form(self):
-        url = "https://eforexcel.com/wp/downloads-18-sample-csv-files-data-sets-for-testing-sales/"
+    def file_select_form(self):
+        url = (
+            "https://eforexcel.com/wp/"
+            "downloads-18-sample-csv-files-data-sets-for-testing-sales/"
+        )
         req = request.Request(url, headers={"User-Agent": "Safari"})
-        # data: str = str(request.urlopen(req).read())
 
-        def loader(req=req):
-            def real_do():
-                return str(request.urlopen(req).read())
-
-            return real_do
-
-        data: str = zzWait(loader(), "Loading webpage...")
+        data: str = zzWait(
+            lambda: str(request.urlopen(req).read()), "Loading webpage..."
+        )
 
         links = []
         for x in data.split('<a href="'):
@@ -50,21 +48,15 @@ class DemoApp(ZzApp):
         form.model.set_records(links)
         form.build_grid_view_auto_form()
         form.actions.add_action(
-            text="Download", worker=lambda: self.load_and_show_link(form)
+            text="Download", worker=lambda: self.load_and_show_file(form), hotkey="F3"
         )
-        return form
+        form.show_mdi_modal_grid()
 
-    def load_and_show_link(self, form: ZzForm):
+    def load_and_show_file(self, form: ZzForm):
         url = form.r.link  # get current row column data
         req = request.Request(url, headers={"User-Agent": "Safari"})
 
-        def loader():
-            data = request.urlopen(req).read()
-            return data
-
-        data = zzWait(loader, "Loading file from web...")
-
-        # data = zzWait(lambda: request.urlopen(req).read(), "Loading file from web...")
+        data = zzWait(lambda: request.urlopen(req).read(), "Loading file from web...")
 
         mem_zip_file_data = BytesIO()
         mem_zip_file_data.write(data)
@@ -77,10 +69,6 @@ class DemoApp(ZzApp):
         )
         form.set_model(model)
         form.build_grid_view_auto_form()
-        form.show_mdi_modal_grid()
-
-    def show_grid_form(self):
-        form = self.describe_grid_form()
         form.show_mdi_modal_grid()
 
 
