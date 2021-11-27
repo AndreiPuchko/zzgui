@@ -19,6 +19,8 @@ import re
 
 zz_app = None
 
+class ZzHeap:
+    pass
 
 class ZzActions:
     def __init__(self, action=None):
@@ -161,7 +163,7 @@ class ZzApp:
     def __init__(self, title=""):
         zzapp.zz_app = self
         self.window_title = title
-
+        self.heap = ZzHeap()
         self.style_file = ""
         self.settings_file = ""
 
@@ -179,7 +181,7 @@ class ZzApp:
         self.on_init()
 
         self.main_window.show()
-    
+
     def set_style(self):
         pass
 

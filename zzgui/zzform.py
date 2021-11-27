@@ -367,7 +367,7 @@ class ZzForm:
         self.current_column = column
 
     def grid_header_clicked(self, column):
-        self._zzdialogs.zzWait(lambda: self.model.set_order(column))
+        self._zzdialogs.zzWait(lambda: self.model.set_order(column), "Sorting...")
 
     def grid_double_clicked(self):
         for tag in ("select", "view", "edit"):
@@ -440,6 +440,7 @@ class ZzFormWindow:
         self.shown = False
         self.zz_form = zz_form
         self.title = ""
+        self.heap = zzapp.ZzHeap()
         self.widgets = {}
         self.tab_widget = None
         # Must be defined in any subclass

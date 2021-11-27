@@ -176,7 +176,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
         )
 
     def show_statusbar_mess(self, text=""):
-        self.main_window.statusBar().showMessage(text)
+        self.main_window.statusBar().showMessage(f"{text}")
 
     def set_tabbar_text(self, text=""):
         self.main_window.zz_tabwidget.tabBar().setTabText(

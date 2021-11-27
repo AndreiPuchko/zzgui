@@ -38,7 +38,7 @@ class DemoApp(ZzApp):
 
             return real_do
 
-        data: str = zzWait(loader(), "Loading")
+        data: str = zzWait(loader(), "Loading webpage...")
 
         links = []
         for x in data.split('<a href="'):
@@ -57,13 +57,14 @@ class DemoApp(ZzApp):
     def load_and_show_link(self, form: ZzForm):
         url = form.r.link  # get current row column data
         req = request.Request(url, headers={"User-Agent": "Safari"})
-        # data = request.urlopen(req).read()
 
         def loader():
             data = request.urlopen(req).read()
             return data
 
-        data = zzWait(loader, "Loading")
+        data = zzWait(loader, "Loading file from web...")
+
+        # data = zzWait(lambda: request.urlopen(req).read(), "Loading file from web...")
 
         mem_zip_file_data = BytesIO()
         mem_zip_file_data.write(data)
@@ -71,7 +72,10 @@ class DemoApp(ZzApp):
         csv_file_object = TextIOWrapper(zip_file.open(zip_file.namelist()[0]))
 
         form = ZzForm("CSV")
-        form.set_model(ZzCsvModel(csv_file_object=csv_file_object))
+        model = zzWait(
+            lambda: ZzCsvModel(csv_file_object=csv_file_object), "Loading CSV data"
+        )
+        form.set_model(model)
         form.build_grid_view_auto_form()
         form.show_mdi_modal_grid()
 

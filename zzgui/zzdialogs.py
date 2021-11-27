@@ -8,6 +8,7 @@ if __name__ == "__main__":
     demo()
 
 from threading import Thread
+import time
 from zzgui.zzform import ZzForm
 import zzgui.zzapp as zzapp
 
@@ -87,35 +88,58 @@ class ZzThread(Thread):
         self._target = target
         self._args = args
         self._return = None
+        self.start_time = time.time()
+
+    def time(self):
+        return time.time() - self.start_time
 
     def run(self):
         self._return = self._target(*self._args)
 
 
+class ZzWaitForm:
+    def __init__(self, mess):
+        self.wait_window = ZzForm("Wait...")
+        self.wait_window.add_control("/s")
+        self.wait_window.add_control("/h")
+        self.wait_window.add_control("/s")
+        self.wait_window.add_control("", label=mess, control="label")
+        self.wait_window.add_control("/s")
+        self.wait_window.add_control("/")
+        self.wait_window.add_control("pb", mess, control="progressbar")
+        self.wait_window.add_control("/s")
+        self.show()
+
+    def show(self):
+        self.wait_window.show_mdi_form()
+        zzapp.zz_app.process_events()
+        w, h = zzapp.zz_app.main_window.get_size()
+        self.wait_window.form_stack[0].set_size(w * 0.8, h * 0.15)
+        self.wait_window.form_stack[0].set_position(w * 0.1, h * 0.3)
+        zzapp.zz_app.process_events()
+
+    def close(self):
+        self.wait_window.close()
+        zzapp.zz_app.process_events()
+
+
 def zzWait(worker, mess=""):
+    wait_window = None
+    wait_window_on = False
+    last_focus_widget = zzapp.zz_app.focus_widget()
+    zzapp.zz_app.lock()
     t = ZzThread(target=worker)
     t.start()
-    last_focus_widget = zzapp.zz_app.focus_widget()
-    wait_window = ZzForm("Wait...")
-    wait_window.add_control("/s")
-    wait_window.add_control("/h")
-    wait_window.add_control("/s")
-    wait_window.add_control("", label=mess, control="label")
-    wait_window.add_control("/s")
-    wait_window.add_control("/")
-    wait_window.add_control("pb", mess, control="progressbar")
-    wait_window.add_control("/s")
-    # wait_window.add_control("", label="Stop", control="button")
-    wait_window.show_mdi_form()
-    w, h = zzapp.zz_app.main_window.get_size()
-    wait_window.form_stack[0].set_size(w * 0.8, h * 0.15)
-    wait_window.form_stack[0].set_position(w * 0.1, h * 0.3)
-    zzapp.zz_app.lock()
     while t.is_alive():
-        # wait_window.s.wa = wait_window.s.wa + " 1"
-        zzapp.zz_app.processEvents()
+        if t.time() > 1 and wait_window_on is not True:
+            wait_window_on = True
+            wait_window = ZzWaitForm(mess)
+        zzapp.zz_app.process_events()
     zzapp.zz_app.unlock()
-    wait_window.close()
+    if wait_window is not None:
+        wait_window.close()
     if last_focus_widget:
         last_focus_widget.set_focus()
+
+    zzapp.zz_app.show_statusbar_mess(f"{t.time():.3f}")
     return t._return

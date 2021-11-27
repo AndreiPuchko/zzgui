@@ -191,45 +191,6 @@ class ZzCsvModel(ZzModel):
             self.use_proxy = False
         self.refresh()
 
-    def set_order1(self, order_data=""):
-        super().set_order(order_data=order_data)
-        colname = self.order_text
-        if self.proxy_records:
-            work_records = self.proxy_records
-        else:
-            work_records = [x for x in range(len(self.records))]
-        tmp_proxy_records = [work_records[0]]
-        # for rownum in range(1, len(self.records)):
-        for rownum in work_records[1:]:
-            current_value = self.records[rownum][colname]
-            start = 0
-            end = len(tmp_proxy_records) - 1
-            while True:
-                if end - start <= 5:
-                    for x in range(start, end + 1):
-                        if current_value <= self.records[tmp_proxy_records[x]][colname]:
-                            tmp_proxy_records.insert(x, rownum)
-                            break
-                        if x == end:
-                            if x == len(tmp_proxy_records) - 1:
-                                tmp_proxy_records.append(rownum)
-                            else:
-                                tmp_proxy_records.insert(x + 1, rownum)
-                            break
-                    break
-                else:
-                    middlepos = int((end - start) / 2) + start
-                    if (
-                        current_value
-                        >= self.records[tmp_proxy_records[middlepos]][colname]
-                    ):
-                        start = middlepos
-                    else:
-                        end = middlepos
-        self.proxy_records = tmp_proxy_records
-        self.use_proxy = True
-        self.refresh()
-
     def set_order(self, order_data=""):
         super().set_order(order_data=order_data)
 
