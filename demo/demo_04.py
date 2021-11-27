@@ -1,7 +1,3 @@
-about = """Parses webpage and shows list of downloadable files (ZIP with CSV inside)
-Uses build_grid_view_auto_form method to create UI
-Then downloads selected file and shows it in the grid (sortable and filterable)
-"""
 if __name__ == "__main__":
     import sys
 
@@ -15,6 +11,11 @@ from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.zzmodel import ZzCsvModel
 from zzgui.qt5.zzform import zzMess, zzWait
+
+about = """Parses webpage and shows list of downloadable files (ZIP with CSV inside)
+Uses build_grid_view_auto_form method to create UI
+Then downloads selected file and shows it in the grid (sortable and filterable)
+"""
 
 
 class DemoApp(ZzApp):

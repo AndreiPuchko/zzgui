@@ -165,7 +165,7 @@ class ZzForm:
                         self.model.set_where(filter_string)
 
                     filter_form.before_form_show = before_form_show
-                    filter_form.valid = valid
+                    filter_form.valid = lambda: self._zzdialogs.zzWait(valid, "Sorting...")
                     filter_form.add_ok_cancel_buttons()
                     filter_form.show_mdi_modal_form()
 
