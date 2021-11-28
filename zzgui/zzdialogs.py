@@ -205,7 +205,7 @@ def zzWait(worker, mess=""):
     worker_thread = ZzThread(target=worker)
     worker_thread.start()
     while worker_thread.is_alive():
-        time.sleep(0.2)
+        time.sleep(0.3)
         if worker_thread.time() > 1 and wait_window_on is not True:
             wait_window_on = True
             wait_window = ZzWaitForm(mess, worker_thread)
@@ -216,7 +216,7 @@ def zzWait(worker, mess=""):
                     and last_progressbar_value != worker_thread.value
                 ):
                     wait_window.step()
-            elif worker_thread.time() - last_progressbar_time > 2:
+            elif worker_thread.time() - last_progressbar_time > 1:
                 wait_window.step()
                 last_progressbar_time = worker_thread.time()
         last_progressbar_value = worker_thread.value
