@@ -3,14 +3,13 @@ if __name__ == "__main__":
 
     sys.path.insert(0, ".")
 
-from typing_extensions import runtime
+
 from urllib import request
 from io import BytesIO, TextIOWrapper
 from zipfile import ZipFile
 import time
 import csv
 import os
-# import threading
 
 
 from zzdb.schema import ZzDbSchema
@@ -20,16 +19,26 @@ from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 
 import zzgui.zzdialogs
-from zzgui.zzdialogs import zzMess, zzWait
-
-from PyQt5.QtWidgets import QApplication, qApp
+from zzgui.zzdialogs import zzMess, zzWait, zzWaitMax, zzWaitStep
 
 zzgui.zzdialogs.ZzForm = ZzForm
 
 
 class DemoApp(ZzApp):
     def on_start(self):
-        self.show_grid_form()
+        def worker():
+            def real_worker():
+                # ZzThread.set_max (60)
+                zzWaitMax(60)
+                for x in range(60):
+                    # ZzThread.step()
+                    zzWaitStep()
+                    time.sleep(0.1)
+
+            return real_worker
+
+        zzWait(worker(), "W o r k i n g")
+        # self.show_grid_form()
 
     def on_init(self):
         self.add_menu("File|Grid", self.show_grid_form, toolbar="*")
@@ -96,6 +105,7 @@ class DemoApp(ZzApp):
                     form.model.records.append(x)
                     # time.sleep(0.00000000000001)
                 form.model.refresh()
+
             return real_do
 
         zzWait(w1(), "Loading")
