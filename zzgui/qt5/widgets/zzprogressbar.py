@@ -21,3 +21,12 @@ class zzprogressbar(QProgressBar, ZzWidget):
         self.set_text(meta["label"])
         self.setMaximum(0)
         self.setMinimum(0)
+
+    def set_max(self, value):
+        self.setMaximum(value)
+
+    def set_min(self, value):
+        self.setMinimum(value)
+
+    def set_value(self, value):
+        self.setValue(value)
