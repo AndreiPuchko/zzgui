@@ -368,14 +368,14 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 name = "zzdb"
 version = "0.1.4"
 description = "python DB API wrapper (MySQL, PostgreSQL, SQLite)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6,<4.0"
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.6.2,<3.11"
-content-hash = "f64c2d442b87c8f1dc62d1531174d5d240fd969c6b88ca5e9158ead5c04788df"
+python-versions = ">=3.6.2,<4"
+content-hash = "1ef433fa38468c81670af957c259b768e3ae988fd7dacdae948ce70453a808e6"
 
 [metadata.files]
 altgraph = [
