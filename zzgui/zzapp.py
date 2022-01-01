@@ -1,7 +1,4 @@
 import sys
-import os
-
-from PyQt5.QtWidgets import QMainWindow
 
 if __name__ == "__main__":
 
@@ -19,8 +16,10 @@ import re
 
 zz_app = None
 
+
 class ZzHeap:
     pass
+
 
 class ZzActions:
     def __init__(self, action=None):
@@ -188,7 +187,7 @@ class ZzApp:
     def get_argv(self, argtext: str):
         for x in sys.argv:
             if x.startswith(f"/{argtext}:") or x.startswith(f"-{argtext}:"):
-                file_name = x[(len(argtext) + 2) :]
+                file_name = x[(len(argtext) + 2):]
                 print(file_name)
                 return file_name
         return ""

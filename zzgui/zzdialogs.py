@@ -103,6 +103,14 @@ class ZzThread(Thread):
         current_thread().max = value
 
     @staticmethod
+    def get_max():
+        c_thread = current_thread()
+        if hasattr(c_thread, "max"):
+            return c_thread.max
+        else:
+            return 0
+
+    @staticmethod
     def step(step_value=1):
         current_thread().shadow_value += 1
         sv = current_thread().shadow_value
@@ -131,25 +139,34 @@ class ZzWaitForm:
         self.wait_window.add_control("", label=mess, control="label")
         self.wait_window.add_control("/s")
         self.wait_window.add_control("/")
+        steps_count_separator = ""
+        if ZzThread.get_max() != 0:
+            steps_count_separator = "/"
+
         if self.wait_window.add_control("/h"):
             self.wait_window.add_control("progressbar", "", control="progressbar")
             self.wait_window.add_control("min", "", control="label")
-            self.wait_window.add_control("", ":", control="label")
+            self.wait_window.add_control("", steps_count_separator, control="label")
             self.wait_window.add_control("value", "", control="label")
-            self.wait_window.add_control("", ":", control="label")
+            self.wait_window.add_control("", steps_count_separator, control="label")
             self.wait_window.add_control("max", "", control="label")
             self.wait_window.add_control("time", "", control="label")
         self.wait_window.add_control("/")
         self.wait_window.add_control("/s")
         self.show()
-        self.wait_window.w.progressbar.set_min(self.worker_thread.min)
-        self.wait_window.s.min = self.worker_thread.min
-        self.wait_window.w.progressbar.set_max(self.worker_thread.max)
-        self.wait_window.s.max = self.worker_thread.max
+        
+        if self.worker_thread.min != 0:
+            self.wait_window.w.progressbar.set_min(self.worker_thread.min)
+            self.wait_window.s.min = self.worker_thread.min
+        if self.worker_thread.max != 0:
+            self.wait_window.w.progressbar.set_max(self.worker_thread.max)
+            self.wait_window.s.max = self.worker_thread.max
 
     def step(self):
-        self.wait_window.w.progressbar.set_value(self.worker_thread.value)
-        self.wait_window.s.value = self.worker_thread.value
+        if self.worker_thread.value != 0:
+            self.wait_window.w.progressbar.set_value(self.worker_thread.value)
+            self.wait_window.s.value = self.worker_thread.value
+
         thread_time = int(self.worker_thread.time())
         # print(self.worker_thread.time())
         sec = thread_time % 60
@@ -185,17 +202,26 @@ def zzWait(worker, mess=""):
     wait_window_on = False
     last_focus_widget = zzapp.zz_app.focus_widget()
     last_progressbar_value = 0
+    last_progressbar_time = 0
     zzapp.zz_app.lock()
-    t = ZzThread(target=worker)
-    t.start()
-    while t.is_alive():
-        if t.time() > 1 and wait_window_on is not True:
+    worker_thread = ZzThread(target=worker)
+    worker_thread.start()
+    while worker_thread.is_alive():
+        time.sleep(0.3)
+        if worker_thread.time() > 1 and wait_window_on is not True:
             wait_window_on = True
-            wait_window = ZzWaitForm(mess, t)
-        if wait_window_on is True and t.min < t.max:
-            if last_progressbar_value != t.value:
+            wait_window = ZzWaitForm(mess, worker_thread)
+        if wait_window_on is True:
+            if worker_thread.min < worker_thread.max:
+                if (
+                    worker_thread.value != 0
+                    and last_progressbar_value != worker_thread.value
+                ):
+                    wait_window.step()
+            elif worker_thread.time() - last_progressbar_time > 1:
                 wait_window.step()
-            last_progressbar_value = t.value
+                last_progressbar_time = worker_thread.time()
+        last_progressbar_value = worker_thread.value
         zzapp.zz_app.process_events()
     zzapp.zz_app.unlock()
     if wait_window is not None:
@@ -203,7 +229,5 @@ def zzWait(worker, mess=""):
     if hasattr(last_focus_widget, "set_focus"):
         last_focus_widget.set_focus()
 
-    ("", "strip")
-
-    zzapp.zz_app.show_statusbar_mess(f"{t.time():.3f}")
-    return t._return
+    zzapp.zz_app.show_statusbar_mess(f"{worker_thread.time():.2f}")
+    return worker_thread._return
