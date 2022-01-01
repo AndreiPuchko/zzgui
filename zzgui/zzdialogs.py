@@ -154,6 +154,7 @@ class ZzWaitForm:
         self.wait_window.add_control("/")
         self.wait_window.add_control("/s")
         self.show()
+        
         if self.worker_thread.min != 0:
             self.wait_window.w.progressbar.set_min(self.worker_thread.min)
             self.wait_window.s.min = self.worker_thread.min
@@ -165,6 +166,7 @@ class ZzWaitForm:
         if self.worker_thread.value != 0:
             self.wait_window.w.progressbar.set_value(self.worker_thread.value)
             self.wait_window.s.value = self.worker_thread.value
+
         thread_time = int(self.worker_thread.time())
         # print(self.worker_thread.time())
         sec = thread_time % 60
