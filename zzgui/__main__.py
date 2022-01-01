@@ -6,7 +6,7 @@ from zzgui.qt5.zzform import zzMess
 class firstApp(ZzApp):
     def on_init(self):
         self.add_menu(
-            "File|About", lambda: zzMess("First application runs!!!"), toolbar=1
+            "File|About", lambda: zzMess("First application!!!"), toolbar=1
         )
         self.add_menu("File|First Form", self.first_form, toolbar=1)
         self.add_menu("File|-")
