@@ -116,7 +116,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
                 with open(self.style_file) as style_data:
                     self.setStyleSheet(style_data.read())
             except Exception:
-                print (f"File {self.style_file} reading error...")
+                print(f"File {self.style_file} reading error...")
 
     def lock(self):
         self.main_window.menuBar().setDisabled(True)
