@@ -1,13 +1,20 @@
-print("""from zzgui.qt5.zzapp import ZzApp
+if __name__ == "__main__":
+    import sys
+
+    sys.path.insert(0, ".")
+
+
+from zzgui.qt5.zzapp import ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.qt5.zzform import zzMess
 
 
 class firstApp(ZzApp):
+    def on_start(self):
+        self.first_form()
+
     def on_init(self):
-        self.add_menu(
-            "File|About", lambda: zzMess("First application!"), toolbar=1
-        )
+        self.add_menu("File|About", lambda: zzMess("First application!"), toolbar=1)
         self.add_menu("File|First Form", self.first_form, toolbar=1)
         self.add_menu("File|-")
         self.add_menu("File|Exit", self.close, toolbar=1)
@@ -21,7 +28,10 @@ class firstApp(ZzApp):
         form.show_mdi_modal_form()
 
 
-if __name__ == "__main__":
-    firstApp("zzgui - the first app").run()
+def demo():
+    app = firstApp("zzgui - the first app")
+    app.run()
 
-""")
+
+if __name__ == "__main__":
+    demo()

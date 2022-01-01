@@ -40,13 +40,32 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def restore_geometry(self, settings):
         paw = self.parent()
         if paw is not None:
+            # save default == minimal size
+            sizeBefore = paw.size()
             left = num(settings.get(self.window_title, "left", "0"))
             top = num(settings.get(self.window_title, "top", "0"))
 
             paw.move(left, top)
-            width = num(settings.get(self.window_title, "width", "800"))
-            height = num(settings.get(self.window_title, "height", "600"))
-            paw.resize(width, height)
+            width = num(settings.get(self.window_title, "width", "0"))
+            height = num(settings.get(self.window_title, "height", "0"))
+            if width > 0 and height > 0:
+                paw.resize(width, height)
+
+            # in case the minimal size is begger than last saved in the settings - correction
+            sizeAfter = paw.size()
+            wDelta = (
+                0
+                if sizeBefore.width() < sizeAfter.width()
+                else sizeBefore.width() - sizeAfter.width()
+            )
+            hDelta = (
+                0
+                if sizeBefore.height() < sizeAfter.height()
+                else sizeBefore.height() - sizeAfter.height()
+            )
+            if wDelta or hDelta:
+                paw.resize(paw.size().width() + wDelta, paw.size().height() + hDelta)
+
         # if num(settings.get(self.window_title, "is_max", "0")):
         #     paw.showMaximized()
 
