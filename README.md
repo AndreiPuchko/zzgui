@@ -1,6 +1,6 @@
 # The light Python GUI builder (currently based on PyQt5)
 
-# How start with PyPI package:
+# How to start with PyPI package:
 ```bash
 poetry new project_01 && cd project_01 && poetry shell
 poetry add zzgui
