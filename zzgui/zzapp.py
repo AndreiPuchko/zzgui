@@ -168,7 +168,7 @@ class ZzApp:
 
         self.style_file = self.get_argv("style")
         if self.style_file == "":
-            self.style_file = "zzGui.css"
+            self.style_file = "zzGui.qss"
         self.settings_file = self.get_argv("ini")
 
         self.set_style()
