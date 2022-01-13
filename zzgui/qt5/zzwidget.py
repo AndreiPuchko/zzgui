@@ -9,8 +9,10 @@ if __name__ == "__main__":
 
 
 from PyQt5.QtWidgets import QWidget
+from PyQt5.QtGui import QFontMetrics
 
 from zzgui import zzwidget
+from zzgui.qt5.zzwindow import zz_align
 
 
 class ZzWidget(QWidget, zzwidget.ZzWidget):
@@ -49,3 +51,26 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
 
     def set_focus(self):
         self.setFocus()
+
+    def set_maximum_width(self, width):
+        self.setMaximumWidth(QFontMetrics(self.font()).width("W") * width)
+
+    def set_maximum_len(self, length):
+        if hasattr(self, "setMaxLength"):
+            return self.setMaxLength(length)
+
+    def set_alignment(self, alignment):
+        if hasattr(self, "setAlignment"):
+            self.setAlignment(zz_align[f"{alignment}"])
+
+    def valid(self):
+        if self.meta.get("valid"):
+            return self.meta.get("valid", lambda: True)()
+        else:
+            return True
+
+    def when(self):
+        if self.meta.get("when"):
+            return self.meta.get("when", lambda: True)()
+        else:
+            return True

@@ -15,6 +15,7 @@ from zzgui import zzapp, zzwindow
 
 zz_align = {
     "": Qt.AlignLeft | Qt.AlignTop,
+    "0": Qt.AlignLeft | Qt.AlignTop,
     "1": Qt.AlignLeft | Qt.AlignBottom,
     "2": Qt.AlignHCenter | Qt.AlignBottom,
     "3": Qt.AlignRight | Qt.AlignBottom,

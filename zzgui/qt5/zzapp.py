@@ -39,6 +39,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
         QApplication.__init__(self, [])
         super().__init__(title)
         self.main_window = ZzMainWindow(title)
+        qApp.focusChanged.connect(self.focus_changed)
 
     def show_form(self, form=None, modal="modal"):
         if modal == "":  # mdiarea normal window
@@ -256,9 +257,6 @@ class ZzMainWindow(QMainWindow, zzapp.ZzMainWindow, ZzQtWindow):
         self.centralWidget().layout().addWidget(self.zz_tabwidget)
         self.statusBar().setVisible(True)
         self.set_title(title)
-
-    # def focus_widget(self):
-    #     return QApplication.focusWidget()
 
     def show(self):
         QMainWindow.show(self)

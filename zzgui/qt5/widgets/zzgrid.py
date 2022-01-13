@@ -40,6 +40,7 @@ class zzgrid(QTableView):
         def __init__(self, zz_model):
             super().__init__(parent=None)
             self.zz_model: ZzModel = zz_model
+            self._zz_model_refresh = self.zz_model.refresh
             self.zz_model.refresh = self.refresh
 
         def set_order(self, column):
@@ -54,6 +55,7 @@ class zzgrid(QTableView):
         def refresh(self):
             self.beginResetModel()
             self.endResetModel()
+            self._zz_model_refresh()
 
         def data(self, index, role=Qt.DisplayRole):
             if role == Qt.DisplayRole:

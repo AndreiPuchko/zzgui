@@ -7,6 +7,8 @@ if __name__ == "__main__":
 
     demo()
 
+from zzgui.zzutils import num
+
 
 class ZzWidget:
     def __init__(self, meta={}):
@@ -14,19 +16,23 @@ class ZzWidget:
         self.form = None
         self.label = None
         self.check = None
-        # print("ddd", meta)
         if self.meta.get("readonly"):
             self.set_readonly(True)
         if self.meta.get("disabled"):
             self.set_disabled(True)
         if self.meta.get("mess"):
             self.set_tooltip(self.meta.get("mess"))
-        # if hasattr(self, "setToolTip") and self.meta.get("mess"):
-        #     self.setToolTip(self.meta.get("mess"))
-        # if self.meta.get("zzForm"):
-        #     self.zzForm = meta["zzForm"]
         if hasattr(self, "set_text") and self.meta.get("data"):
             self.set_text(self.meta.get("data"))
+
+        max_width = max(num(self.meta.get("datalen", 0)), len(self.meta.get("pic", "")))
+        if max_width:
+            self.set_maximum_width(max_width)
+
+        self.set_alignment(self.meta.get("alignment", 0))
+
+        if num(self.meta.get("datalen", 0)):
+            self.set_maximum_len(num(self.meta.get("datalen", 0)))
 
     def set_readonly(self, arg):
         pass
@@ -60,3 +66,12 @@ class ZzWidget:
 
     def when(self):
         return self.meta.get("when", lambda: True)()
+
+    def set_maximum_len(self, length):
+        pass
+
+    def set_maximum_width(self, width):
+        pass
+
+    def set_alignment(self, alignment):
+        pass

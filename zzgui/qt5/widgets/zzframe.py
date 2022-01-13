@@ -14,7 +14,6 @@ from PyQt5.QtCore import Qt
 # from zzgui.zzutils import num
 
 from zzgui.qt5.zzwindow import ZzFrame
-
 from zzgui.qt5.zzwidget import ZzWidget
 
 

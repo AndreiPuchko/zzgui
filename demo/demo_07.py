@@ -4,13 +4,18 @@ if __name__ == "__main__":
     sys.path.insert(0, ".")
 
 
+from zzdb.cursor import ZzCursor
 from zzgui.qt5.zzapp import ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
+from zzgui.zzform import ZzControl
 from zzdb.schema import ZzDbSchema
 from zzdb.db import ZzDb
+
+# from zzdb.cursor import ZzCursor
 from random import randint
 
 from zzgui.qt5.zzform import zzMess
+from zzgui.zzmodel import ZzCursorModel
 
 
 class dataSchema(ZzDbSchema):
@@ -75,47 +80,51 @@ class dataSchema(ZzDbSchema):
             table="customers",
             column="customer_id",
             datatype="int",
-            datalen=0,
+            datalen=9,
             pk=True,
         )
         self.add(table="customers", column="name", datatype="varchar", datalen=100)
 
 
 def data_load(db: ZzDb):
-    for x in range(1, 10):
+    customer_qt = 10
+    product_qt = 10
+    order_qt = 10
+    order_lines_qt = 6
+    for x in range(1, customer_qt):
         db.insert("customers", {"customer_id": x, "name": f"Customer {x}"})
-    for x in range(1, 50):
+    for x in range(1, product_qt):
         db.insert("products", {"product_id": x, "name": f"Product {x}"})
-    for x in range(1, 50):
+    for x in range(1, order_qt):
         db.insert(
             "orders",
             {
                 "order_id": x,
-                "customer_id": randint(1, 9),
-                "date": f"2022-01-{randint(1,31)}",
+                "customer_id": randint(1, customer_qt - 1),
+                "date": f"2022-01-{randint(1,31):02}",
             },
         )
-        for y in range(1, randint(1, 5)):
+        for y in range(1, randint(1, order_lines_qt)):
             db.insert(
                 "order_lines",
                 {
                     "order_id": x,
-                    "product_id": randint(1, 9),
+                    "product_id": randint(1, product_qt - 1),
                     "quantity": randint(1, 100),
                     "price": randint(1, y),
                 },
             )
 
     assert len(db.get_tables()) == 8
-    assert db.cursor(table_name="customers").row_count() == 9
-    assert db.cursor(table_name="products").row_count() == 49
-    assert db.cursor(table_name="orders").row_count() == 49
-    print(db.cursor(table_name="order_lines").row_count())
+    assert db.cursor(table_name="customers").row_count() == customer_qt - 1
+    assert db.cursor(table_name="products").row_count() == product_qt - 1
+    assert db.cursor(table_name="orders").row_count() == order_qt - 1
+    # print(db.cursor(table_name="order_lines").row_count())
 
 
 class databaseApp(ZzApp):
     def on_start(self):
-        self.customers()
+        self.orders()
 
     def create_database(self):
         self.db = ZzDb("sqlite3", database_name=":memory:")
@@ -133,26 +142,56 @@ class databaseApp(ZzApp):
 
         return super().on_init()
 
-    def customers(self):
+    def form_customers(self):
         form = ZzForm("Customers")
-        form.add_control("", "First Label")
-        form.add_control("field", "First Field")
-        form.add_control("", "Close Form", control="button", valid=form.close)
-        form.show_mdi_modal_form()
+        form.add_control("/f")
+        form.add_control(
+            ZzControl("customer_id", "Customer Id")
+            .alignment(9)
+            .datatype("int")
+            .datalen(10)
+        )
+        form.add_control("name", "Name", datatype="char", datalen=100)
+
+        cursor: ZzCursor = self.db.table(table_name="customers")
+
+        model = ZzCursorModel(cursor)
+        form.set_model(model)
+        form.actions.add_action("/crud")
+        return form
+
+    def customers(self):
+        self.form_customers().show_mdi_modal_grid()
 
     def products(self):
         form = ZzForm("Products")
-        form.add_control("", "First Label")
-        form.add_control("field", "First Field")
-        form.add_control("", "Close Form", control="button", valid=form.close)
-        form.show_mdi_modal_form()
+        form.add_control("/f")
+        form.add_control("product_id", "Product Id", datalen=9, alignment=9)
+        form.add_control("name", "Name", datalen=20)
+        form.set_model(ZzCursorModel(self.db.table(table_name="products")))
+        form.actions.add_action("/crud")
+        form.show_mdi_modal_grid()
+
+    def form_orders(self):
+        form = ZzForm("Orders")
+        form.add_control("/f")
+        form.add_control("order_id", "Order Id", alignment=9, datatype="int")
+        form.add_control("date", "Date")
+        form.add_control(
+            name="customer_id",
+            label="Customer",
+            control="line",
+            to_table="customers",
+            to_column="customer_id",
+            to_form=self.form_customers(),
+            related="name",
+        )
+        form.actions.add_action("/crud")
+        form.set_model(ZzCursorModel(self.db.table("orders")))
+        return form
 
     def orders(self):
-        form = ZzForm("Orders")
-        form.add_control("", "First Label")
-        form.add_control("field", "First Field")
-        form.add_control("", "Close Form", control="button", valid=form.close)
-        form.show_mdi_modal_form()
+        self.form_orders().show_mdi_modal_grid()
 
 
 def demo():

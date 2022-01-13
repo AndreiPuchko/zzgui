@@ -32,6 +32,11 @@ class ZzActions:
 
     def add_action(self, text, worker=None, icon="", mess="", hotkey="", tag=""):
         """ "/view", "/crud" """
+        for x in range(len(self.action_list)):
+            if text in self.action_list[x]["text"]:
+                self.action_list[x]["worker"] = worker
+                self.action_list[x]["hotkey"] = hotkey
+                return True
         action = {}
         action["text"] = text
         action["worker"] = worker
@@ -79,7 +84,16 @@ class ZzControls:
         control="",
         pic="",
         data="",
+        datatype="char",
+        datalen=0,
+        datadec=0,
+        pk="",
         actions=[],
+        alignment=7,
+        to_table="",
+        to_column="",
+        to_form=None,
+        related="",
         valid=None,
         readonly=None,
         disabled=None,
@@ -93,29 +107,9 @@ class ZzControls:
         eat_enter=None,
         hotkey="",
     ):
-        self.controls.append(
-            {
-                "name": name,
-                "label": label,
-                "gridlabel": gridlabel,
-                "control": control,
-                "pic": pic,
-                "data": data,
-                "actions": actions,
-                "readonly": readonly,
-                "disabled": disabled,
-                "check": check,
-                "form_only": form_only,
-                "grid_only": grid_only,
-                "valid": valid,
-                "when": when,
-                "widget": widget,
-                "mess": mess,
-                "eat_enter": eat_enter,
-                "tag": tag,
-                "hotkey": hotkey,
-            }
-        )
+        d = locals().copy()
+        del d["self"]
+        self.controls.append(d)
         return True
 
 
@@ -187,7 +181,7 @@ class ZzApp:
     def get_argv(self, argtext: str):
         for x in sys.argv:
             if x.startswith(f"/{argtext}:") or x.startswith(f"-{argtext}:"):
-                file_name = x[(len(argtext) + 2):]
+                file_name = x[(len(argtext) + 2) :]
                 print(file_name)
                 return file_name
         return ""
@@ -238,7 +232,22 @@ class ZzApp:
     def show_form(self, form=None, modal="modal"):
         pass
 
-    def focus_widget(self):
+    def focus_changed(self, from_widget, to_widget):
+        if from_widget.__class__.__name__ in (
+            "zzline",
+            "zzScriptEdit",
+            "zzScriptSqlEdit",
+        ):
+            if from_widget.valid() is False:
+                from_widget.setFocus()
+            return
+        if to_widget.__class__.__name__ in (
+            "zzline",
+            "zzScriptEdit",
+            "zzScriptSqlEdit",
+        ):
+            to_widget.when()
+
         pass
 
     def lock(self):
@@ -249,6 +258,9 @@ class ZzApp:
 
     def process_events(self):
         pass
+
+    # def focus_changed(self):
+    #     pass
 
     def on_init(self):
         pass

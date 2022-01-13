@@ -134,6 +134,5 @@ class zztoolbar(QFrame, ZzWidget):
             self.layout().addWidget(self.toolBarButton)
 
     def set_context_menu(self, widget):
-        print()
         widget.setContextMenuPolicy(Qt.ActionsContextMenu)
         widget.addActions(self.toolBarButton.actions())

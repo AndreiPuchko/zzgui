@@ -10,13 +10,17 @@ if __name__ == "__main__":
 import csv
 
 
-# from zzgui.zzutils import num
-# import datetime
+from zzgui.zzutils import num
+
+import datetime
+import re
+from zzdb.cursor import ZzCursor
+from zzdb.db import ZzDb
 
 
 class ZzModel:
-    def __init__(self, zz_form=None):
-        self.zz_form = zz_form
+    def __init__(self):
+        self.zz_form = None
         self.columns = []
         self.headers = []
         self.alignments = []
@@ -24,6 +28,7 @@ class ZzModel:
         self.records = []
         self.proxy_records = []
         self.use_proxy = False
+        self.relation_cache = {}
 
         self.meta = []
 
@@ -61,12 +66,17 @@ class ZzModel:
             self.order_text = order_data
 
     def refresh(self):
-        pass
+        self.relation_cache = {}
+        self.records = []
 
     def set_records(self, records):
         self.records = records
 
     def build(self):
+        self.columns = []
+        self.headers = []
+        self.alignments = []
+        self.meta = []
         for meta in self.zz_form.controls.controls:
             if meta.get("name", "").startswith("/") or meta.get("formonly"):
                 continue
@@ -75,9 +85,48 @@ class ZzModel:
             self.zz_form.model.add_column(meta)
 
     def add_column(self, meta):
+        if meta["datatype"].lower() == "date":
+            meta["control"] = "date"
+            meta["datalen"] = 16
+
+        if not meta.get("control"):
+            meta["control"] = "line"
+        if num(meta.get("datalen", 0)) == 0 and meta["control"] == "line":
+            if meta["datatype"].lower() == "int":
+                meta["datalen"] = 9
+            elif meta["datatype"].lower() == "bigint":
+                meta["datalen"] = 17
+            else:
+                meta["datalen"] = 10
+
+        if re.match(
+            ".*int.*|.*dec.*|.*num.*", meta["datatype"], re.RegexFlag.IGNORECASE
+        ):
+            meta["num"] = True
+            if meta.get("pic", "") == "":
+                meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
+                    ""
+                    if num(meta["datadec"]) == 0
+                    else "." + "9" * int(num(meta["datadec"]))
+                )
+            if num(meta.get("alignment", 0)) == 0:
+                meta["alignment"] = 9
+
+        if (
+            re.match(".*text.*", meta["datatype"], re.RegexFlag.IGNORECASE)
+            and meta["control"] != "script"
+        ):
+            meta["datalen"] = 0
+            meta["control"] = "edit"
+
+        if "***" == "".join(
+            ["*" if meta.get(x) else "" for x in ("to_table", "to_column", "related")]
+        ):
+            meta["relation"] = True
+
         self.columns.append(meta["name"])
         self.headers.append(meta["label" if meta.get("saygrid") else "label"])
-        self.alignments.append(meta.get("align", "7"))
+        self.alignments.append(meta.get("alignment", "7"))
         self.meta.append(meta)
 
     def get_record(self, row):
@@ -86,52 +135,51 @@ class ZzModel:
         else:
             return self.records[row]
 
-    # def _get_related(self, value, meta):
-    #     if meta.get("num") and num(value) == 0:
-    #         return ""
-    #     elif value == "":
-    #         return ""
-    #     key = (meta["to_table"], f"{meta['to_field']}='{value}'", meta["related"])
-    #     if key in self.relatedCache:
-    #         related = self.relatedCache[key]
-    #     else:
-    #         related = self.get_related(
-    #             meta["to_table"], f"{meta['to_field']}='{value}'", meta["related"]
-    #         )
-    #         self.relatedCache[key] = related
-    #     if related is None:
-    #         related = ""
-    #     return f"{value},{related}"
+    def _get_related(self, value, meta):
+        if meta.get("num") and num(value) == 0:
+            return ""
+        elif value == "":
+            return ""
+        key = (meta["to_table"], f"{meta['to_column']}='{value}'", meta["related"])
+        if key in self.relation_cache:
+            related = self.relation_cache[key]
+        else:
+            related = self.get_related(
+                meta["to_table"], f"{meta['to_column']}='{value}'", meta["related"]
+            )
+            self.relation_cache[key] = related
+        if related is None:
+            related = ""
+        return f"{value},{related}"
 
-    # def get_related(self, to_table, filter, related):
-    #     return self.dbEngine.get(to_table, filter, related)
+    def get_related(self, to_table, filter, related):
+        return "get_related"
 
     def data(self, row, col, role="display"):
         if role == "display":
             colName = self.columns[col]
             value = self.get_record(row).get(colName, "")
-            # meta = self.meta[col]
-            # if meta.get("relation"):
-            #     value = self._get_related(value, meta)
-            # elif "radio" in meta["control"]:
-            #     if meta.get("num"):
-            #         value = meta.get("pic").split(";")[int(num(value)) - 1]
-            # elif meta["datatype"] == "date":
-            #     try:
-            #         value = datetime.datetime.strptime(value, "%Y-%m-%d").strftime(
-            #             "%d.%m.%Y"
-            #         )
-            #     except:
-            #         value = ""
+            meta = self.meta[col]
+            if meta.get("relation"):
+                value = self._get_related(value, meta)
+            elif "radio" in meta["control"]:
+                if meta.get("num"):
+                    value = meta.get("pic").split(";")[int(num(value)) - 1]
+            elif meta["datatype"] == "date":
+                try:
+                    value = datetime.datetime.strptime(value, "%Y-%m-%d").strftime(
+                        "%d.%m.%Y"
+                    )
+                except Exception:
+                    value = ""
             return value
 
     def alignment(self, col):
-        return 7
-        # if self.meta[col].get("relation"):
-        #     return 7
-        # elif "radio" in self.meta[col]["control"] and self.meta[col].get("num"):
-        #     return 7
-        # return self.alignments[col]
+        if self.meta[col].get("relation"):
+            return 7
+        elif "radio" in self.meta[col]["control"] and self.meta[col].get("num"):
+            return 7
+        return self.alignments[col]
 
     def column_header_data(self, col):
         return self.headers[col]
@@ -150,8 +198,8 @@ class ZzModel:
 
 
 class ZzCsvModel(ZzModel):
-    def __init__(self, zz_form=None, csv_file_object=None):
-        super().__init__(zz_form=zz_form)
+    def __init__(self, csv_file_object=None):
+        super().__init__()
         csv_dict = csv.DictReader(csv_file_object)
 
         # If there are names with space -  replace spaces in columns names
@@ -222,3 +270,44 @@ class ZzCsvModel(ZzModel):
         self.proxy_records = tmp_proxy_records
         self.use_proxy = True
         self.refresh()
+
+
+class ZzCursorModel(ZzModel):
+    def __init__(self, cursor: ZzCursor = None):
+        super().__init__()
+        self.cursor = cursor
+
+    def row_count(self):
+        return self.cursor.row_count()
+
+    def get_record(self, row):
+        return self.cursor.record(row)
+
+    def refresh(self):
+        self.cursor.refresh()
+        return super().refresh()
+
+    def update(self, record: dict, current_row=0):
+        if self.cursor.update(record):
+            self.refresh()
+            return True
+        else:
+            return False
+
+    def get_related(self, to_table, filter, related):
+        db: ZzDb = self.cursor.zz_db
+        return db.get(to_table, filter, related)
+
+    def add_column(self, meta):
+        db: ZzDb = self.cursor.zz_db
+        db_meta = db.db_schema.get_schema_table_attr(
+            self.cursor.table_name, meta["name"]
+        )
+        meta["pk"] = db_meta.get("pk", "")
+        meta["datatype"] = db_meta.get("datatype", meta["datatype"])
+        if "datalen" not in meta or num(meta["datalen"]) == 0:
+            meta["datalen"] = int(num(db_meta.get("datalen", 10)))
+        if "datadec" not in meta:
+            meta["datadec"] = int(num(db_meta.get("datadec", 2)))
+
+        return super().add_column(meta)

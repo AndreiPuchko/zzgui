@@ -19,6 +19,49 @@ NO_DATA_WIDGETS = ("button", "toolbutton", "frame", "label")
 NO_LABEL_WIDGETS = ("button", "toolbutton", "frame", "label", "check")
 
 
+class ZzControl(dict):
+    def __init__(self, name: str, label: str):
+        super().__init__(self)
+        self["name"] = name
+        self["label"] = label
+
+    def gridlabel(self, gridlabel: str = "char"):
+        self["gridlabel"] = gridlabel
+        return self
+
+    def alignment(self, alignment):
+        """[1-9] see numpad keyboard"""
+        self["alignment"] = alignment
+        return self
+
+    def datatype(self, datatype="char"):
+        self["datatype"] = datatype
+        return self
+
+    def datalen(self, datalen=0):
+        self["datalen"] = datalen
+        return self
+
+    def datadec(self, datadec=0):
+        self["datadec"] = datadec
+        return self
+
+        # gridlabel=gridlabel,
+        # control=control,
+        # pic=pic,
+        # data=data,
+        # actions=actions,
+        # valid=valid,
+        # when=when,
+        # mess=mess,
+        # readonly=readonly,
+        # hotkey=hotkey,
+        # disabled=disabled,
+        # eat_enter=eat_enter,
+        # widget=widget,
+        # tag=tag,
+
+
 class ZzForm:
     def __init__(self, title=""):
         super().__init__()
@@ -165,7 +208,9 @@ class ZzForm:
                         self.model.set_where(filter_string)
 
                     filter_form.before_form_show = before_form_show
-                    filter_form.valid = lambda: self._zzdialogs.zzWait(valid, "Sorting...")
+                    filter_form.valid = lambda: self._zzdialogs.zzWait(
+                        valid, "Sorting..."
+                    )
                     filter_form.add_ok_cancel_buttons()
                     filter_form.show_mdi_modal_form()
 
@@ -305,8 +350,10 @@ class ZzForm:
             if x.get("text").startswith("/"):
                 continue
             tmp_actions.action_list.append(x)
-        for x in grid_navi_actions.action_list:
-            tmp_actions.action_list.append(x)
+        # for x in grid_navi_actions.action_list:
+        #     if x['text'] in [x["text"] for x in tmp_actions.action_list]:
+        #         continue
+        #     tmp_actions.action_list.append(x)
 
         self.actions = tmp_actions
 
@@ -334,8 +381,8 @@ class ZzForm:
             widget = self.crud_form.widgets[x]
             if widget.meta.get("control") in NO_DATA_WIDGETS:
                 continue
-            if hasattr(widget, "text"):
-                crud_data[x] = widget.text()
+            if hasattr(widget, "get_text"):
+                crud_data[x] = widget.get_text()
         return crud_data
 
     def crud_close(self):
@@ -402,7 +449,15 @@ class ZzForm:
         control="",
         pic="",
         data="",
+        datatype="char",
+        datalen=0,
+        datadec=0,
         actions=[],
+        alignment=0,
+        to_table="",
+        to_column="",
+        to_form=None,
+        related="",
         valid=None,
         when=None,
         mess="",
@@ -413,25 +468,40 @@ class ZzForm:
         widget=None,
         tag="",
     ):
-        self.controls.add_control(
-            name=name,
-            label=label,
-            gridlabel=gridlabel,
-            control=control,
-            pic=pic,
-            data=data,
-            actions=actions,
-            valid=valid,
-            when=when,
-            mess=mess,
-            readonly=readonly,
-            hotkey=hotkey,
-            disabled=disabled,
-            eat_enter=eat_enter,
-            widget=widget,
-            tag=tag,
-        )
+        if isinstance(name, dict):
+            self.controls.add_control(**name)
+        else:
+            d = locals().copy()
+            del d["self"]
+            self.controls.add_control(**d)
+            # self.controls.add_control(
+            #     name=name,
+            #     label=label,
+            #     gridlabel=gridlabel,
+            #     control=control,
+            #     pic=pic,
+            #     data=data,
+            #     datatype=datatype,
+            #     datalen=datalen,
+            #     datadec=datadec,
+            #     actions=actions,
+            #     alignment=alignment,
+            #     valid=valid,
+            #     when=when,
+            #     mess=mess,
+            #     readonly=readonly,
+            #     hotkey=hotkey,
+            #     disabled=disabled,
+            #     eat_enter=eat_enter,
+            #     widget=widget,
+            #     tag=tag,
+            # )
         return True
+
+    def add_action(self, text, worker=None, icon="", mess="", hotkey="", tag=""):
+        d = locals().copy()
+        del d["self"]
+        self.actions.add_action(**d)
 
 
 class ZzFormWindow:
@@ -492,7 +562,12 @@ class ZzFormWindow:
         self.mode = "grid"
         gridForm = ZzForm()
         gridForm.add_control("/vs", tag="gridsplitter")
-        gridForm.add_control("toolbar", control="toolbar", actions=self.zz_form.actions)
+
+        gridForm.add_control(
+            "toolbar",
+            control="toolbar",
+            actions=[self.zz_form.actions, self.create_grid_navigation_actions()],
+        )
         gridForm.add_control("form__grid", control="grid")
 
         if self.zz_form.show_app_modal_form is False:
@@ -612,8 +687,13 @@ class ZzFormWindow:
                 control = "line" if meta.get("name") else "label"
         else:
             control = meta.get("control")
+
+        if meta.get("to_table"):  # relation is here
+            control = "relation"
+
         if control == "":
             control = "label"
+
         name = meta.get("name", "")
         label = meta.get("label", "")
         class_name = ""
@@ -623,6 +703,7 @@ class ZzFormWindow:
             label2add = self._get_widget("label")(meta)
         else:
             label2add = None
+
         # Form or widget
         if control == "widget":
             if isinstance(meta.get("widget"), ZzForm):
@@ -675,6 +756,7 @@ class ZzFormWindow:
         try:
             return getattr(getattr(self._widgets_package, module_name), class_name)
         except Exception:
+            print(self._widgets_package, module_name, class_name)
             return getattr(getattr(self._widgets_package, "zzlabel"), "zzlabel")
 
 
