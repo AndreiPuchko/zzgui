@@ -96,8 +96,8 @@ class ZzModel:
                 meta["datalen"] = 9
             elif meta["datatype"].lower() == "bigint":
                 meta["datalen"] = 17
-            else:
-                meta["datalen"] = 10
+            # else:
+            #     meta["datalen"] = 10
 
         if re.match(
             ".*int.*|.*dec.*|.*num.*", meta["datatype"], re.RegexFlag.IGNORECASE
@@ -311,3 +311,7 @@ class ZzCursorModel(ZzModel):
             meta["datadec"] = int(num(db_meta.get("datadec", 2)))
 
         return super().add_column(meta)
+
+    def set_where(self, where_text=""):
+        self.cursor.set_where(where_text)
+        return super().set_where(where_text)

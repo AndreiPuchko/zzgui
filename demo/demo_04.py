@@ -9,7 +9,7 @@ from zipfile import ZipFile
 
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
-from zzgui.zzmodel import ZzCsvModel
+from zzgui.zzmodel import ZzCsvModel, ZzModel
 from zzgui.qt5.zzform import zzMess, zzWait
 
 about = """Parses webpage and shows list of downloadable files (ZIP with CSV inside)
@@ -46,6 +46,7 @@ class DemoApp(ZzApp):
                 links.append({"link": link})
 
         form = ZzForm("Grid form")
+        form.set_model(ZzModel())
         form.model.set_records(links)
         form.build_grid_view_auto_form()
         form.actions.add_action(

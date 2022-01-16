@@ -4,18 +4,17 @@ if __name__ == "__main__":
     sys.path.insert(0, ".")
 
 
-from zzdb.cursor import ZzCursor
 from zzgui.qt5.zzapp import ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
-from zzgui.zzform import ZzControl
+from zzgui.qt5.zzform import zzMess
+
+from zzgui.zzmodel import ZzCursorModel
+
 from zzdb.schema import ZzDbSchema
 from zzdb.db import ZzDb
+from zzdb.cursor import ZzCursor
 
-# from zzdb.cursor import ZzCursor
 from random import randint
-
-from zzgui.qt5.zzform import zzMess
-from zzgui.zzmodel import ZzCursorModel
 
 
 class dataSchema(ZzDbSchema):
@@ -89,7 +88,7 @@ class dataSchema(ZzDbSchema):
 def data_load(db: ZzDb):
     customer_qt = 10
     product_qt = 10
-    order_qt = 10
+    order_qt = 100
     order_lines_qt = 6
     for x in range(1, customer_qt):
         db.insert("customers", {"customer_id": x, "name": f"Customer {x}"})
@@ -114,16 +113,15 @@ def data_load(db: ZzDb):
                     "price": randint(1, y),
                 },
             )
-
     assert len(db.get_tables()) == 8
     assert db.cursor(table_name="customers").row_count() == customer_qt - 1
     assert db.cursor(table_name="products").row_count() == product_qt - 1
     assert db.cursor(table_name="orders").row_count() == order_qt - 1
-    # print(db.cursor(table_name="order_lines").row_count())
 
 
 class databaseApp(ZzApp):
     def on_start(self):
+        # self.form_order_lines().show_mdi_modal_grid()
         self.orders()
 
     def create_database(self):
@@ -146,31 +144,41 @@ class databaseApp(ZzApp):
         form = ZzForm("Customers")
         form.add_control("/f")
         form.add_control(
-            ZzControl("customer_id", "Customer Id")
-            .alignment(9)
-            .datatype("int")
-            .datalen(10)
+            name="customer_id",
+            label="Customer Id",
+            alignment=9,
+            datatype="int",
+            datalen=10,
         )
         form.add_control("name", "Name", datatype="char", datalen=100)
 
         cursor: ZzCursor = self.db.table(table_name="customers")
-
         model = ZzCursorModel(cursor)
         form.set_model(model)
         form.actions.add_action("/crud")
+        form.add_action(
+            "Orders",
+            child_form=self.form_orders,
+            child_filter="customer_id",
+            parent_column="customer_id",
+        )
+
         return form
 
     def customers(self):
         self.form_customers().show_mdi_modal_grid()
 
-    def products(self):
+    def form_products(self):
         form = ZzForm("Products")
         form.add_control("/f")
         form.add_control("product_id", "Product Id", datalen=9, alignment=9)
         form.add_control("name", "Name", datalen=20)
         form.set_model(ZzCursorModel(self.db.table(table_name="products")))
         form.actions.add_action("/crud")
-        form.show_mdi_modal_grid()
+        return form
+
+    def products(self):
+        self.form_products().show_mdi_modal_grid()
 
     def form_orders(self):
         form = ZzForm("Orders")
@@ -183,15 +191,41 @@ class databaseApp(ZzApp):
             control="line",
             to_table="customers",
             to_column="customer_id",
-            to_form=self.form_customers(),
+            to_form=self.form_customers,
             related="name",
         )
-        form.actions.add_action("/crud")
+        form.add_action("/crud")
+        form.add_action("-")
+        form.add_action(
+            "Lines",
+            child_form=self.form_order_lines,
+            child_filter="order_id",
+            parent_column="order_id",
+        )
         form.set_model(ZzCursorModel(self.db.table("orders")))
         return form
 
     def orders(self):
         self.form_orders().show_mdi_modal_grid()
+
+    def form_order_lines(self):
+        form = ZzForm("Order lines")
+        form.add_control("/f")
+        form.add_control("order_id", "Order Id", alignment=9, datatype="int")
+        form.add_control(
+            name="product_id",
+            label="Product",
+            control="line",
+            to_table="products",
+            to_column="product_id",
+            to_form=self.form_products,
+            related="name",
+        )
+        form.add_control("quantity", "Quantity", datatype="num", datalen=10, datadec=4)
+        form.add_control("price", "Price", datatype="num", datalen=15, datadec=2)
+        form.add_action("/crud")
+        form.set_model(ZzCursorModel(self.db.table("order_lines")))
+        return form
 
 
 def demo():

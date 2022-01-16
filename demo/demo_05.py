@@ -12,14 +12,12 @@ import csv
 import os
 
 
-from zzdb.schema import ZzDbSchema
-from zzdb.db import ZzDb
-
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 
 import zzgui.zzdialogs
 from zzgui.zzdialogs import zzMess, zzWait, zzWaitMax, zzWaitStep
+from zzgui.zzmodel import ZzModel
 
 zzgui.zzdialogs.ZzForm = ZzForm
 
@@ -33,12 +31,12 @@ class DemoApp(ZzApp):
                 for x in range(60):
                     # ZzThread.step()
                     zzWaitStep()
-                    time.sleep(0.1)
+                    time.sleep(0.06)
 
             return real_worker
 
         zzWait(worker(), "W o r k i n g")
-        # self.show_grid_form()
+        self.show_grid_form()
 
     def on_init(self):
         self.add_menu("File|Grid", self.show_grid_form, toolbar="*")
@@ -74,37 +72,13 @@ class DemoApp(ZzApp):
         csv_dict = csv.DictReader(csv_file_object)
         csv_dict2 = csv.DictReader(csv_file_object2)
 
-        # db = ZzDb(guest_mode=True)
-
-        # def dbcreate(db, csv_dict2, form):
-        #     # schema = ZzDbSchema()
-        #     schema = ZzDbSchema()
-        #     schema.add(table="t1", column="row_uid", datatype="int", pk=True, ai=True)
-        #     for x in csv_dict.fieldnames:
-        #         schema.add(table="t1", column=x, datatype="char")
-        #     db.set_schema(schema)
-        #     i = 1
-        #     dico = [x for x in csv_dict2]
-        #     print(len(dico))
-        #     for x in dico[:10]:
-        #         # qApp.processEvents()
-        #         time.sleep(2)
-        #         db.insert("t1", x)
-        #         i += 1
-        #         print(i)
-        #     print("Done")
-        #     form.close()
-
-        # dbcreate(db, csv_dict2)
-
         form = ZzForm("Grid form")
+        form.set_model(ZzModel())
 
         def w1(form: ZzForm = form, csv_dict2=csv_dict2):
             def real_do():
                 for x in [x for x in csv_dict2]:
                     form.model.records.append(x)
-                    # time.sleep(0.00000000000001)
-                form.model.refresh()
 
             return real_do
 
@@ -114,8 +88,6 @@ class DemoApp(ZzApp):
         for x in csv_dict.fieldnames:
             form.add_control(x, x, control="line")
 
-        # form.model.set_records([x for x in db.cursor(table_name="t1").records()])
-        # form.model.set_records([x for x in csv_dict][:5])
         form.actions.add_action("/view")
         return form
 

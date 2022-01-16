@@ -154,7 +154,7 @@ class ZzWaitForm:
         self.wait_window.add_control("/")
         self.wait_window.add_control("/s")
         self.show()
-        
+
         if self.worker_thread.min != 0:
             self.wait_window.w.progressbar.set_min(self.worker_thread.min)
             self.wait_window.s.min = self.worker_thread.min

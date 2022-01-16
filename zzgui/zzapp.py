@@ -30,7 +30,18 @@ class ZzActions:
         else:
             self.action_list = []
 
-    def add_action(self, text, worker=None, icon="", mess="", hotkey="", tag=""):
+    def add_action(
+        self,
+        text,
+        worker=None,
+        icon="",
+        mess="",
+        hotkey="",
+        tag="",
+        child_form=None,
+        child_filter="",
+        parent_column="",
+    ):
         """ "/view", "/crud" """
         for x in range(len(self.action_list)):
             if text in self.action_list[x]["text"]:
@@ -44,6 +55,9 @@ class ZzActions:
         action["mess"] = mess
         action["hotkey"] = hotkey
         action["tag"] = tag
+        action["child_form"] = child_form
+        action["child_filter"] = child_filter
+        action["parent_column"] = parent_column
         self.action_list.append(action)
         return True
 
@@ -181,7 +195,7 @@ class ZzApp:
     def get_argv(self, argtext: str):
         for x in sys.argv:
             if x.startswith(f"/{argtext}:") or x.startswith(f"-{argtext}:"):
-                file_name = x[(len(argtext) + 2) :]
+                file_name = x[(len(argtext) + 2):]
                 print(file_name)
                 return file_name
         return ""

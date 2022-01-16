@@ -73,7 +73,7 @@ class zzgrid(QTableView):
             else:
                 return QVariant()
 
-    currentCellChangedSignal = pyqtSignal(int, int)
+    # currentCellChangedSignal = pyqtSignal(int, int)
 
     def __init__(self, zz_form: ZzForm):
         super().__init__()
@@ -92,7 +92,7 @@ class zzgrid(QTableView):
         self.horizontalHeader().sectionClicked.connect(self.zz_form.grid_header_clicked)
 
     def currentChanged(self, current, previous):
-        self.currentCellChangedSignal.emit(current.row(), current.column())
+        # self.currentCellChangedSignal.emit(current.row(), current.column())
         super().currentChanged(current, previous)
         self.model().dataChanged.emit(current, previous)
         self.zz_form.grid_index_changed(

@@ -7,6 +7,7 @@ if __name__ == "__main__":
 
     demo()
 
+from zzgui import zzmodel
 import zzgui.zzapp as zzapp
 from zzgui.zzmodel import ZzModel
 from zzgui.zzutils import int_
@@ -46,21 +47,6 @@ class ZzControl(dict):
         self["datadec"] = datadec
         return self
 
-        # gridlabel=gridlabel,
-        # control=control,
-        # pic=pic,
-        # data=data,
-        # actions=actions,
-        # valid=valid,
-        # when=when,
-        # mess=mess,
-        # readonly=readonly,
-        # hotkey=hotkey,
-        # disabled=disabled,
-        # eat_enter=eat_enter,
-        # widget=widget,
-        # tag=tag,
-
 
 class ZzForm:
     def __init__(self, title=""):
@@ -70,12 +56,15 @@ class ZzForm:
         self.actions = zzapp.ZzActions()
         self.controls = zzapp.ZzControls()
         self.system_controls = zzapp.ZzControls()
-        self.model: ZzModel = self.set_model(ZzModel())
+        self.model = None
+        # self.model: ZzModel = self.set_model(ZzModel())
         # Shortcuts to get
         self.s = ZzFormData(self)  # widgets data by name
         self.w = ZzFormWidget(self)  # widgets by name
         self.a = ZzFormAction(self)  # Actions by text
         self.r = ZzModelData(self)  # Grid data by name
+
+        self.children_forms = []  # forms inside this form
 
         self.show_grid_action_top = True
         self.do_not_save_geometry = False
@@ -410,8 +399,19 @@ class ZzForm:
                 self.crud_form.widgets[x].set_text(data[x])
 
     def grid_index_changed(self, row, column):
+        refresh_children_forms = row != self.current_row and row >= 0
         self.current_row = row
         self.current_column = column
+
+        if refresh_children_forms:
+            for action in self.children_forms:
+                child_filter = action["child_filter"]
+                parent_column_value = self.r.__getattr__(action["parent_column"])
+                filter = f"{child_filter}='{parent_column_value}'"
+                action["child_form"].model.set_where(filter)
+                action["child_form"].model.refresh()
+                action["child_form"].current_row = -1
+                action["child_form"].set_grid_index(0)
 
     def grid_header_clicked(self, column):
         self._zzdialogs.zzWait(lambda: self.model.set_order(column), "Sorting...")
@@ -468,37 +468,29 @@ class ZzForm:
         widget=None,
         tag="",
     ):
+        """
+        to_form - form class or function that returns form object
+        """
         if isinstance(name, dict):
             self.controls.add_control(**name)
         else:
             d = locals().copy()
             del d["self"]
             self.controls.add_control(**d)
-            # self.controls.add_control(
-            #     name=name,
-            #     label=label,
-            #     gridlabel=gridlabel,
-            #     control=control,
-            #     pic=pic,
-            #     data=data,
-            #     datatype=datatype,
-            #     datalen=datalen,
-            #     datadec=datadec,
-            #     actions=actions,
-            #     alignment=alignment,
-            #     valid=valid,
-            #     when=when,
-            #     mess=mess,
-            #     readonly=readonly,
-            #     hotkey=hotkey,
-            #     disabled=disabled,
-            #     eat_enter=eat_enter,
-            #     widget=widget,
-            #     tag=tag,
-            # )
-        return True
+        return True  # Do not delete - it allows indentation in code
 
-    def add_action(self, text, worker=None, icon="", mess="", hotkey="", tag=""):
+    def add_action(
+        self,
+        text,
+        worker=None,
+        icon="",
+        mess="",
+        hotkey="",
+        tag="",
+        child_form=None,
+        child_filter="",
+        parent_column="",
+    ):
         d = locals().copy()
         del d["self"]
         self.actions.add_action(**d)
@@ -560,23 +552,35 @@ class ZzFormWindow:
     def build_grid(self):
         # populate model with columns metadata
         self.mode = "grid"
-        gridForm = ZzForm()
-        gridForm.add_control("/vs", tag="gridsplitter")
+        tmp_grid_form = ZzForm()
+        tmp_grid_form.add_control("/vs", tag="gridsplitter")
 
-        gridForm.add_control(
+        tmp_grid_form.add_control(
             "toolbar",
             control="toolbar",
             actions=[self.zz_form.actions, self.create_grid_navigation_actions()],
         )
-        gridForm.add_control("form__grid", control="grid")
+        tmp_grid_form.add_control("form__grid", control="grid")
+        # place child forms
+        for action in self.zz_form.actions.action_list:
+            if action.get("child_form"):
+                tmp_grid_form.add_control("/t", action.get("text", "="))
+                #  create child form!
+                action["child_form_fabric"] = action.get("child_form")
+                action["child_form"] = action.get("child_form")()
+                self.zz_form.children_forms.append(action)
+                tmp_grid_form.add_control(
+                    f"child_grid__{action['text']}", widget=action["child_form"]
+                )
+        tmp_grid_form.add_control("/")
 
         if self.zz_form.show_app_modal_form is False:
-            gridForm.controls.controls[-1], gridForm.controls.controls[-2] = (
-                gridForm.controls.controls[-2],
-                gridForm.controls.controls[-1],
+            tmp_grid_form.controls.controls[-1], tmp_grid_form.controls.controls[-2] = (
+                tmp_grid_form.controls.controls[-2],
+                tmp_grid_form.controls.controls[-1],
             )
 
-        self.build_form(gridForm.get_controls())
+        self.build_form(tmp_grid_form.get_controls())
         self.move_grid_index(7)
 
     def build_form(self, controls=[]):
@@ -707,7 +711,10 @@ class ZzFormWindow:
         # Form or widget
         if control == "widget":
             if isinstance(meta.get("widget"), ZzForm):
-                widget2add = meta.get("widget").get_form_widget()
+                if meta.get("widget").model is not None:
+                    widget2add = meta.get("widget").get_grid_widget()
+                else:
+                    widget2add = meta.get("widget").get_form_widget()
             else:
                 widget2add = meta.get("widget")
         else:

@@ -30,17 +30,19 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
             {"label": "?", "datalen": 3, "valid": self.show_related_form}
         )
         self.say = zzline({"disabled": "*"})
+
+        self.to_form: ZzForm = self.meta.get("to_form")()
+
         self.add_widget(self.get)
         self.add_widget(self.button)
         self.add_widget(self.say)
         self.get_valid()
 
     def show_related_form(self):
-        self.form_to: ZzForm = self.meta.get("to_form")
-        if isinstance(self.form_to, ZzForm):
+        if isinstance(self.to_form, ZzForm):
             # if not self.formTo.isAction("Select"):
             #     self.formTo.addAction("Select",self.showRelatedFormResult,key="Enter",tag="select")
-            self.form_to.add_action(
+            self.to_form.add_action(
                 "Select", self.show_related_form_result, hotkey="Enter", tag="select"
             )
 
@@ -55,11 +57,11 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
 
             # self.form_to.beforeStart = beforeStart
 
-            self.form_to.show_mdi_modal_grid()
+            self.to_form.show_mdi_modal_grid()
 
     def show_related_form_result(self):
-        self.get.setText(self.form_to.r.__getattr__(self.meta["to_column"]))
-        self.form_to.close()
+        self.get.set_text(self.to_form.r.__getattr__(self.meta["to_column"]))
+        self.to_form.close()
         self.get.set_focus()
         self.get_valid()
 
@@ -72,8 +74,8 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
         return self.set_related()
 
     def set_related(self):
-        if self.meta.get("to_form"):
-            rel = self.meta.get("to_form").model.get_related(
+        if self.to_form:
+            rel = self.to_form.model.get_related(
                 self.meta["to_table"],
                 f"{self.meta['to_column']} = '{self.get.text()}'",
                 self.meta["related"],

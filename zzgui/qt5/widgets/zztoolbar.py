@@ -71,24 +71,16 @@ class zztoolbar(QFrame, ZzWidget):
                         if worker:
                             act["engineAction"].triggered.connect(worker)
                         elif (
-                            act.get("child_field") or act.get("parent_field")
+                            act.get("child_filter") or act.get("parent_column")
                         ) and act.get("child_form"):
                             # self.zzForm.gridChildren.append(act)
                             def getChildForm(act):
                                 def rd():
-                                    child = act.get("child_form")()
-                                    if child.t:
-                                        parent_field_vause = (
-                                            self.zzForm.t.r.__getattr__(
-                                                act.get("parent_field")
-                                            )
-                                        )
-                                        child_field = act.get("child_field")
-                                        filter = f"{child_field}='{parent_field_vause}'"
-                                        child.t.setFilter(filter)
-                                        child.t.refresh()
-                                    child.showForm()
-
+                                    child_form = act.get("child_form_fabric")()
+                                    print(act.get("child_form").model.get_where())
+                                    child_form.model.set_where(act.get("child_form").model.get_where())
+                                    child_form.model.refresh()
+                                    child_form.show_mdi_modal_grid()
                                 return rd
 
                             act["engineAction"].triggered.connect(getChildForm(act))
