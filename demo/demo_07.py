@@ -142,7 +142,6 @@ class databaseApp(ZzApp):
 
     def form_customers(self):
         form = ZzForm("Customers")
-        form.add_control("/f")
         form.add_control(
             name="customer_id",
             label="Customer Id",
@@ -159,7 +158,7 @@ class databaseApp(ZzApp):
         form.add_action(
             "Orders",
             child_form=self.form_orders,
-            child_filter="customer_id",
+            child_where="customer_id",
             parent_column="customer_id",
         )
 
@@ -170,7 +169,6 @@ class databaseApp(ZzApp):
 
     def form_products(self):
         form = ZzForm("Products")
-        form.add_control("/f")
         form.add_control("product_id", "Product Id", datalen=9, alignment=9)
         form.add_control("name", "Name", datalen=20)
         form.set_model(ZzCursorModel(self.db.table(table_name="products")))
@@ -182,7 +180,6 @@ class databaseApp(ZzApp):
 
     def form_orders(self):
         form = ZzForm("Orders")
-        form.add_control("/f")
         form.add_control("order_id", "Order Id", alignment=9, datatype="int")
         form.add_control("date", "Date")
         form.add_control(
@@ -199,7 +196,7 @@ class databaseApp(ZzApp):
         form.add_action(
             "Lines",
             child_form=self.form_order_lines,
-            child_filter="order_id",
+            child_where="order_id",
             parent_column="order_id",
         )
         form.set_model(ZzCursorModel(self.db.table("orders")))
@@ -210,7 +207,6 @@ class databaseApp(ZzApp):
 
     def form_order_lines(self):
         form = ZzForm("Order lines")
-        form.add_control("/f")
         form.add_control("order_id", "Order Id", alignment=9, datatype="int")
         form.add_control(
             name="product_id",

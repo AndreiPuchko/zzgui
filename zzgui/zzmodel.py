@@ -29,6 +29,7 @@ class ZzModel:
         self.proxy_records = []
         self.use_proxy = False
         self.relation_cache = {}
+        self.lastdata_error_text = ""
 
         self.meta = []
 
@@ -38,6 +39,12 @@ class ZzModel:
 
         self.order_text = ""
         self.where_text = ""
+
+    def get_data_error(self):
+        return self.lastdata_error_text
+
+    def set_data_error(self, text=""):
+        self.lastdata_error_text = text
 
     def insert(self, record: dict, current_row=0):
         print(record)
@@ -288,10 +295,12 @@ class ZzCursorModel(ZzModel):
         return super().refresh()
 
     def update(self, record: dict, current_row=0):
+        self.set_data_error()
         if self.cursor.update(record):
             self.refresh()
             return True
         else:
+            self.set_data_error(self.cursor.last_sql_error())
             return False
 
     def get_related(self, to_table, filter, related):

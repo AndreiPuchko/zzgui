@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     demo()
 
-from zzgui import zzmodel
+# from zzgui import zzmodel
 import zzgui.zzapp as zzapp
 from zzgui.zzmodel import ZzModel
 from zzgui.zzutils import int_
@@ -57,6 +57,7 @@ class ZzForm:
         self.controls = zzapp.ZzControls()
         self.system_controls = zzapp.ZzControls()
         self.model = None
+        self.model_record = {}
         # self.model: ZzModel = self.set_model(ZzModel())
         # Shortcuts to get
         self.s = ZzFormData(self)  # widgets data by name
@@ -65,6 +66,7 @@ class ZzForm:
         self.r = ZzModelData(self)  # Grid data by name
 
         self.children_forms = []  # forms inside this form
+        self.i_am_child = None
 
         self.show_grid_action_top = True
         self.do_not_save_geometry = False
@@ -90,7 +92,8 @@ class ZzForm:
         return self.model
 
     def refresh(self):
-        pass
+        self.model.refresh()
+        self.refresh_children()
 
     def widgets(self):
         return self.form_stack[-1].widgets
@@ -353,6 +356,7 @@ class ZzForm:
 
     def crud_save(self):
         crud_data = self.get_crud_form_data()
+        # print(crud_data)
         if self.crud_mode in [EDIT, VIEW]:
             rez = self.model.update(crud_data, self.current_row)
             self.set_grid_index(self.current_row)
@@ -360,18 +364,21 @@ class ZzForm:
             rez = self.model.insert(crud_data, self.current_row)
             self.move_grid_index(1)
         if rez is False:
-            pass
+            print(self.model.get_data_error())
         else:
             self.close()
 
     def get_crud_form_data(self):
         crud_data = {}
+        crud_data.update(self.model_record)
         for x in self.crud_form.widgets:
+            if x.startswith("/"):
+                continue
             widget = self.crud_form.widgets[x]
             if widget.meta.get("control") in NO_DATA_WIDGETS:
                 continue
-            if hasattr(widget, "get_text"):
-                crud_data[x] = widget.get_text()
+            crud_data[x] = self.s.__getattr__(x)
+
         return crud_data
 
     def crud_close(self):
@@ -389,14 +396,14 @@ class ZzForm:
 
     def set_crud_form_data(self, mode=EDIT):
         """set current record's value in crud_form"""
-        data = self.model.get_record(self.current_row)
-        for x in data:
+        self.model_record = self.model.get_record(self.current_row)
+        for x in self.model_record:
             if x not in self.crud_form.widgets:
                 continue
             if mode == NEW:
                 self.crud_form.widgets[x].set_text("")
             else:
-                self.crud_form.widgets[x].set_text(data[x])
+                self.crud_form.widgets[x].set_text(self.model_record[x])
 
     def grid_index_changed(self, row, column):
         refresh_children_forms = row != self.current_row and row >= 0
@@ -404,14 +411,26 @@ class ZzForm:
         self.current_column = column
 
         if refresh_children_forms:
-            for action in self.children_forms:
-                child_filter = action["child_filter"]
-                parent_column_value = self.r.__getattr__(action["parent_column"])
-                filter = f"{child_filter}='{parent_column_value}'"
-                action["child_form"].model.set_where(filter)
-                action["child_form"].model.refresh()
-                action["child_form"].current_row = -1
-                action["child_form"].set_grid_index(0)
+            self.refresh_children()
+
+    def refresh_children(self):
+        for action in self.children_forms:
+            filter = self.get_where_for_child(action)
+            action["child_form_object"].model.set_where(filter)
+            action["child_form_object"].model.refresh()
+
+    def get_where_for_child(self, action):
+        child_where = action["child_where"]
+        parent_column_value = self.r.__getattr__(action["parent_column"])
+        where_string = f"{child_where}='{parent_column_value}'"
+        return where_string
+
+    def show_child_form(self, action):
+        child_form = action.get("child_form")()
+        child_form.model.set_where(self.get_where_for_child(action))
+        child_form.model.refresh()
+        child_form.show_mdi_modal_grid()
+        self.refresh()
 
     def grid_header_clicked(self, column):
         self._zzdialogs.zzWait(lambda: self.model.set_order(column), "Sorting...")
@@ -488,7 +507,7 @@ class ZzForm:
         hotkey="",
         tag="",
         child_form=None,
-        child_filter="",
+        child_where="",
         parent_column="",
     ):
         d = locals().copy()
@@ -520,13 +539,14 @@ class ZzFormWindow:
             text="<<", worker=lambda: self.move_grid_index(7), hotkey="Ctrl+Up"
         )
         actions.add_action(text="🡸", worker=lambda: self.move_grid_index(8))
-        actions.add_action(text="↺", worker=lambda: None, hotkey="F5")
+        actions.add_action(text="↺", worker=lambda: self.zz_form.refresh(), hotkey="F5")
         actions.add_action(text="🡺", worker=lambda: self.move_grid_index(2))
         actions.add_action(
             text=">>", worker=lambda: self.move_grid_index(1), hotkey="Ctrl+Down"
         )
-        actions.add_action(text="-")
-        actions.add_action(text="Close", worker=self.close, hotkey="Esc")
+        if not self.zz_form.i_am_child:
+            actions.add_action(text="-")
+            actions.add_action(text="Close", worker=self.close, hotkey="Esc")
         return actions
 
     def move_grid_index(self, direction=None):
@@ -562,16 +582,18 @@ class ZzFormWindow:
         )
         tmp_grid_form.add_control("form__grid", control="grid")
         # place child forms
-        for action in self.zz_form.actions.action_list:
-            if action.get("child_form"):
-                tmp_grid_form.add_control("/t", action.get("text", "="))
-                #  create child form!
-                action["child_form_fabric"] = action.get("child_form")
-                action["child_form"] = action.get("child_form")()
-                self.zz_form.children_forms.append(action)
-                tmp_grid_form.add_control(
-                    f"child_grid__{action['text']}", widget=action["child_form"]
-                )
+        if not self.zz_form.i_am_child:
+            for action in self.zz_form.actions.action_list:
+                if action.get("child_form"):
+                    tmp_grid_form.add_control("/t", action.get("text", "="))
+                    #  create child form!
+                    action["child_form_object"] = action.get("child_form")()
+                    action["child_form_object"].i_am_child = True
+                    self.zz_form.children_forms.append(action)
+                    tmp_grid_form.add_control(
+                        f"child_grid__{action['text']}",
+                        widget=action["child_form_object"],
+                    )
         tmp_grid_form.add_control("/")
 
         if self.zz_form.show_app_modal_form is False:
@@ -589,7 +611,10 @@ class ZzFormWindow:
 
         if controls == []:
             controls = self.zz_form.get_controls()
+        if controls and controls[0].get("name", "") != "/f":
+            controls.insert(0, {"name": "/f"})
         for meta in controls:
+            meta["form"] = self.zz_form
             if meta.get("noform", ""):
                 continue
             current_frame = frame_stack[-1]
@@ -603,6 +628,8 @@ class ZzFormWindow:
                         current_frame.add_widget(label2add)
                     if widget2add is not None:
                         current_frame.add_widget(widget2add)
+                        # if meta.get('control') == 'toolbar':
+                        #     widget2add.set_context_menu(current_frame)
             # Hotkeys
             if meta.get("hotkey") and meta.get("valid"):
                 if meta.get("hotkey") not in self.hotkey_widgets:
@@ -778,6 +805,8 @@ class ZzFormData:
             widget = self.zz_form.form_stack[-1].widgets.get(name)
             if widget:
                 widget.set_text(value)
+            else:  # no widget - put data to model's record
+                self.zz_form.model_record[name] = value
         else:
             self.__dict__[name] = value
 
@@ -791,6 +820,8 @@ class ZzFormData:
             widget = self.zz_form.form_stack[-1].widgets.get(name)
         if widget is not None:
             return widget.get_text()
+        else:  # no widget here? get data from model
+            return self.zz_form.model_record.get(name, None)
 
 
 class ZzFormWidget:

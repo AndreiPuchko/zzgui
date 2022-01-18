@@ -50,47 +50,41 @@ class zztoolbar(QFrame, ZzWidget):
         tool_bar_qt_actions = QMenu()
         cascade_action = {"": tool_bar_qt_actions}
 
-        for act in action_list:
-            if act.get("text", "").startswith("/"):
+        for action in action_list:
+            if action.get("text", "").startswith("/"):
                 continue
-            worker = act.get("worker", None)
-            action_text_list = act["text"].split("|")
+            worker = action.get("worker", None)
+            action_text_list = action["text"].split("|")
             for x in range(len(action_text_list)):
                 action_key = "|".join(action_text_list[:x])
                 action_text = action_text_list[x]
                 if action_text == "-":
-                    act["engineAction"] = cascade_action[action_key].addSeparator()
+                    action["engineAction"] = cascade_action[action_key].addSeparator()
                 else:
                     if x + 1 == len(action_text_list):  # real action
 
-                        act["engineAction"] = cascade_action[action_key].addAction(
+                        action["engineAction"] = cascade_action[action_key].addAction(
                             action_text
                         )
-                        act["engineAction"].setToolTip(act.get("mess", ""))
-                        act["engineAction"].setStatusTip(act.get("mess", ""))
+                        action["engineAction"].setToolTip(action.get("mess", ""))
+                        action["engineAction"].setStatusTip(action.get("mess", ""))
                         if worker:
-                            act["engineAction"].triggered.connect(worker)
+                            action["engineAction"].triggered.connect(worker)
                         elif (
-                            act.get("child_filter") or act.get("parent_column")
-                        ) and act.get("child_form"):
-                            # self.zzForm.gridChildren.append(act)
-                            def getChildForm(act):
+                            action.get("child_where") or action.get("parent_column")
+                        ) and action.get("child_form"):
+                            def getChildForm(action):
                                 def rd():
-                                    child_form = act.get("child_form_fabric")()
-                                    print(act.get("child_form").model.get_where())
-                                    child_form.model.set_where(act.get("child_form").model.get_where())
-                                    child_form.model.refresh()
-                                    child_form.show_mdi_modal_grid()
+                                    self.meta['form'].show_child_form(action)
                                 return rd
+                            action["engineAction"].triggered.connect(getChildForm(action))
 
-                            act["engineAction"].triggered.connect(getChildForm(act))
-
-                        act["engineAction"].setShortcut(
-                            act["hotkey"]
-                            if not act["hotkey"] == "Spacebar"
+                        action["engineAction"].setShortcut(
+                            action["hotkey"]
+                            if not action["hotkey"] == "Spacebar"
                             else Qt.Key_Space
                         )
-                        act["engineAction"].setShortcutContext(
+                        action["engineAction"].setShortcutContext(
                             Qt.WidgetWithChildrenShortcut
                         )
                     else:  # cascade

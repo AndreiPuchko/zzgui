@@ -39,12 +39,12 @@ class ZzActions:
         hotkey="",
         tag="",
         child_form=None,
-        child_filter="",
+        child_where="",
         parent_column="",
     ):
         """ "/view", "/crud" """
         for x in range(len(self.action_list)):
-            if text in self.action_list[x]["text"]:
+            if text in self.action_list[x]["text"] and text != "-":
                 self.action_list[x]["worker"] = worker
                 self.action_list[x]["hotkey"] = hotkey
                 return True
@@ -56,7 +56,7 @@ class ZzActions:
         action["hotkey"] = hotkey
         action["tag"] = tag
         action["child_form"] = child_form
-        action["child_filter"] = child_filter
+        action["child_where"] = child_where
         action["parent_column"] = parent_column
         self.action_list.append(action)
         return True
@@ -195,7 +195,7 @@ class ZzApp:
     def get_argv(self, argtext: str):
         for x in sys.argv:
             if x.startswith(f"/{argtext}:") or x.startswith(f"-{argtext}:"):
-                file_name = x[(len(argtext) + 2):]
+                file_name = x[(len(argtext) + 2) :]  # noqa: E203
                 print(file_name)
                 return file_name
         return ""
