@@ -757,27 +757,56 @@ class ZzFormWindow:
             )
             self.widgets[x].splitter.set_sizes(sizes)
         # Restore grid columns sizes
-        if "form__grid" in self.widgets:
-            self.restore_grid_columns()
-            for x in self.zz_form.children_forms:
-                x["child_form_object"].grid_form.restore_grid_columns()
-
+        self.restore_grid_columns()
         zzapp.zz_app.show_form(self, modal)
 
+    def get_grid_list(self):
+        return [
+            self.widgets[x]
+            for x in self.widgets
+            if type(self.widgets[x]).__name__ == "zzgrid"
+        ]
+    def get_sub_form_list(self):
+        return [
+            self.widgets[x]
+            for x in self.widgets
+            if type(self.widgets[x]).__name__ == "ZzFormWindow"
+        ]
+
     def restore_grid_columns(self):
-        col_settings = {}
-        for x in self.zz_form.model.headers:
-            data = zzapp.zz_app.settings.get(
-                self.window_title, f"grid_column__'{x}'"
-            )
-            col_settings[x] = data
-        self.widgets["form__grid"].set_column_settings(col_settings)
+        for grid in self.get_grid_list():
+            col_settings = {}
+            for x in self.zz_form.model.headers:
+                data = zzapp.zz_app.settings.get(
+                    self.window_title, f"grid_column__'{x}'"
+                )
+                col_settings[x] = data
+            grid.set_column_settings(col_settings)
+        # looking fo griid in the subfoms
+        # for x in self.zz_form.children_forms:
+        #     x["child_form_object"].grid_form.restore_grid_columns()
+        for x in self.get_sub_form_list():
+            x.restore_grid_columns()
+
+    def save_grid_columns(self):
+        for grid in self.get_grid_list():
+            for x in grid.get_columns_settings():
+                zzapp.zz_app.settings.set(
+                    self.window_title,
+                    f"grid_column__'{x['name']}'",
+                    x["data"],
+                )
+        # for x in self.zz_form.children_forms:
+        #     x["child_form_object"].close()
+        for x in self.get_sub_form_list():
+            x.close()
+
 
     def close(self):
-        # Splitters sizes
         if self._in_close_flag:
             return
         self._in_close_flag = True
+        # Splitters sizes
         for x in self.get_splitters():
             zzapp.zz_app.settings.set(
                 self.window_title,
@@ -785,15 +814,7 @@ class ZzFormWindow:
                 self.widgets[x].splitter.get_sizes(),
             )
         # Grid columns
-        if "form__grid" in self.widgets:
-            for x in self.widgets["form__grid"].get_columns_settings():
-                zzapp.zz_app.settings.set(
-                    self.window_title,
-                    f"grid_column__'{x['name']}'",
-                    x["data"],
-                )
-            for x in self.zz_form.children_forms:
-                x["child_form_object"].close()
+        self.save_grid_columns()
         self.save_geometry(zzapp.zz_app.settings)
 
     def get_splitters(self):
