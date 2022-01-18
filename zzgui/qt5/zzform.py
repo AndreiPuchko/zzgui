@@ -140,6 +140,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         keyText = QKeySequence(event.modifiers() | event.key()).toString()
         if key == Qt.Key_Escape and self.escapeEnabled:
             self.close()
+        elif key == Qt.Key_Escape and not self.escapeEnabled:
+            event.ignore()
+            # return
         elif self.mode == "form" and key in (Qt.Key_Up,):
             QApplication.sendEvent(
                 self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.ShiftModifier)
@@ -166,7 +169,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         #     for wi in self.hotKeyWidgets[keyText]:
         #         if wi.isEnabled():
         # else:
-        event.accept()
+        # event.acc5ept()
 
     def close(self):
         super().close()

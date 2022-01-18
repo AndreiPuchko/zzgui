@@ -84,7 +84,7 @@ class ZzModel:
         self.headers = []
         self.alignments = []
         self.meta = []
-        for meta in self.zz_form.controls.controls:
+        for meta in self.zz_form.controls:
             if meta.get("name", "").startswith("/") or meta.get("formonly"):
                 continue
             if meta.get("control", "") in ["button", "widget", "form"]:

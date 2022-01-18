@@ -8,6 +8,7 @@ if __name__ == "__main__":
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.qt5.zzform import zzMess
+from zzgui.zzmodel import ZzModel
 
 from zzgui.zzutils import num
 
@@ -34,7 +35,7 @@ class DemoApp(ZzApp):
 
     def describe_form1(self):
         form = ZzForm("First form")
-        form.add_control("/f")
+        form.add_control("/")
         form.add_control("uid", "Uid", control="line", data=1)
         if form.add_control("/h"):
 
@@ -72,7 +73,6 @@ class DemoApp(ZzApp):
 
     def describe_form2(self):
         form = ZzForm("Second form")
-        form.add_control("/f")
         form.add_control(
             "radio", "Color", pic="Red;White;Black", control="radio", data="2"
         )
@@ -102,6 +102,7 @@ class DemoApp(ZzApp):
 
     def describe_complex_form(self):
         form = ZzForm("Complex form")
+        form.add_control("/")
         form.add_control("/h")
         form.add_control("", "1", widget=self.describe_form1())
         form.add_control("/v")
@@ -138,6 +139,7 @@ class DemoApp(ZzApp):
             {"uid": 4, "name": "Iron nagel", "date": "2005-01-15"},
         ]
         form = self.describe_form4()
+        form.set_model(ZzModel())
         form.model.set_records(data)
         return form
 

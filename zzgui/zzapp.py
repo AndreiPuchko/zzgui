@@ -21,14 +21,15 @@ class ZzHeap:
     pass
 
 
-class ZzActions:
+class ZzActions(list):
     def __init__(self, action=None):
         self.show_main_button = True
         self.show_actions = True
         if isinstance(action, list):
-            self.action_list = action[:]
-        else:
-            self.action_list = []
+            # self.action_list = action[:]
+            self.extend(action[:])
+        # else:
+        #     self.action_list = []
 
     def add_action(
         self,
@@ -43,10 +44,10 @@ class ZzActions:
         parent_column="",
     ):
         """ "/view", "/crud" """
-        for x in range(len(self.action_list)):
-            if text in self.action_list[x]["text"] and text != "-":
-                self.action_list[x]["worker"] = worker
-                self.action_list[x]["hotkey"] = hotkey
+        for x in range(len(self)):
+            if text in self[x]["text"] and text != "-":
+                self[x]["worker"] = worker
+                self[x]["hotkey"] = hotkey
                 return True
         action = {}
         action["text"] = text
@@ -58,7 +59,7 @@ class ZzActions:
         action["child_form"] = child_form
         action["child_where"] = child_where
         action["parent_column"] = parent_column
-        self.action_list.append(action)
+        self.append(action)
         return True
 
     # def insertAction(
@@ -75,19 +76,19 @@ class ZzActions:
     #         self.action_list.pop(actionIndex)
 
 
-class ZzControls:
+class ZzControls(list):
     class _C:
         def __init__(self, controls):
             self.controls = controls
 
         def __getattr__(self, name):
-            for line in self.controls.controls:
+            for line in self.controls:
                 if line.get("name") == name or line.get("tag") == name:
                     return line
-            return [line["name"] for line in self.controls.controls]
+            return [line["name"] for line in self.controls]
 
     def __init__(self):
-        self.controls = []
+        # self.controls = []
         self.c = self._C(self)
 
     def add_control(
@@ -116,6 +117,7 @@ class ZzControls:
         grid_only=None,
         when=None,
         widget=None,
+        stretch = 0, 
         mess="",
         tag="",
         eat_enter=None,
@@ -123,7 +125,7 @@ class ZzControls:
     ):
         d = locals().copy()
         del d["self"]
-        self.controls.append(d)
+        self.append(d)
         return True
 
 

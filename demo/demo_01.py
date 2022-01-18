@@ -37,7 +37,7 @@ class DemoApp(ZzApp):
 
     def first_form(self):
         form = ZzForm("First form ever")
-
+        form.add_control("/")
         actions = ZzActions()
         # # actions.show_main_button = False
         # actions.show_actions = False

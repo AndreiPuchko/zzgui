@@ -56,10 +56,6 @@ class ZzFrame(zzwindow.ZzFrame, QWidget):
         self.setLayout(layout(mode))
 
     def insert_widget(self, pos=None, widget=None):
-        # If toolbar - set context menu for parent widget
-        # if hasattr(widget, "meta"):
-        #     if "toolbar" in widget.meta.get("name", ""):
-        #         widget.set_context_menu(self)
         self.layout().addWidget(widget)
 
     def add_row(self, label=None, widget=None):

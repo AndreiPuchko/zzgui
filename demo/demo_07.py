@@ -103,16 +103,18 @@ def data_load(db: ZzDb):
                 "date": f"2022-01-{randint(1,31):02}",
             },
         )
-        for y in range(1, randint(1, order_lines_qt)):
-            db.insert(
+        for y in range(1, randint(2, order_lines_qt)):
+            rez = db.insert(
                 "order_lines",
                 {
                     "order_id": x,
-                    "product_id": randint(1, product_qt - 1),
+                    "product_id": randint(1, product_qt-1),
                     "quantity": randint(1, 100),
                     "price": randint(1, y),
                 },
             )
+            if rez is not True:
+                print(db.last_sql_error)
     assert len(db.get_tables()) == 8
     assert db.cursor(table_name="customers").row_count() == customer_qt - 1
     assert db.cursor(table_name="products").row_count() == product_qt - 1
@@ -123,6 +125,8 @@ class databaseApp(ZzApp):
     def on_start(self):
         # self.form_order_lines().show_mdi_modal_grid()
         self.orders()
+        # self.products()
+
 
     def create_database(self):
         self.db = ZzDb("sqlite3", database_name=":memory:")
@@ -161,7 +165,6 @@ class databaseApp(ZzApp):
             child_where="customer_id",
             parent_column="customer_id",
         )
-
         return form
 
     def customers(self):

@@ -36,12 +36,12 @@ class zztoolbar(QFrame, ZzWidget):
 
         action_list = []
         if isinstance(meta.get("actions"), ZzActions):
-            action_list.extend(meta.get("actions").action_list)
+            action_list.extend(meta.get("actions"))
             actions = meta.get("actions")
         elif isinstance(meta.get("actions"), list):
             for x in meta.get("actions"):
                 if isinstance(x, ZzActions):
-                    action_list.extend(x.action_list)
+                    action_list.extend(x)
             actions = meta.get("actions")[0]
 
         if action_list is []:

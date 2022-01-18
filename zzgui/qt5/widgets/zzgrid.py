@@ -75,9 +75,10 @@ class zzgrid(QTableView):
 
     # currentCellChangedSignal = pyqtSignal(int, int)
 
-    def __init__(self, zz_form: ZzForm):
+    def __init__(self, meta):
         super().__init__()
-        self.zz_form = zz_form
+        self.meta = meta
+        self.zz_form = self.meta.get("form")
         self.setModel(self.ZzTableModel(self.zz_form.model))
         self.setItemDelegate(zzDelegate(self))
         self.setTabKeyNavigation(False)

@@ -10,6 +10,8 @@ if __name__ == "__main__":
 
 from PyQt5.QtWidgets import QGroupBox, QSplitter, QSizePolicy
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QResizeEvent
+from zzgui.qt5 import widgets
 
 # from zzgui.zzutils import num
 
@@ -34,8 +36,11 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
         if self.splitter is not None:
             self.splitter.addWidget(widget)
             if hasattr(widget, "meta"):
-                if "toolbar" in widget.meta.get("name", ""):
-                    widget.set_context_menu(self.splitter)
+                # print(widget.meta.get("stretch"), widget)
+                self.splitter.setStretchFactor(self.splitter.count()-1, widget.meta.get("stretch"))
+            # if hasattr(widget, "meta"):
+            #     if "toolbar" in widget.meta.get("name", ""):
+            #         widget.set_context_menu(self.splitter)
         else:
             return super().add_widget(widget=widget, label=label)
 
@@ -52,3 +57,10 @@ class zzsplitter(QSplitter):
         if sizes:
             sizes = [int(x) for x in sizes.split(",")]
             self.setSizes(sizes)
+
+    # def resizeEvent(self, event: QResizeEvent):
+    #     self.setStretchFactor(0,0)
+    #     for x in range(1, self.count()):
+    #         self.setStretchFactor(x ,0)
+    #     # event.ignore()
+    #     return super().resizeEvent(event)
