@@ -29,7 +29,7 @@ class ZzWidget:
         if max_width:
             self.set_maximum_width(max_width)
 
-        self.set_alignment(self.meta.get("alignment", 0))
+        self.set_alignment(self.meta.get("alignment", 7))
 
         if num(self.meta.get("datalen", 0)):
             self.set_maximum_len(num(self.meta.get("datalen", 0)))

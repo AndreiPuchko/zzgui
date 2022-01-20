@@ -66,6 +66,7 @@ class ZzForm:
     def refresh(self):
         self.model.refresh()
         self.refresh_children()
+        self.set_grid_index()
 
     def widgets(self):
         return self.form_stack[-1].widgets
@@ -122,6 +123,7 @@ class ZzForm:
         self.model.build()
         self.get_grid_crud_actions()
         self.grid_form.build_grid()
+        self._after_grid_create()
         return self.grid_form
 
     def get_grid_crud_actions(self):
@@ -219,10 +221,33 @@ class ZzForm:
                     "Filter", worker=run_filter_data_form, hotkey="F9"
                 )
 
+    def get_table_schema(self):
+        rez = []
+        if self.model is not None:
+            table_name = ""
+            table_name = self.model.get_table_name()
+            for x in self.controls:
+                if x["name"].startswith("/"):
+                    continue
+                if x.get("control") in NO_DATA_WIDGETS:
+                    continue
+                column = {
+                    "table": table_name,
+                    "column": x["name"],
+                    "datatype": x["datatype"],
+                    "datalen": x["datatype"],
+                    "pk": x["pk"],
+                }
+                rez.append(column)
+        return rez
+
     def _valid(self):
         if self.valid() is False:
             return
         self.close()
+
+    def _after_grid_create(self):
+        pass
 
     def add_ok_cancel_buttons(self):
         buttons = zzapp.ZzControls()
@@ -385,6 +410,7 @@ class ZzForm:
             filter = self.get_where_for_child(action)
             action["child_form_object"].model.set_where(filter)
             action["child_form_object"].model.refresh()
+            action["child_form_object"].set_grid_index()
 
     def get_where_for_child(self, action):
         child_where = action["child_where"]
@@ -400,7 +426,9 @@ class ZzForm:
         self.refresh()
 
     def grid_header_clicked(self, column):
-        self._zzdialogs.zzWait(lambda: self.model.set_order(column), "Sorting...")
+        if self.model is not None:
+            self._zzdialogs.zzWait(lambda: self.model.set_order(column), "Sorting...")
+            self.refresh()
 
     def grid_double_clicked(self):
         for tag in ("select", "view", "edit"):
@@ -409,8 +437,12 @@ class ZzForm:
                 action.get("worker")()
                 break
 
-    def set_grid_index(self, row_number=0):
-        self.grid_form.set_grid_index(row_number)
+    def set_grid_index(self, row=None, column=None):
+        if row is None:
+            row = self.current_row
+        if column is None:
+            column = self.current_column
+        self.grid_form.set_grid_index(row, column)
 
     def move_grid_index(self, mode):
         self.grid_form.move_grid_index(mode)
@@ -440,7 +472,7 @@ class ZzForm:
         datadec=0,
         pk="",
         actions=[],
-        alignment=7,
+        alignment=-1,
         to_table="",
         to_column="",
         to_form=None,
@@ -449,8 +481,8 @@ class ZzForm:
         readonly=None,
         disabled=None,
         check=None,
-        form_only=None,
-        grid_only=None,
+        noform=None,
+        nogrid=None,
         when=None,
         widget=None,
         stretch=0,
@@ -596,6 +628,8 @@ class ZzFormWindow:
             controls.insert(0, {"name": "/f"})
         # Create widgets
         for meta in controls:
+            if meta.get("noform"):
+                continue
             meta["form"] = self.zz_form
             if meta.get("noform", ""):
                 continue
@@ -766,6 +800,7 @@ class ZzFormWindow:
             for x in self.widgets
             if type(self.widgets[x]).__name__ == "zzgrid"
         ]
+
     def get_sub_form_list(self):
         return [
             self.widgets[x]
@@ -800,7 +835,6 @@ class ZzFormWindow:
         #     x["child_form_object"].close()
         for x in self.get_sub_form_list():
             x.close()
-
 
     def close(self):
         if self._in_close_flag:

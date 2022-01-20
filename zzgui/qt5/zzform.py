@@ -65,9 +65,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             )
             if wDelta or hDelta:
                 paw.resize(paw.size().width() + wDelta, paw.size().height() + hDelta)
-
-        # if num(settings.get(self.window_title, "is_max", "0")):
-        #     paw.showMaximized()
+            if num(settings.get(self.window_title, "is_max", "0")):
+                self.showMaximized()
+                paw.move(0, 0)
 
     def set_position(self, left, top):
         paw = self.parent()

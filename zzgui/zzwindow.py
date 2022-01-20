@@ -60,10 +60,10 @@ class ZzWindow(ZzFrame):
     def get_size(self):
         pass
 
-    def is_maximized():
+    def is_maximized(self):
         pass
 
-    def show_maximized():
+    def show_maximized(self):
         return 0
 
     def restore_geometry(self, settings):
@@ -86,4 +86,6 @@ class ZzWindow(ZzFrame):
             size = self.get_size()
             settings.set(self.window_title, "width", size[0])
             settings.set(self.window_title, "height", size[1])
+        else:
+            settings.set(self.window_title, "is_max", 1)
         settings.write()

@@ -30,8 +30,9 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
             {"label": "?", "datalen": 3, "valid": self.show_related_form}
         )
         self.say = zzline({"disabled": "*"})
-
-        self.to_form: ZzForm = self.meta.get("to_form")()
+        self.to_form = None
+        if self.meta.get("to_form"):
+            self.to_form: ZzForm = self.meta.get("to_form")()
 
         self.add_widget(self.get)
         self.add_widget(self.button)
@@ -46,24 +47,22 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
                 "Select", self.show_related_form_result, hotkey="Enter", tag="select"
             )
 
-            # self.form_to.addSelectGridAction(self.showRelatedFormResult)
+            def seek():
+                row = self.to_form.model.cursor.seek_row(
+                    {self.meta["to_column"]: self.get_text()}
+                )
+                self.to_form.set_grid_index(row)
 
-            # def beforeStart():
-            #     row = self.form_to.model.cursor.getPkRow(
-            #         {self.meta["to_field"]: self.get.text()}
-            #     )
-            #     if row:
-            #         self.form_to.setGridIndex(row)
-
-            # self.form_to.beforeStart = beforeStart
+            self.to_form._after_grid_create = seek
 
             self.to_form.show_mdi_modal_grid()
 
     def show_related_form_result(self):
-        self.get.set_text(self.to_form.r.__getattr__(self.meta["to_column"]))
-        self.to_form.close()
-        self.get.set_focus()
-        self.get_valid()
+        if self.to_form:
+            self.get.set_text(self.to_form.r.__getattr__(self.meta["to_column"]))
+            self.to_form.close()
+            self.get.set_focus()
+            self.get_valid()
 
     def get_valid(self):
         value = self.get.get_text()
@@ -74,14 +73,17 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
         return self.set_related()
 
     def set_related(self):
-        if self.to_form:
-            rel = self.to_form.model.get_related(
-                self.meta["to_table"],
-                f"{self.meta['to_column']} = '{self.get.text()}'",
-                self.meta["related"],
-            )
-        else:
-            rel = "...relation not defined..."
+        # if self.to_form:
+        #     rel = self.to_form.model.get_related(
+        #         self.meta["to_table"],
+        #         f"{self.meta['to_column']} = '{self.get.text()}'",
+        #         self.meta["related"],
+        #     )
+        # else:
+        #     rel = "...relation not defined..."
+        rel = self.meta["form"].model._get_related(
+            self.get.text(), self.meta, do_not_show_value=1, reset_cache=1
+        )
         if rel is None:
             self.say.set_text(" wrong key ")
             return False

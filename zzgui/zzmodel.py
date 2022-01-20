@@ -40,6 +40,9 @@ class ZzModel:
         self.order_text = ""
         self.where_text = ""
 
+    def get_table_name(self):
+        return ""
+
     def get_data_error(self):
         return self.lastdata_error_text
 
@@ -66,7 +69,7 @@ class ZzModel:
 
     def set_order(self, order_data=""):
         if isinstance(order_data, int):
-            self.order_text = self.column_header_data(order_data)
+            self.order_text = self.columns[order_data]
         elif isinstance(order_data, list):
             self.order_text = ",".join(order_data)
         else:
@@ -74,7 +77,14 @@ class ZzModel:
 
     def refresh(self):
         self.relation_cache = {}
+
+
+    def reset(self):
         self.records = []
+        self.proxy_records = []
+        self.use_proxy = False
+        self.relation_cache = {}
+        self.lastdata_error_text = ""
 
     def set_records(self, records):
         self.records = records
@@ -85,7 +95,7 @@ class ZzModel:
         self.alignments = []
         self.meta = []
         for meta in self.zz_form.controls:
-            if meta.get("name", "").startswith("/") or meta.get("formonly"):
+            if meta.get("name", "").startswith("/") or meta.get("nogrid"):
                 continue
             if meta.get("control", "") in ["button", "widget", "form"]:
                 continue
@@ -131,6 +141,19 @@ class ZzModel:
         ):
             meta["relation"] = True
 
+        if re.match(
+            ".*int.*|.*dec.*|.*num.*", meta["datatype"], re.RegexFlag.IGNORECASE
+        ):
+            meta["num"] = True
+            if meta.get("pic", "") == "":
+                meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
+                    ""
+                    if num(meta["datadec"]) == 0
+                    else "." + "9" * int(num(meta["datadec"]))
+                )
+            if meta.get("alignment", -1) == -1:
+                meta["alignment"] = 9
+
         self.columns.append(meta["name"])
         self.headers.append(meta["label" if meta.get("saygrid") else "label"])
         self.alignments.append(meta.get("alignment", "7"))
@@ -142,13 +165,13 @@ class ZzModel:
         else:
             return self.records[row]
 
-    def _get_related(self, value, meta):
+    def _get_related(self, value, meta, do_not_show_value=False, reset_cache=False):
         if meta.get("num") and num(value) == 0:
             return ""
         elif value == "":
             return ""
         key = (meta["to_table"], f"{meta['to_column']}='{value}'", meta["related"])
-        if key in self.relation_cache:
+        if not reset_cache and key in self.relation_cache:
             related = self.relation_cache[key]
         else:
             related = self.get_related(
@@ -157,7 +180,10 @@ class ZzModel:
             self.relation_cache[key] = related
         if related is None:
             related = ""
-        return f"{value},{related}"
+        if do_not_show_value:
+            return f"{related}"
+        else:
+            return f"{value},{related}"
 
     def get_related(self, to_table, filter, related):
         return "get_related"
@@ -276,13 +302,15 @@ class ZzCsvModel(ZzModel):
 
         self.proxy_records = tmp_proxy_records
         self.use_proxy = True
-        self.refresh()
 
 
 class ZzCursorModel(ZzModel):
     def __init__(self, cursor: ZzCursor = None):
         super().__init__()
         self.cursor = cursor
+
+    def get_table_name(self):
+        return self.cursor.table_name
 
     def row_count(self):
         return self.cursor.row_count()
@@ -291,8 +319,8 @@ class ZzCursorModel(ZzModel):
         return self.cursor.record(row)
 
     def refresh(self):
+        super().refresh()
         self.cursor.refresh()
-        return super().refresh()
 
     def update(self, record: dict, current_row=0):
         self.set_data_error()
@@ -307,6 +335,11 @@ class ZzCursorModel(ZzModel):
         db: ZzDb = self.cursor.zz_db
         return db.get(to_table, filter, related)
 
+    def set_order(self, order_data):
+        super().set_order(order_data=order_data)
+        colname = self.order_text
+        self.cursor.set_order(colname)
+
     def add_column(self, meta):
         db: ZzDb = self.cursor.zz_db
         db_meta = db.db_schema.get_schema_table_attr(
@@ -314,11 +347,10 @@ class ZzCursorModel(ZzModel):
         )
         meta["pk"] = db_meta.get("pk", "")
         meta["datatype"] = db_meta.get("datatype", meta["datatype"])
-        if "datalen" not in meta or num(meta["datalen"]) == 0:
+        if num(meta["datalen"]) < num(db_meta.get("datalen", 10)):
             meta["datalen"] = int(num(db_meta.get("datalen", 10)))
         if "datadec" not in meta:
             meta["datadec"] = int(num(db_meta.get("datadec", 2)))
-
         return super().add_column(meta)
 
     def set_where(self, where_text=""):
