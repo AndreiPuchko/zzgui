@@ -16,6 +16,60 @@ import re
 
 zz_app = None
 
+ASK_REMOVE_RECORD_TEXT = "You are about to remove current record! Are You Sure?"
+DATA_FORMAT_STRING = "%d.%m.%Y"
+
+ACTION_VIEW_TEXT = "View"
+ACTION_VIEW_ICON = "View"
+ACTION_VIEW_HOTKEY = "F12"
+
+ACTION_NEW_TEXT = "New"
+ACTION_NEW_ICON = "New"
+ACTION_NEW_HOTKEY = "Ins"
+
+ACTION_COPY_TEXT = "Copy"
+ACTION_COPY_ICON = "Copy"
+ACTION_COPY_HOTKEY = "Ctrl+Ins"
+
+ACTION_EDIT_TEXT = "Edit"
+ACTION_EDIT_ICON = "Edit"
+ACTION_EDIT_HOTKEY = "Spacebar"
+
+ACTION_REMOVE_TEXT = "Remove"
+ACTION_REMOVE_ICON = "Remove"
+ACTION_REMOVE_HOTKEY = "Delete"
+
+
+ACTION_FIRST_ROW_TEXT = "<<"
+ACTION_FIRST_ROW_ICON = "First"
+ACTION_FIRST_ROW_HOTKEY = "Ctrl+Up"
+
+ACTION_PREVIOUS_ROW_TEXT = "🡸"
+ACTION_PREVIOUS_ROW_ICON = "Previous"
+
+ACTION_REFRESH_TEXT = "↺"
+ACTION_REFRESH_ICON = "REFRESH"
+ACTION_REFRESH_HOTKEY = "F5"
+
+ACTION_NEXT_ROW_TEXT = "🡺"
+ACTION_NEXT_ROW_ICON = "Next"
+
+ACTION_LAST_ROW_TEXT = ">>"
+ACTION_LAST_ROW_ICON = "Last"
+ACTION_LAST_ROW_HOTKEY = "Ctrl+Down"
+
+ACTION_CLOSE_TEXT = "Close"
+ACTION_CLOSE_ICON = "Close"
+
+CRUD_BUTTON_EDIT_TEXT = "Edit"
+CRUD_BUTTON_EDIT_MESSAGE = "enable editing"
+
+CRUD_BUTTON_OK_TEXT = "OK"
+CRUD_BUTTON_OK_MESSAGE = "save data"
+
+CRUD_BUTTON_CANCEL_TEXT = "Cancel"
+CRUD_BUTTON_CANCEL_MESSAGE = "Do not save data"
+
 
 class ZzHeap:
     pass
@@ -41,7 +95,6 @@ class ZzActions(list):
         tag="",
         child_form=None,
         child_where="",
-        parent_column="",
     ):
         """ "/view", "/crud" """
         for x in range(len(self)):
@@ -58,7 +111,6 @@ class ZzActions(list):
         action["tag"] = tag
         action["child_form"] = child_form
         action["child_where"] = child_where
-        action["parent_column"] = parent_column
         self.append(action)
         return True
 
@@ -90,6 +142,15 @@ class ZzControls(list):
     def __init__(self):
         # self.controls = []
         self.c = self._C(self)
+
+    # def __getitem__(self, list_index):
+    #     if isinstance(list_index, str):  # not index but name - return index for name
+    #         for x in range(len(self)):
+    #             if list_index == self[x].get("name"):
+    #                 return x
+    #         return None
+    #     else:
+    #         return super().__getitem__(list_index)
 
     def add_control(
         self,

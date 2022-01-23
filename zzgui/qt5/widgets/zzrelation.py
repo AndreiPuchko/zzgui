@@ -73,14 +73,6 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
         return self.set_related()
 
     def set_related(self):
-        # if self.to_form:
-        #     rel = self.to_form.model.get_related(
-        #         self.meta["to_table"],
-        #         f"{self.meta['to_column']} = '{self.get.text()}'",
-        #         self.meta["related"],
-        #     )
-        # else:
-        #     rel = "...relation not defined..."
         rel = self.meta["form"].model._get_related(
             self.get.text(), self.meta, do_not_show_value=1, reset_cache=1
         )

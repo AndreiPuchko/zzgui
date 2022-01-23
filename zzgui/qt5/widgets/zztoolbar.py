@@ -70,14 +70,17 @@ class zztoolbar(QFrame, ZzWidget):
                         action["engineAction"].setStatusTip(action.get("mess", ""))
                         if worker:
                             action["engineAction"].triggered.connect(worker)
-                        elif (
-                            action.get("child_where") or action.get("parent_column")
-                        ) and action.get("child_form"):
+                        elif action.get("child_where") and action.get("child_form"):
+
                             def getChildForm(action):
                                 def rd():
-                                    self.meta['form'].show_child_form(action)
+                                    self.meta["form"].show_child_form(action)
+
                                 return rd
-                            action["engineAction"].triggered.connect(getChildForm(action))
+
+                            action["engineAction"].triggered.connect(
+                                getChildForm(action)
+                            )
 
                         action["engineAction"].setShortcut(
                             action["hotkey"]

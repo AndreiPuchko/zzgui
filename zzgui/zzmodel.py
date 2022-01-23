@@ -8,12 +8,12 @@ if __name__ == "__main__":
     demo()
 
 import csv
-
-
-from zzgui.zzutils import num
-
 import datetime
 import re
+
+
+import zzgui.zzapp as zzapp
+from zzgui.zzutils import num
 from zzdb.cursor import ZzCursor
 from zzdb.db import ZzDb
 
@@ -77,7 +77,6 @@ class ZzModel:
 
     def refresh(self):
         self.relation_cache = {}
-
 
     def reset(self):
         self.records = []
@@ -201,7 +200,7 @@ class ZzModel:
             elif meta["datatype"] == "date":
                 try:
                     value = datetime.datetime.strptime(value, "%Y-%m-%d").strftime(
-                        "%d.%m.%Y"
+                        zzapp.DATA_FORMAT_STRING
                     )
                 except Exception:
                     value = ""
@@ -322,9 +321,28 @@ class ZzCursorModel(ZzModel):
         super().refresh()
         self.cursor.refresh()
 
+    def delete(self, current_row=0):
+        self.set_data_error()
+        record = self.get_record(current_row)
+        if self.cursor.delete(record):
+            self.refresh()
+            return True
+        else:
+            self.set_data_error(self.cursor.last_sql_error())
+            return False
+
     def update(self, record: dict, current_row=0):
         self.set_data_error()
         if self.cursor.update(record):
+            self.refresh()
+            return True
+        else:
+            self.set_data_error(self.cursor.last_sql_error())
+            return False
+
+    def insert(self, record: dict, current_row=0):
+        self.set_data_error()
+        if self.cursor.insert(record):
             self.refresh()
             return True
         else:

@@ -20,7 +20,6 @@ from random import randint
 class dataSchema(ZzDbSchema):
     def __init__(self):
         super().__init__()
-
         self.add_customers()
         self.add_products()
         self.add_orders()
@@ -85,7 +84,7 @@ class dataSchema(ZzDbSchema):
         self.add(table="customers", column="name", datatype="varchar", datalen=100)
 
 
-def data_load(db: ZzDb):
+def load_mock_data(db: ZzDb):
     customer_qt = 10
     product_qt = 10
     order_qt = 100
@@ -130,17 +129,17 @@ class databaseApp(ZzApp):
     def create_database(self):
         self.db = ZzDb("sqlite3", database_name=":memory:")
         self.db.set_schema(dataSchema())
-        data_load(self.db)
+        load_mock_data(self.db)
 
     def on_init(self):
+        self.create_database()
+
         self.add_menu("File|About", lambda: zzMess("First application!"))
         self.add_menu("File|-")
         self.add_menu("File|Exit", self.close, toolbar=1)
         self.add_menu("Catalogs|Customers", self.customers, toolbar=1)
         self.add_menu("Catalogs|Products", self.products, toolbar=1)
         self.add_menu("Documents|Orders", self.orders, toolbar=1)
-        self.create_database()
-
         return super().on_init()
 
     def form_customers(self):
@@ -148,9 +147,8 @@ class databaseApp(ZzApp):
         form.add_control(
             name="customer_id",
             label="Customer Id",
-            alignment=9,
             datatype="int",
-            datalen=10,
+            pk="*",
         )
         form.add_control("name", "Name", datatype="char", datalen=100)
 
@@ -161,8 +159,7 @@ class databaseApp(ZzApp):
         form.add_action(
             "Orders",
             child_form=self.form_orders,
-            child_where="customer_id",
-            parent_column="customer_id",
+            child_where="customer_id={customer_id}",
             hotkey="F2",
         )
         return form
@@ -172,10 +169,17 @@ class databaseApp(ZzApp):
 
     def form_products(self):
         form = ZzForm("Products")
-        form.add_control("product_id", "Product Id")
-        form.add_control("name", "Name", datalen=20)
+        form.add_control("product_id", "Product Id", datatype="int", pk="*")
+        form.add_control("name", "Name", datalen=100, datatype="char")
         form.set_model(ZzCursorModel(self.db.table(table_name="products")))
         form.actions.add_action("/crud")
+        form.add_action(
+            text="Orders",
+            worker=None,
+            child_form=self.form_orders,
+            child_where="""order_id in (select order_id from order_lines  where product_id={product_id})""",
+            hotkey="F2",
+        )
         return form
 
     def products(self):
@@ -183,11 +187,12 @@ class databaseApp(ZzApp):
 
     def form_orders(self):
         form = ZzForm("Orders")
-        form.add_control("order_id", "Order Id", alignment=9, datatype="int")
-        form.add_control("date", "Date")
+        form.add_control("order_id", "Order Id", datatype="int", pk="*")
+        form.add_control("date", "Date", datatype="date")
         form.add_control(
             name="customer_id",
             label="Customer",
+            datatype="int",
             control="line",
             to_table="customers",
             to_column="customer_id",
@@ -199,8 +204,7 @@ class databaseApp(ZzApp):
         form.add_action(
             "Lines",
             child_form=self.form_order_lines,
-            child_where="order_id",
-            parent_column="order_id",
+            child_where="order_id={order_id}",
             hotkey="F2",
         )
         form.set_model(ZzCursorModel(self.db.table("orders")))
@@ -211,13 +215,10 @@ class databaseApp(ZzApp):
 
     def form_order_lines(self):
         form = ZzForm("Order lines")
+        form.add_control("id", "line id", datatype="int", pk="*", noform=1, nogrid=1)
         form.add_control(
-            "id", "line id", alignment=9, datatype="int", pk="*", noform=1, nogrid=1
-        )
-        form.add_control(
-            "order_id",
-            "Order Id",
-            alignment=9,
+            name="order_id",
+            label="Order Id",
             datatype="int",
             to_table="orders",
             to_column="order_id",
@@ -239,13 +240,11 @@ class databaseApp(ZzApp):
 
         form.add_action("/crud")
         form.set_model(ZzCursorModel(self.db.table("order_lines")))
-        for x in form.get_table_schema():
-            print(x)
         return form
 
 
 def demo():
-    app = databaseApp("zzgui - the database app")
+    app = databaseApp("zzgui - the database (zzdb) app")
     app.run()
 
 

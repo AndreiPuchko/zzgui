@@ -7,7 +7,6 @@ if __name__ == "__main__":
 
     demo()
 
-# from zzgui import zzmodel
 import zzgui.zzapp as zzapp
 from zzgui.zzmodel import ZzModel
 from zzgui.zzutils import int_
@@ -29,7 +28,7 @@ class ZzForm:
         self.controls = zzapp.ZzControls()
         self.system_controls = zzapp.ZzControls()
         self.model = None
-        self.model_record = {}
+        self._model_record = {}  # contains the data of the currently edited record
 
         # Shortcuts to elements
         self.s = ZzFormData(self)  # widgets data by name
@@ -133,27 +132,38 @@ class ZzForm:
         tmp_actions = zzapp.ZzActions()
         if is_view or is_crud:
             tmp_actions.add_action(
-                text="View",
+                text=zzapp.ACTION_VIEW_TEXT,
                 worker=lambda: self.show_crud_form(VIEW),
-                hotkey="F12",
+                icon=zzapp.ACTION_VIEW_ICON,
+                hotkey=zzapp.ACTION_VIEW_HOTKEY,
                 tag="view",
             )
         if is_crud and self.model.readonly:
             tmp_actions.add_action(
-                text="New", worker=lambda: self.show_crud_form(NEW), hotkey="Ins"
+                text=zzapp.ACTION_NEW_TEXT,
+                worker=lambda: self.show_crud_form(NEW),
+                icon=zzapp.ACTION_NEW_ICON,
+                hotkey=zzapp.ACTION_NEW_HOTKEY,
             )
             tmp_actions.add_action(
-                text="Copy", worker=lambda: self.show_crud_form(COPY), hotkey="Ctrl+Ins"
+                text=zzapp.ACTION_COPY_TEXT,
+                worker=lambda: self.show_crud_form(COPY),
+                icon=zzapp.ACTION_COPY_ICON,
+                hotkey=zzapp.ACTION_COPY_HOTKEY,
             )
             tmp_actions.add_action(
                 text="Edit",
                 worker=lambda: self.show_crud_form(EDIT),
-                hotkey="Spacebar",
+                icon=zzapp.ACTION_EDIT_ICON,
+                hotkey=zzapp.ACTION_EDIT_HOTKEY,
                 tag="edit",
             )
             tmp_actions.add_action(text="-")
             tmp_actions.add_action(
-                text="Remove", worker=self.crud_delete, hotkey="Delete"
+                text=zzapp.ACTION_REMOVE_TEXT,
+                worker=self.crud_delete,
+                icon=zzapp.ACTION_REMOVE_ICON,
+                hotkey=zzapp.ACTION_REMOVE_HOTKEY,
             )
             tmp_actions.add_action(text="-")
 
@@ -235,7 +245,10 @@ class ZzForm:
                     "table": table_name,
                     "column": x["name"],
                     "datatype": x["datatype"],
-                    "datalen": x["datatype"],
+                    "datalen": x["datalen"],
+                    "to_table": x["to_table"],
+                    "to_column": x["to_column"],
+                    "related": x["related"],
                     "pk": x["pk"],
                 }
                 rez.append(column)
@@ -299,9 +312,9 @@ class ZzForm:
         if self.a.tag("edit"):
             buttons.add_control(
                 name="_edit_button",
-                label="edit",
+                label=zzapp.CRUD_BUTTON_EDIT_TEXT,
                 control="button",
-                mess="enable editing",
+                mess=zzapp.CRUD_BUTTON_EDIT_MESSAGE,
                 valid=self.crud_view_to_edit,
                 disabled=True if mode is not VIEW else False,
             )
@@ -309,9 +322,9 @@ class ZzForm:
 
             buttons.add_control(
                 name="_ok_button",
-                label="Ok",
+                label=zzapp.CRUD_BUTTON_OK_TEXT,
                 control="button",
-                mess="save data",
+                mess=zzapp.CRUD_BUTTON_OK_MESSAGE,
                 disabled=True if mode is VIEW else False,
                 hotkey="PgDown",
                 valid=self.crud_save,
@@ -319,9 +332,9 @@ class ZzForm:
 
         buttons.add_control(
             name="_cancel_button",
-            label="Cancel",
+            label=zzapp.CRUD_BUTTON_CANCEL_TEXT,
             control="button",
-            mess="Do not save data",
+            mess=zzapp.CRUD_BUTTON_CANCEL_MESSAGE,
             valid=self.crud_close,
         )
         self.system_controls = buttons
@@ -342,9 +355,11 @@ class ZzForm:
         self.set_crud_form_data()
 
     def crud_delete(self):
-        if self._zzdialogs.zzAskYN("a u sure?"):
-            self.model.delete(self.current_row)
-            self.set_grid_index(self.current_row)
+        if self._zzdialogs.zzAskYN(zzapp.ASK_REMOVE_RECORD_TEXT):
+            if self.model.delete(self.current_row) is not True:
+                self._zzdialogs.zzMess(self.model.get_data_error())
+            else:
+                self.set_grid_index(self.current_row)
 
     def crud_save(self):
         crud_data = self.get_crud_form_data()
@@ -362,7 +377,7 @@ class ZzForm:
 
     def get_crud_form_data(self):
         crud_data = {}
-        crud_data.update(self.model_record)
+        crud_data.update(self._model_record)
         for x in self.crud_form.widgets:
             if x.startswith("/"):
                 continue
@@ -388,20 +403,37 @@ class ZzForm:
 
     def set_crud_form_data(self, mode=EDIT):
         """set current record's value in crud_form"""
-        self.model_record = self.model.get_record(self.current_row)
-        for x in self.model_record:
+        where_string = self.model.get_where()
+        if where_string:
+            where_dict = {
+                x.split("=")[0].strip(): x.split("=")[1].strip()
+                for x in self.model.get_where().split(" and ")
+            }
+        else:
+            where_dict = {}
+
+        self._model_record = self.model.get_record(self.current_row)
+        for x in self._model_record:
             if x not in self.crud_form.widgets:
                 continue
             if mode == NEW:
-                self.crud_form.widgets[x].set_text("")
+                if x not in where_dict:
+                    self.crud_form.widgets[x].set_text("")
+                else:  # set where fields
+                    if where_dict[x][0] == where_dict[x][-1] and where_dict[x][0] in (
+                        '"',
+                        "'",
+                    ):
+                        where_dict[x] = where_dict[x][1:-1]  # cut quotes
+                    self.crud_form.widgets[x].set_text(where_dict[x])
+                    self.crud_form.widgets[x].set_disabled()
             else:
-                self.crud_form.widgets[x].set_text(self.model_record[x])
+                self.crud_form.widgets[x].set_text(self._model_record[x])
 
     def grid_index_changed(self, row, column):
         refresh_children_forms = row != self.current_row and row >= 0
         self.current_row = row
         self.current_column = column
-
         if refresh_children_forms:
             self.refresh_children()
 
@@ -412,18 +444,16 @@ class ZzForm:
             action["child_form_object"].model.refresh()
             action["child_form_object"].set_grid_index()
 
-    def get_where_for_child(self, action):
-        child_where = action["child_where"]
-        parent_column_value = self.r.__getattr__(action["parent_column"])
-        where_string = f"{child_where}='{parent_column_value}'"
-        return where_string
-
     def show_child_form(self, action):
         child_form = action.get("child_form")()
         child_form.model.set_where(self.get_where_for_child(action))
         child_form.model.refresh()
         child_form.show_mdi_modal_grid()
         self.refresh()
+
+    def get_where_for_child(self, action):
+        current_record = self.model.get_record(self.current_row)
+        return action["child_where"].format(**current_record)
 
     def grid_header_clicked(self, column):
         if self.model is not None:
@@ -512,7 +542,6 @@ class ZzForm:
         tag="",
         child_form=None,
         child_where="",
-        parent_column="",
     ):
         """
         child_form - form class or function(fabric) that returns form object
@@ -544,17 +573,40 @@ class ZzFormWindow:
         actions = zzapp.ZzActions()
         actions.add_action(text="-")
         actions.add_action(
-            text="<<", worker=lambda: self.move_grid_index(7), hotkey="Ctrl+Up"
+            text=zzapp.ACTION_FIRST_ROW_TEXT,
+            worker=lambda: self.move_grid_index(7),
+            icon=zzapp.ACTION_FIRST_ROW_ICON,
+            hotkey=zzapp.ACTION_FIRST_ROW_HOTKEY,
         )
-        actions.add_action(text="🡸", worker=lambda: self.move_grid_index(8))
-        actions.add_action(text="↺", worker=lambda: self.zz_form.refresh(), hotkey="F5")
-        actions.add_action(text="🡺", worker=lambda: self.move_grid_index(2))
         actions.add_action(
-            text=">>", worker=lambda: self.move_grid_index(1), hotkey="Ctrl+Down"
+            text=zzapp.ACTION_PREVIOUS_ROW_TEXT,
+            worker=lambda: self.move_grid_index(8),
+            icon=zzapp.ACTION_PREVIOUS_ROW_ICON,
+        )
+        actions.add_action(
+            text=zzapp.ACTION_REFRESH_TEXT,
+            worker=lambda: self.zz_form.refresh(),
+            icon=zzapp.ACTION_REFRESH_ICON,
+            hotkey=zzapp.ACTION_REFRESH_HOTKEY,
+        )
+        actions.add_action(
+            text=zzapp.ACTION_NEXT_ROW_TEXT,
+            worker=lambda: self.move_grid_index(2),
+            icon=zzapp.ACTION_NEXT_ROW_ICON,
+        )
+        actions.add_action(
+            text=zzapp.ACTION_LAST_ROW_TEXT,
+            worker=lambda: self.move_grid_index(1),
+            icon=zzapp.ACTION_LAST_ROW_ICON,
+            hotkey=zzapp.ACTION_LAST_ROW_HOTKEY,
         )
         if not self.zz_form.i_am_child:
             actions.add_action(text="-")
-            actions.add_action(text="Close", worker=self.close)
+            actions.add_action(
+                text=zzapp.ACTION_CLOSE_TEXT,
+                worker=self.close,
+                icon=zzapp.ACTION_CLOSE_ICON,
+            )
         return actions
 
     def move_grid_index(self, direction=None):
@@ -872,7 +924,7 @@ class ZzFormData:
             if widget:
                 widget.set_text(value)
             else:  # no widget - put data to model's record
-                self.zz_form.model_record[name] = value
+                self.zz_form._model_record[name] = value
         else:
             self.__dict__[name] = value
 
@@ -887,7 +939,7 @@ class ZzFormData:
         if widget is not None:
             return widget.get_text()
         else:  # no widget here? get data from model
-            return self.zz_form.model_record.get(name, None)
+            return self.zz_form._model_record.get(name, None)
 
 
 class ZzFormWidget:
@@ -905,6 +957,7 @@ class ZzFormWidget:
                 widgets = self.zz_form.last_closed_form.widgets
         else:
             widgets = self.zz_form.form_stack[-1].widgets
+        print(widgets)
         if attrname.startswith("_") and attrname.endswith("_"):
             pos = int_(attrname.replace("_", ""))
             if pos < len(widgets):
