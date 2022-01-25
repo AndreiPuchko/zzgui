@@ -101,58 +101,10 @@ class ZzModel:
             self.zz_form.model.add_column(meta)
 
     def add_column(self, meta):
-        if meta["datatype"].lower() == "date":
-            meta["control"] = "date"
-            meta["datalen"] = 16
-
         if not meta.get("control"):
             meta["control"] = "line"
-        if num(meta.get("datalen", 0)) == 0 and meta["control"] == "line":
-            if meta["datatype"].lower() == "int":
-                meta["datalen"] = 9
-            elif meta["datatype"].lower() == "bigint":
-                meta["datalen"] = 17
-            # else:
-            #     meta["datalen"] = 10
 
-        if re.match(
-            ".*int.*|.*dec.*|.*num.*", meta["datatype"], re.RegexFlag.IGNORECASE
-        ):
-            meta["num"] = True
-            if meta.get("pic", "") == "":
-                meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
-                    ""
-                    if num(meta["datadec"]) == 0
-                    else "." + "9" * int(num(meta["datadec"]))
-                )
-            if num(meta.get("alignment", 0)) == 0:
-                meta["alignment"] = 9
-
-        if (
-            re.match(".*text.*", meta["datatype"], re.RegexFlag.IGNORECASE)
-            and meta["control"] != "script"
-        ):
-            meta["datalen"] = 0
-            meta["control"] = "edit"
-
-        if "***" == "".join(
-            ["*" if meta.get(x) else "" for x in ("to_table", "to_column", "related")]
-        ):
-            meta["relation"] = True
-
-        if re.match(
-            ".*int.*|.*dec.*|.*num.*", meta["datatype"], re.RegexFlag.IGNORECASE
-        ):
-            meta["num"] = True
-            if meta.get("pic", "") == "":
-                meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
-                    ""
-                    if num(meta["datadec"]) == 0
-                    else "." + "9" * int(num(meta["datadec"]))
-                )
-            if meta.get("alignment", -1) == -1:
-                meta["alignment"] = 9
-
+        meta = zzapp.ZzControls.validate(meta)
         self.columns.append(meta["name"])
         self.headers.append(meta["label" if meta.get("saygrid") else "label"])
         self.alignments.append(meta.get("alignment", "7"))

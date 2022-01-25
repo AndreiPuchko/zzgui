@@ -14,11 +14,13 @@ cd zzgui
 pip3 install poetry
 poetry shell
 poetry install
-python3 demo/demo.py
-python3 demo/demo_01.py
-python3 demo/demo_02.py
-python3 demo/demo_03.py
-python3 demo/demo_04.py
+python3 demo/demo_01.py     # basic: main menu, form & widgets
+python3 demo/demo_02.py     # forms and forms in form
+python3 demo/demo_03.py     # grid form (CSV data), automatic creation of forms based on data
+python3 demo/demo_04.py     # progressbar, data loading, sorting and filtering
+python3 demo/demo_05.py     # nonmodal form
+python3 demo/demo_07.py     # database app (4 tables, mock data loading) - requires a zzdb package
+python3 demo/demo_08.py     # database app, requires a zzdb package, autoschema
 ```
 
 # demo/demo_03.py screenshot

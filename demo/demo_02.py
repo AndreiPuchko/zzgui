@@ -15,7 +15,9 @@ from zzgui.zzutils import num
 
 class DemoApp(ZzApp):
     def on_start(self):
-        self.show_complex_form()
+        # self.show_complex_form()
+        self.show_form1()
+        # self.show_form2()
 
     def on_init(self):
         self.add_menu("File|First", self.show_form1, toolbar="*")
@@ -35,8 +37,17 @@ class DemoApp(ZzApp):
 
     def describe_form1(self):
         form = ZzForm("First form")
-        form.add_control("/")
-        form.add_control("uid", "Uid", control="line", data=1)
+        # form.add_control("/")
+        form.add_control(
+            "uid",
+            "Uid",
+            control="line",
+            data=12,
+            datatype="num",
+            datalen=15,
+            datadec=2,
+            pic="F"
+        )
         if form.add_control("/h"):
 
             def add_id():
@@ -50,8 +61,8 @@ class DemoApp(ZzApp):
             form.add_control("/")
 
         form.add_control("/s")
-        form.add_control("name", "Name", control="line", data="First Name")
-        form.add_control("birthdate", "", control="date", data="1990-05-01")
+        form.add_control("name", "Name", control="line", data="First Name", datalen=100)
+        form.add_control("birthdate", "", control="date", data="2006-05-01")
         form.add_control("/")
         form.add_control("/h")
         form.add_control("/s")

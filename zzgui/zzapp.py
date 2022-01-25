@@ -9,10 +9,13 @@ if __name__ == "__main__":
     demo()
 
 
-from configparser import ConfigParser
 import zzgui.zzapp as zzapp
+from configparser import ConfigParser
 from zzgui.zzwindow import ZzWindow
+from zzgui.zzutils import num
+
 import re
+
 
 zz_app = None
 
@@ -170,6 +173,7 @@ class ZzControls(list):
         to_column="",
         to_form=None,
         related="",
+        mask="",
         valid=None,
         readonly=None,
         disabled=None,
@@ -184,10 +188,69 @@ class ZzControls(list):
         eat_enter=None,
         hotkey="",
     ):
-        d = locals().copy()
-        del d["self"]
-        self.append(d)
+        meta = locals().copy()
+        del meta["self"]
+        # meta = self.validate(meta)
+        self.append(meta)
         return True
+
+    @staticmethod
+    def validate(meta):
+        if meta.get("datatype", "").lower() == "date":
+            meta["control"] = "date"
+            meta["datalen"] = 16
+
+        if not meta.get("control"):
+            # meta["control"] = "line"
+            meta["control"] = ""
+
+        if num(meta.get("datalen", 0)) == 0 and meta["control"] == "line":
+            if meta.get("datatype", "").lower() == "int":
+                meta["datalen"] = 9
+            elif meta.get("datatype", "").lower() == "bigint":
+                meta["datalen"] = 17
+            else:
+                meta["datalen"] = 10
+
+        if re.match(
+            ".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE
+        ):
+            meta["num"] = True
+            if meta.get("pic", "") == "":
+                meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
+                    ""
+                    if num(meta["datadec"]) == 0
+                    else "." + "9" * int(num(meta["datadec"]))
+                )
+            if num(meta.get("alignment", 0)) == 0:
+                meta["alignment"] = 9
+
+        if (
+            re.match(".*text.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE)
+            and meta["control"] != "script"
+        ):
+            meta["datalen"] = 0
+            meta["control"] = "edit"
+
+        if "***" == "".join(
+            ["*" if meta.get(x) else "" for x in ("to_table", "to_column", "related")]
+        ):
+            meta["relation"] = True
+
+        if re.match(
+            ".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE
+        ):
+            meta["num"] = True
+            if meta.get("pic", "") == "":
+                meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
+                    ""
+                    if num(meta["datadec"]) == 0
+                    else "." + "9" * int(num(meta["datadec"]))
+                )
+            if meta.get("alignment", -1) == -1:
+                meta["alignment"] = 9
+
+        return meta
 
 
 class ZzSettings:

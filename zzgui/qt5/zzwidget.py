@@ -53,7 +53,8 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         self.setFocus()
 
     def set_maximum_width(self, width):
-        self.setMaximumWidth(QFontMetrics(self.font()).width("W") * width)
+        if self.meta.get("control", "") not in ("radio"):
+            self.setMaximumWidth(QFontMetrics(self.font()).width("W") * width)
 
     def set_maximum_len(self, length):
         if hasattr(self, "setMaxLength"):

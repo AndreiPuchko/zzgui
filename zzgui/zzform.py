@@ -507,6 +507,7 @@ class ZzForm:
         to_column="",
         to_form=None,
         related="",
+        mask="",
         valid=None,
         readonly=None,
         disabled=None,
@@ -685,6 +686,7 @@ class ZzFormWindow:
             meta["form"] = self.zz_form
             if meta.get("noform", ""):
                 continue
+            meta = zzapp.ZzControls.validate(meta)
             current_frame = frame_stack[-1]
             # do not add widget if it is not first tabpage on the form
             if not (meta.get("name", "") == ("/t") and self.tab_widget is not None):
