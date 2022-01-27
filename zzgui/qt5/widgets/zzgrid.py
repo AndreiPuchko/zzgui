@@ -1,3 +1,4 @@
+from email.charset import QP
 import sys
 
 if __name__ == "__main__":
@@ -12,27 +13,53 @@ if __name__ == "__main__":
 from PyQt5.QtWidgets import (
     QTableView,
     QStyledItemDelegate,
+    QItemDelegate,
     QAbstractItemView,
 )
-from PyQt5.QtGui import QPalette
-from PyQt5.QtCore import pyqtSignal, Qt, QAbstractTableModel, QVariant
+from PyQt5.QtGui import QPalette, QFont, QPainter, QPixmap
+
+from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, QRect, QPoint
+
+from PyQt5.QtWidgets import (
+    QStyle,
+    QStyleOptionViewItem,
+    QStyleOptionButton,
+    QApplication,
+    QCheckBox,
+)
 
 from zzgui.qt5.zzwindow import zz_align
-from zzgui.zzutils import num
-from zzgui.zzform import ZzForm
+from zzgui.zzutils import num, int_
 from zzgui.zzmodel import ZzModel
 
 
 class zzDelegate(QStyledItemDelegate):
-    # def displayText(self, value, locale):
-    #     return super().displayText(value, locale)
-
-    def paint(self, painter, option, index):
+    def paint(self, painter: QPainter, option, index):
         if self.parent().currentIndex().column() == index.column():
             color = option.palette.color(QPalette.AlternateBase).darker(900)
             color.setAlpha(color.alpha() / 10)
             painter.fillRect(option.rect, color)
-        super().paint(painter, option, index)
+        meta = self.parent().model().zz_model.meta[index.column()]
+        if meta.get("control") == "check":
+            if meta.get("num"):
+                checked = True if int_(index.data()) else False
+            else:
+                checked = True if index.data() else False
+            cb_option = QStyleOptionButton()
+            if checked:
+                cb_option.state |= QStyle.State_On
+            else:
+                cb_option.state |= QStyle.State_Off
+            checkBoxRect = QApplication.style().subElementRect(
+                QStyle.SE_CheckBoxIndicator, cb_option, None
+            )
+            cb_option.rect = option.rect
+            cb_option.rect.setX(cb_option.rect.x() + checkBoxRect.width() / 2)
+            if cb_option.rect.height() > checkBoxRect.height() * 2 + 3:
+                cb_option.rect.setHeight(checkBoxRect.height() * 2)
+            QApplication.style().drawControl(QStyle.CE_CheckBox, cb_option, painter)
+        else:
+            super().paint(painter, option, index)
 
 
 class zzgrid(QTableView):

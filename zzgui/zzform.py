@@ -371,7 +371,7 @@ class ZzForm:
             rez = self.model.insert(crud_data, self.current_row)
             self.move_grid_index(1)
         if rez is False:
-            print(self.model.get_data_error())
+            self._zzdialogs.zzMess(self.model.get_data_error())
         else:
             self.close()
 
@@ -830,7 +830,7 @@ class ZzFormWindow:
         try:
             return getattr(getattr(self._widgets_package, module_name), class_name)
         except Exception:
-            print(self._widgets_package, module_name, class_name)
+            # print(self._widgets_package, module_name, class_name)
             return getattr(getattr(self._widgets_package, "zzlabel"), "zzlabel")
 
     def show_form(self, modal="modal", no_build=False):
@@ -959,7 +959,7 @@ class ZzFormWidget:
                 widgets = self.zz_form.last_closed_form.widgets
         else:
             widgets = self.zz_form.form_stack[-1].widgets
-        print(widgets)
+        # print(widgets)
         if attrname.startswith("_") and attrname.endswith("_"):
             pos = int_(attrname.replace("_", ""))
             if pos < len(widgets):

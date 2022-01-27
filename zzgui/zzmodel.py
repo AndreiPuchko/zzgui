@@ -50,15 +50,15 @@ class ZzModel:
         self.lastdata_error_text = text
 
     def insert(self, record: dict, current_row=0):
-        print(record)
+        # print(record)
         return True
 
     def update(self, record: dict, current_row=0):
-        print(record)
+        # print(record)
         return True
 
     def delete(self, current_row=0):
-        print(current_row)
+        # print(current_row)
         return True
 
     def set_where(self, where_text=""):

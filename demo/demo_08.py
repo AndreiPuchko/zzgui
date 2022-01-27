@@ -15,10 +15,13 @@ from zzdb.db import ZzDb
 from zzdb.cursor import ZzCursor
 
 
-def data_load(db: ZzDb):
+def mock_data_load(db: ZzDb):
     customer_qt = 10
     for x in range(1, customer_qt):
-        db.insert("customers", {"customer_id": x, "name": f"Customer {x}"})
+        db.insert(
+            "customers",
+            {"customer_id": x, "name": f"Customer {x}", "vip": {0: "", 1: "*"}[x % 2]},
+        )
 
 
 class databaseApp(ZzApp):
@@ -42,7 +45,7 @@ class databaseApp(ZzApp):
             data_schema.add(x)
 
         self.db.set_schema(data_schema)
-        data_load(self.db)
+        mock_data_load(self.db)
 
         return super().on_init()
 
@@ -55,6 +58,9 @@ class databaseApp(ZzApp):
             pk="*",
         )
         form.add_control("name", "Name", datatype="char", datalen=100)
+        form.add_control(
+            "vip", "vip", datatype="char", datalen=1, control="check", pic="VIP client"
+        )
 
         cursor: ZzCursor = self.db.table(table_name="customers")
         model = ZzCursorModel(cursor)

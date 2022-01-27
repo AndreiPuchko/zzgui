@@ -8,16 +8,17 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QCheckBox
+from PyQt5.QtWidgets import QCheckBox, QSizePolicy
 
 from zzgui.qt5.zzwidget import ZzWidget
-
+from zzgui.zzutils import int_
 
 class zzcheck(QCheckBox, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
-        self.setText(meta["label"])
+        self.setText(meta.get("pic", meta.get("label", "")))
         self.managed_widgets = []
+        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.stateChanged.connect(self.state_changed)
 
     def state_changed(self):
@@ -36,10 +37,16 @@ class zzcheck(QCheckBox, ZzWidget):
             self.managed_widgets.pop(self.managed_widgets.index(widget))
 
     def set_text(self, text):
-        self.setChecked(True if text else False)
+        if self.meta.get("num"):
+            self.setChecked(True if int_(text) else False)
+        else:
+            self.setChecked(True if text else False)
 
     def get_text(self):
-        return "*" if self.isChecked() else False
+        if self.meta.get("num"):
+            return 1 if self.isChecked() else 0
+        else:
+            return "*" if self.isChecked() else ""
 
     def set_checked(self, mode=True):
         self.set_text(mode)
