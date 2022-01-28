@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
 import csv
 import datetime
-
+import re
 
 import zzgui.zzapp as zzapp
 from zzgui.zzutils import num
@@ -177,6 +177,30 @@ class ZzModel:
     def column_count(self):
         return len(self.columns)
 
+    def lookup(self, column, text):
+        """search for text in column, return list of [row, value]"""
+        text = text.upper()
+        raw_cond_list = ["+"] + re.split("([+-])", text)
+        cond_list = []
+        for cond in range(int(len(raw_cond_list) / 2)):
+            operator = raw_cond_list[cond * 2]
+            value = raw_cond_list[cond * 2 + 1]
+            if operator and value:
+                cond_list.append([operator, value])
+        rez = []
+        for x in range(self.row_count()):
+            cond_result = True
+            for cond in cond_list:
+                operator = cond[0]
+                value = cond[1]
+                if operator == "+" and value not in self.get_record(x)[self.columns[column]].upper():
+                    cond_result = False
+                elif operator == "-" and value in self.get_record(x)[self.columns[column]].upper():
+                    cond_result = False
+            if cond_result:
+                rez.append([x, self.get_record(x)[self.columns[column]]])
+        return rez
+
 
 class ZzCsvModel(ZzModel):
     def __init__(self, csv_file_object=None):
@@ -308,8 +332,7 @@ class ZzCursorModel(ZzModel):
         self.cursor.set_order(colname)
 
     def add_column(self, meta):
-        """ update metadata from db
-        """
+        """update metadata from db"""
         db: ZzDb = self.cursor.zz_db
         db_meta = db.db_schema.get_schema_table_attr(self.cursor.table_name, meta["name"])
         meta["pk"] = db_meta.get("pk", "")

@@ -179,7 +179,7 @@ class ZzForm:
             self.add_control("/f", "Frame with form layout")
             # Populate it with the columns from csv
             for x in self.model.records[0]:
-                self.add_control(x, x, control="line")
+                self.add_control(x, x, control="line", datalen=100)
             # Assign data source
             self.model.readonly = True
             self.actions.add_action(text="/view")
@@ -195,6 +195,7 @@ class ZzForm:
                             label=x["label"],
                             control=x["control"],
                             check=False if x["name"].startswith("/") else True,
+                            datalen=x["datalen"] 
                         )
 
                     def before_form_show():
@@ -404,7 +405,7 @@ class ZzForm:
     def set_crud_form_data(self, mode=EDIT):
         """set current record's value in crud_form"""
         where_string = self.model.get_where()
-        if where_string:
+        if "=" in where_string:
             where_dict = {
                 x.split("=")[0].strip(): x.split("=")[1].strip()
                 for x in self.model.get_where().split(" and ")
@@ -871,9 +872,6 @@ class ZzFormWindow:
                 )
                 col_settings[x] = data
             grid.set_column_settings(col_settings)
-        # looking fo griid in the subfoms
-        # for x in self.zz_form.children_forms:
-        #     x["child_form_object"].grid_form.restore_grid_columns()
         for x in self.get_sub_form_list():
             x.restore_grid_columns()
 

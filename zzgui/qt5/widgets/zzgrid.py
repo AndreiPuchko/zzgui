@@ -17,15 +17,18 @@ from PyQt5.QtWidgets import (
     QStyle,
     QStyleOptionButton,
     QApplication,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt5.QtGui import QPalette, QPainter
+from PyQt5.QtGui import QPalette, QPainter, QKeyEvent
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant
-
+from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, QTimer
 
 from zzgui.qt5.zzwindow import zz_align
 from zzgui.zzutils import int_
 from zzgui.zzmodel import ZzModel
+from zzgui.qt5.widgets.zzline import zzline
+from zzgui.qt5.widgets.zzlist import zzlist
 
 
 class zzDelegate(QStyledItemDelegate):
@@ -51,9 +54,7 @@ class zzDelegate(QStyledItemDelegate):
             cb_option.state |= QStyle.State_On
         else:
             cb_option.state |= QStyle.State_Off
-        checkBoxRect = QApplication.style().subElementRect(
-            QStyle.SE_CheckBoxIndicator, cb_option, None
-        )
+        checkBoxRect = QApplication.style().subElementRect(QStyle.SE_CheckBoxIndicator, cb_option, None)
         cb_option.rect = option.rect
         cb_option.rect.setX(cb_option.rect.x() + checkBoxRect.width() / 2)
         if cb_option.rect.height() > checkBoxRect.height() * 2 + 3:
@@ -104,7 +105,10 @@ class zzgrid(QTableView):
     def __init__(self, meta):
         super().__init__()
         self.meta = meta
+
         self.zz_form = self.meta.get("form")
+        self.zz_model = self.zz_form.model
+
         self.setModel(self.ZzTableModel(self.zz_form.model))
         self.setItemDelegate(zzDelegate(self))
         self.setTabKeyNavigation(False)
@@ -122,9 +126,7 @@ class zzgrid(QTableView):
         # self.currentCellChangedSignal.emit(current.row(), current.column())
         super().currentChanged(current, previous)
         self.model().dataChanged.emit(current, previous)
-        self.zz_form.grid_index_changed(
-            self.currentIndex().row(), self.currentIndex().column()
-        )
+        self.zz_form.grid_index_changed(self.currentIndex().row(), self.currentIndex().column())
 
     def current_index(self):
         return self.currentIndex().row(), self.currentIndex().column()
@@ -138,16 +140,20 @@ class zzgrid(QTableView):
     def column_count(self):
         return self.model().columnCount()
 
-    def set_index(self, row, col):
+    def set_index(self, row, column=None):
         if row < 0:
             row = 0
         elif row > self.row_count() - 1:
             row = self.row_count() - 1
-        if col < 0:
-            col = 0
-        elif col > self.column_count() - 1:
-            col = self.column_count() - 1
-        self.setCurrentIndex(self.model().index(row, col))
+
+        if column is None:
+            column = self.currentIndex().column()
+        elif column < 0:
+            column = 0
+        elif column > self.column_count() - 1:
+            column = self.column_count() - 1
+
+        self.setCurrentIndex(self.model().index(row, column))
 
     def keyPressEvent(self, event):
         event.accept()
@@ -157,16 +163,23 @@ class zzgrid(QTableView):
         if (
             event.text()
             and event.key() not in (Qt.Key_Escape, Qt.Key_Enter, Qt.Key_Return)
-            and self.model().rowCount() >= 0
+            and self.model().rowCount() >= 1
         ):
-            # lpb = zzGridLookUpBox(self, event.text())
-            # lpb.show()
-            pass
-            # col = self.grid.currentIndex().column()
-            # colName = self.model().columns[col].upper()
-
+            lookup_widget = zzlookup(self, event.text())
+            self.set_lookup_size_pos(lookup_widget)
+            lookup_widget.show(self.currentIndex().column())
         else:
             super().keyPressEvent(event)
+
+    def set_lookup_size_pos(self, lookup_widget):
+        """move lookup widget"""
+        rect = self.visualRect(self.currentIndex())
+        rect.moveTop(self.horizontalHeader().height() + 2)
+        rect.moveLeft(self.verticalHeader().width() + rect.x() + 2)
+        pos = rect.topLeft()
+        pos = self.mapToGlobal(pos)
+        lookup_widget.setFixedWidth(self.width() - rect.x())
+        lookup_widget.move(pos)
 
     def get_columns_headers(self):
         rez = {}
@@ -195,3 +208,64 @@ class zzgrid(QTableView):
             self.setColumnWidth(headers.get(x), column_width)
             old_visual = self.horizontalHeader().visualIndex(int_(headers[x]))
             self.horizontalHeader().moveSection(old_visual, column_pos)
+        self.set_index(0, self.horizontalHeader().logicalIndex(0))
+
+
+class zzlookup(QWidget):
+    def __init__(self, zz_grid, text):
+        super().__init__(zz_grid, Qt.Popup)
+        self.zz_grid = zz_grid
+        self.zz_model = zz_grid.zz_model
+        self.setLayout(QVBoxLayout())
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.lookup_edit = zzline({})
+        self.lookup_list = zzlist({})
+        self.layout().addWidget(self.lookup_edit)
+        self.layout().addWidget(self.lookup_list)
+        self.lookup_edit.set_text("" if text == "*" else text)
+        self.lookup_edit.setFocus()
+
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.setInterval(500)
+        self.timer.timeout.connect(self.lookup_search)
+
+        self.lookup_edit.textChanged.connect(self.lookup_text_changed)
+        self.lookup_edit.returnPressed.connect(self.lookup_edit_return_predssed)
+
+        self.lookup_list.itemActivated.connect(self.lookup_list_selected)
+
+    def lookup_list_selected(self):
+        self.zz_grid.set_index(self.found_rows[self.lookup_list.currentRow()][0])
+        self.close()
+
+    def lookup_search(self):
+        self.lookup_list.clear()
+        self.found_rows = self.zz_model.lookup(self.zz_model_column, self.lookup_edit.get_text())
+        for x in self.found_rows:
+            self.lookup_list.addItem(f"{x[1]}")
+
+    def lookup_edit_return_predssed(self):
+        self.timer.stop()
+        self.timer.timeout.emit()
+        self.lookup_list.setFocus()
+
+    def lookup_text_changed(self):
+        if len(self.lookup_edit.get_text()) > 1:
+            self.timer.start()
+
+    def show(self, column):
+        self.zz_model_column = column
+        return super().show()
+
+    def keyPressEvent(self, event:QKeyEvent):
+        if event.key() == Qt.Key_Down and self.lookup_edit.hasFocus():
+            event.accept()
+            self.lookup_list.setCurrentRow(0)
+            self.lookup_list.setFocus()
+        elif event.key() == Qt.Key_Up and self.lookup_list.hasFocus() and self.lookup_list.currentRow() == 0:
+            self.lookup_edit.setFocus()
+            event.accept()
+        else:
+            return super().keyPressEvent(event)
