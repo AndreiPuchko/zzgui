@@ -9,7 +9,6 @@ if __name__ == "__main__":
 
 import csv
 import datetime
-import re
 
 
 import zzgui.zzapp as zzapp
@@ -125,9 +124,7 @@ class ZzModel:
         if not reset_cache and key in self.relation_cache:
             related = self.relation_cache[key]
         else:
-            related = self.get_related(
-                meta["to_table"], f"{meta['to_column']}='{value}'", meta["related"]
-            )
+            related = self.get_related(meta["to_table"], f"{meta['to_column']}='{value}'", meta["related"])
             self.relation_cache[key] = related
         if related is None:
             related = ""
@@ -146,22 +143,22 @@ class ZzModel:
             meta = self.meta[col]
             if meta.get("relation"):
                 value = self._get_related(value, meta)
-            elif "radio" in meta["control"]:
-                if meta.get("num"):
-                    value = meta.get("pic").split(";")[int(num(value)) - 1]
+            elif self.is_strign_for_num(meta):
+                value = meta.get("pic").split(";")[int(num(value)) - 1]
             elif meta["datatype"] == "date":
                 try:
-                    value = datetime.datetime.strptime(value, "%Y-%m-%d").strftime(
-                        zzapp.DATA_FORMAT_STRING
-                    )
+                    value = datetime.datetime.strptime(value, "%Y-%m-%d").strftime(zzapp.DATA_FORMAT_STRING)
                 except Exception:
                     value = ""
             return value
 
+    def is_strign_for_num(self, meta):
+        return meta.get("num") and ("radio" in meta["control"] or meta["control"] in ("list", "combo"))
+
     def alignment(self, col):
         if self.meta[col].get("relation"):
             return 7
-        elif "radio" in self.meta[col]["control"] and self.meta[col].get("num"):
+        elif self.is_strign_for_num(self.meta[col]):
             return 7
         return self.alignments[col]
 
@@ -311,10 +308,10 @@ class ZzCursorModel(ZzModel):
         self.cursor.set_order(colname)
 
     def add_column(self, meta):
+        """ update metadata from db
+        """
         db: ZzDb = self.cursor.zz_db
-        db_meta = db.db_schema.get_schema_table_attr(
-            self.cursor.table_name, meta["name"]
-        )
+        db_meta = db.db_schema.get_schema_table_attr(self.cursor.table_name, meta["name"])
         meta["pk"] = db_meta.get("pk", "")
         meta["datatype"] = db_meta.get("datatype", meta["datatype"])
         if num(meta["datalen"]) < num(db_meta.get("datalen", 10)):

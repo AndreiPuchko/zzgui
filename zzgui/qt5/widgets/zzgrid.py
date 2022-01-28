@@ -13,23 +13,18 @@ if __name__ == "__main__":
 from PyQt5.QtWidgets import (
     QTableView,
     QStyledItemDelegate,
-    QItemDelegate,
     QAbstractItemView,
-)
-from PyQt5.QtGui import QPalette, QFont, QPainter, QPixmap
-
-from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, QRect, QPoint
-
-from PyQt5.QtWidgets import (
     QStyle,
-    QStyleOptionViewItem,
     QStyleOptionButton,
     QApplication,
-    QCheckBox,
 )
+from PyQt5.QtGui import QPalette, QPainter
+
+from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant
+
 
 from zzgui.qt5.zzwindow import zz_align
-from zzgui.zzutils import num, int_
+from zzgui.zzutils import int_
 from zzgui.zzmodel import ZzModel
 
 
@@ -41,25 +36,29 @@ class zzDelegate(QStyledItemDelegate):
             painter.fillRect(option.rect, color)
         meta = self.parent().model().zz_model.meta[index.column()]
         if meta.get("control") == "check":
-            if meta.get("num"):
-                checked = True if int_(index.data()) else False
-            else:
-                checked = True if index.data() else False
-            cb_option = QStyleOptionButton()
-            if checked:
-                cb_option.state |= QStyle.State_On
-            else:
-                cb_option.state |= QStyle.State_Off
-            checkBoxRect = QApplication.style().subElementRect(
-                QStyle.SE_CheckBoxIndicator, cb_option, None
-            )
-            cb_option.rect = option.rect
-            cb_option.rect.setX(cb_option.rect.x() + checkBoxRect.width() / 2)
-            if cb_option.rect.height() > checkBoxRect.height() * 2 + 3:
-                cb_option.rect.setHeight(checkBoxRect.height() * 2)
-            QApplication.style().drawControl(QStyle.CE_CheckBox, cb_option, painter)
+            self.paint_checkbox(painter, option, index, meta)
         else:
             super().paint(painter, option, index)
+
+    def paint_checkbox(self, painter: QPainter, option, index, meta):
+        """paint checkbox - left - with top+left alignment"""
+        if meta.get("num"):
+            checked = True if int_(index.data()) else False
+        else:
+            checked = True if index.data() else False
+        cb_option = QStyleOptionButton()
+        if checked:
+            cb_option.state |= QStyle.State_On
+        else:
+            cb_option.state |= QStyle.State_Off
+        checkBoxRect = QApplication.style().subElementRect(
+            QStyle.SE_CheckBoxIndicator, cb_option, None
+        )
+        cb_option.rect = option.rect
+        cb_option.rect.setX(cb_option.rect.x() + checkBoxRect.width() / 2)
+        if cb_option.rect.height() > checkBoxRect.height() * 2 + 3:
+            cb_option.rect.setHeight(checkBoxRect.height() * 2)
+        QApplication.style().drawControl(QStyle.CE_CheckBox, cb_option, painter)
 
 
 class zzgrid(QTableView):
@@ -96,7 +95,7 @@ class zzgrid(QTableView):
             if orientation == Qt.Horizontal and role == Qt.DisplayRole:
                 return self.zz_model.headers[col]
             elif orientation == Qt.Vertical and role == Qt.DisplayRole:
-                return QVariant(" ")
+                return QVariant("")
             else:
                 return QVariant()
 
@@ -191,8 +190,8 @@ class zzgrid(QTableView):
         for x in col_settings:
             if "," not in col_settings[x]:
                 continue
-            column_pos = num(col_settings[x].split(",")[0])
-            column_width = num(col_settings[x].split(",")[1])
+            column_pos = int_(col_settings[x].split(",")[0])
+            column_width = int_(col_settings[x].split(",")[1])
             self.setColumnWidth(headers.get(x), column_width)
-            old_visual = self.horizontalHeader().visualIndex(num(headers[x]))
+            old_visual = self.horizontalHeader().visualIndex(int_(headers[x]))
             self.horizontalHeader().moveSection(old_visual, column_pos)

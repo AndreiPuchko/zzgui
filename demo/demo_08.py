@@ -20,7 +20,14 @@ def mock_data_load(db: ZzDb):
     for x in range(1, customer_qt):
         db.insert(
             "customers",
-            {"customer_id": x, "name": f"Customer {x}", "vip": {0: "", 1: "*"}[x % 2]},
+            {
+                "customer_id": x,
+                "name": f"Customer {x}",
+                "vip": {0: "", 1: "*"}[x % 2],
+                "combo_status": x % 3 + 1,
+                "list_status": x % 3 + 1,
+                "radio_status": x % 3 + 1,
+            },
         )
 
 
@@ -51,16 +58,24 @@ class databaseApp(ZzApp):
 
     def form_customers(self):
         form = ZzForm("Customers")
-        form.add_control(
-            name="customer_id",
-            label="Customer Id",
-            datatype="int",
-            pk="*",
-        )
+
+        form.add_control(name="customer_id", label="Customer Id", datatype="int", pk="*")
         form.add_control("name", "Name", datatype="char", datalen=100)
-        form.add_control(
-            "vip", "vip", datatype="char", datalen=1, control="check", pic="VIP client"
-        )
+        form.add_control("vip", "VIP", datatype="char", datalen=1, control="check", pic="VIP client")
+
+        status_control_num = {"datatype": "int", "datalen": 1, "pic": "active;frozen;blocked"}
+        status_control_char = {"datatype": "char", "datalen": 15, "pic": "active;frozen;blocked"}
+
+        form.add_control("radio_status", "Num Radio Status", control="radio", **status_control_num)
+        form.add_control("radio_status_char", "Char Radio Status", control="radio", **status_control_char)
+
+        form.add_control("combo_status", "Num Combo Status", control="combo", **status_control_num)
+        form.add_control("combo_status", "Char Combo Status", control="combo", **status_control_char)
+
+        form.add_control("/")
+        form.add_control("/h")
+        form.add_control("list_status", "Num List Status", control="list", **status_control_num)
+        form.add_control("list_status_char", "Char List Status", control="list", **status_control_char)
 
         cursor: ZzCursor = self.db.table(table_name="customers")
         model = ZzCursorModel(cursor)

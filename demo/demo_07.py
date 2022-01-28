@@ -68,9 +68,7 @@ class dataSchema(ZzDbSchema):
         )
 
     def add_products(self):
-        self.add(
-            table="products", column="product_id", datatype="int", datalen=9, pk=True
-        )
+        self.add(table="products", column="product_id", datatype="int", datalen=9, pk=True)
         self.add(table="products", column="name", datatype="varchar", datalen=100)
 
     def add_customers(self):
@@ -144,12 +142,7 @@ class databaseApp(ZzApp):
 
     def form_customers(self):
         form = ZzForm("Customers")
-        form.add_control(
-            name="customer_id",
-            label="Customer Id",
-            datatype="int",
-            pk="*",
-        )
+        form.add_control(name="customer_id", label="Customer Id", datatype="int", pk="*")
         form.add_control("name", "Name", datatype="char", datalen=100)
 
         cursor: ZzCursor = self.db.table(table_name="customers")
@@ -157,10 +150,7 @@ class databaseApp(ZzApp):
         form.set_model(model)
         form.actions.add_action("/crud")
         form.add_action(
-            "Orders",
-            child_form=self.form_orders,
-            child_where="customer_id={customer_id}",
-            hotkey="F2",
+            "Orders", child_form=self.form_orders, child_where="customer_id={customer_id}", hotkey="F2"
         )
         return form
 
@@ -202,10 +192,7 @@ class databaseApp(ZzApp):
         form.add_action("/crud")
         form.add_action("-")
         form.add_action(
-            "Lines",
-            child_form=self.form_order_lines,
-            child_where="order_id={order_id}",
-            hotkey="F2",
+            "Lines", child_form=self.form_order_lines, child_where="order_id={order_id}", hotkey="F2"
         )
         form.set_model(ZzCursorModel(self.db.table("orders")))
         return form
