@@ -88,7 +88,7 @@ def load_mock_data(db: ZzDb):
     order_qt = 100
     order_lines_qt = 6
     for x in range(1, customer_qt):
-        db.insert("customers", {"customer_id": x, "name": f"Customer {x}"})
+        db.insert("customers", {"customer_id": x, "name": f"Customer {x}{str(randint(0,600)*6)}"})
     for x in range(1, product_qt):
         db.insert("products", {"product_id": x, "name": f"Product {x}"})
     for x in range(1, order_qt):

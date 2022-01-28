@@ -122,7 +122,7 @@ class ZzForm:
         self.model.build()
         self.get_grid_crud_actions()
         self.grid_form.build_grid()
-        self._after_grid_create()
+        # self._after_grid_create()
         return self.grid_form
 
     def get_grid_crud_actions(self):
@@ -847,6 +847,7 @@ class ZzFormWindow:
             self.widgets[x].splitter.set_sizes(sizes)
         # Restore grid columns sizes
         self.restore_grid_columns()
+        self.zz_form._after_grid_create()
         zzapp.zz_app.show_form(self, modal)
 
     def get_grid_list(self):

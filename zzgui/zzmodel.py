@@ -177,8 +177,7 @@ class ZzModel:
     def column_count(self):
         return len(self.columns)
 
-    def lookup(self, column, text):
-        """search for text in column, return list of [row, value]"""
+    def parse_lookup_text(self, text):
         text = text.upper()
         raw_cond_list = ["+"] + re.split("([+-])", text)
         cond_list = []
@@ -187,18 +186,27 @@ class ZzModel:
             value = raw_cond_list[cond * 2 + 1]
             if operator and value:
                 cond_list.append([operator, value])
+        return cond_list
+
+    def lookup(self, column, text):
+        """search for text in column, return list of [row, value]"""
+        cond_list = self.parse_lookup_text(text)
         rez = []
         for x in range(self.row_count()):
             cond_result = True
             for cond in cond_list:
                 operator = cond[0]
                 value = cond[1]
-                if operator == "+" and value not in self.get_record(x)[self.columns[column]].upper():
+                model_value = self.get_record(x)[self.columns[column]]
+                if self.meta[column].get("relation"):
+                    model_value = self._get_related(model_value, self.meta[column])
+
+                if operator == "+" and value not in model_value.upper():
                     cond_result = False
-                elif operator == "-" and value in self.get_record(x)[self.columns[column]].upper():
+                elif operator == "-" and value in model_value.upper():
                     cond_result = False
             if cond_result:
-                rez.append([x, self.get_record(x)[self.columns[column]]])
+                rez.append([x, model_value])
         return rez
 
 
@@ -280,6 +288,7 @@ class ZzCursorModel(ZzModel):
     def __init__(self, cursor: ZzCursor = None):
         super().__init__()
         self.cursor = cursor
+        # print("init",self, self.cursor.table_name)
 
     def get_table_name(self):
         return self.cursor.table_name
@@ -291,6 +300,7 @@ class ZzCursorModel(ZzModel):
         return self.cursor.record(row)
 
     def refresh(self):
+        # print("refre",self, self.cursor.table_name)
         super().refresh()
         self.cursor.refresh()
 

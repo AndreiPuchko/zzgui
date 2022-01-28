@@ -1,4 +1,3 @@
-from email.charset import QP
 import sys
 
 if __name__ == "__main__":
@@ -17,18 +16,15 @@ from PyQt5.QtWidgets import (
     QStyle,
     QStyleOptionButton,
     QApplication,
-    QVBoxLayout,
-    QWidget,
 )
-from PyQt5.QtGui import QPalette, QPainter, QKeyEvent
+from PyQt5.QtGui import QPalette, QPainter
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, QTimer
+from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant
 
 from zzgui.qt5.zzwindow import zz_align
 from zzgui.zzutils import int_
 from zzgui.zzmodel import ZzModel
-from zzgui.qt5.widgets.zzline import zzline
-from zzgui.qt5.widgets.zzlist import zzlist
+from zzgui.qt5.widgets.zzlookup import zzlookup
 
 
 class zzDelegate(QStyledItemDelegate):
@@ -40,8 +36,24 @@ class zzDelegate(QStyledItemDelegate):
         meta = self.parent().model().zz_model.meta[index.column()]
         if meta.get("control") == "check":
             self.paint_checkbox(painter, option, index, meta)
-        else:
-            super().paint(painter, option, index)
+            return
+        # elif meta.get("relation"):
+        #     super().paint(painter, option, index)
+        #     self.paint_relation_button(painter, option, index, meta)
+        #     return
+        super().paint(painter, option, index)
+
+    # def paint_relation_button(self, painter: QPainter, option, index, meta):
+    #     pb_option = QStyleOptionButton()
+    #     pb_option.text = "?"
+    #     checkBoxRect = QApplication.style().subElementRect(QStyle.SE_PushButtonBevel, pb_option, None)
+    #     sz = 30
+    #     pb_option.rect = option.rect
+    #     pb_option.rect.setX(pb_option.rect.x() - sz + option.rect.width())
+    #     print(checkBoxRect.height())
+    #     pb_option.rect.setHeight(sz)
+    #     pb_option.rect.setWidth(sz)
+    #     QApplication.style().drawControl(QStyle.CE_PushButton, pb_option, painter)
 
     def paint_checkbox(self, painter: QPainter, option, index, meta):
         """paint checkbox - left - with top+left alignment"""
@@ -165,21 +177,10 @@ class zzgrid(QTableView):
             and event.key() not in (Qt.Key_Escape, Qt.Key_Enter, Qt.Key_Return)
             and self.model().rowCount() >= 1
         ):
-            lookup_widget = zzlookup(self, event.text())
-            self.set_lookup_size_pos(lookup_widget)
-            lookup_widget.show(self.currentIndex().column())
+            lookup_widget = zz_grid_lookup(self, event.text())
+            lookup_widget.show(self, self.currentIndex().column())
         else:
             super().keyPressEvent(event)
-
-    def set_lookup_size_pos(self, lookup_widget):
-        """move lookup widget"""
-        rect = self.visualRect(self.currentIndex())
-        rect.moveTop(self.horizontalHeader().height() + 2)
-        rect.moveLeft(self.verticalHeader().width() + rect.x() + 2)
-        pos = rect.topLeft()
-        pos = self.mapToGlobal(pos)
-        lookup_widget.setFixedWidth(self.width() - rect.x())
-        lookup_widget.move(pos)
 
     def get_columns_headers(self):
         rez = {}
@@ -211,31 +212,7 @@ class zzgrid(QTableView):
         self.set_index(0, self.horizontalHeader().logicalIndex(0))
 
 
-class zzlookup(QWidget):
-    def __init__(self, zz_grid, text):
-        super().__init__(zz_grid, Qt.Popup)
-        self.zz_grid = zz_grid
-        self.zz_model = zz_grid.zz_model
-        self.setLayout(QVBoxLayout())
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        self.setAttribute(Qt.WA_DeleteOnClose)
-        self.lookup_edit = zzline({})
-        self.lookup_list = zzlist({})
-        self.layout().addWidget(self.lookup_edit)
-        self.layout().addWidget(self.lookup_list)
-        self.lookup_edit.set_text("" if text == "*" else text)
-        self.lookup_edit.setFocus()
-
-        self.timer = QTimer()
-        self.timer.setSingleShot(True)
-        self.timer.setInterval(500)
-        self.timer.timeout.connect(self.lookup_search)
-
-        self.lookup_edit.textChanged.connect(self.lookup_text_changed)
-        self.lookup_edit.returnPressed.connect(self.lookup_edit_return_predssed)
-
-        self.lookup_list.itemActivated.connect(self.lookup_list_selected)
-
+class zz_grid_lookup(zzlookup):
     def lookup_list_selected(self):
         self.zz_grid.set_index(self.found_rows[self.lookup_list.currentRow()][0])
         self.close()
@@ -246,26 +223,18 @@ class zzlookup(QWidget):
         for x in self.found_rows:
             self.lookup_list.addItem(f"{x[1]}")
 
-    def lookup_edit_return_predssed(self):
-        self.timer.stop()
-        self.timer.timeout.emit()
-        self.lookup_list.setFocus()
-
-    def lookup_text_changed(self):
-        if len(self.lookup_edit.get_text()) > 1:
-            self.timer.start()
-
-    def show(self, column):
+    def show(self, zz_grid, column):
+        self.zz_grid = zz_grid
         self.zz_model_column = column
+        self.zz_model = zz_grid.zz_model
         return super().show()
 
-    def keyPressEvent(self, event:QKeyEvent):
-        if event.key() == Qt.Key_Down and self.lookup_edit.hasFocus():
-            event.accept()
-            self.lookup_list.setCurrentRow(0)
-            self.lookup_list.setFocus()
-        elif event.key() == Qt.Key_Up and self.lookup_list.hasFocus() and self.lookup_list.currentRow() == 0:
-            self.lookup_edit.setFocus()
-            event.accept()
-        else:
-            return super().keyPressEvent(event)
+    def set_geometry(self):
+        parent = self.parent()
+        rect = parent.visualRect(parent.currentIndex())
+        rect.moveTop(parent.horizontalHeader().height() + 2)
+        rect.moveLeft(parent.verticalHeader().width() + rect.x() + 2)
+        pos = rect.topLeft()
+        pos = parent.mapToGlobal(pos)
+        self.setFixedWidth(parent.width() - rect.x())
+        self.move(pos)

@@ -13,16 +13,17 @@ from zzgui.zzmodel import ZzCursorModel
 from zzdb.schema import ZzDbSchema
 from zzdb.db import ZzDb
 from zzdb.cursor import ZzCursor
+from random import randint
 
 
 def mock_data_load(db: ZzDb):
-    customer_qt = 10
+    customer_qt = 100
     for x in range(1, customer_qt):
         db.insert(
             "customers",
             {
                 "customer_id": x,
-                "name": f"Customer {x}",
+                "name": f"Customer {x}{str(randint(0,600)*6)}",
                 "vip": {0: "", 1: "*"}[x % 2],
                 "combo_status": x % 3 + 1,
                 "list_status": x % 3 + 1,
