@@ -50,7 +50,7 @@ class databaseApp(ZzApp):
         data_schema = ZzDbSchema()
 
         for x in self.form_customers().get_table_schema():
-            data_schema.add(x)
+            data_schema.add(**x)
 
         self.db.set_schema(data_schema)
         mock_data_load(self.db)
