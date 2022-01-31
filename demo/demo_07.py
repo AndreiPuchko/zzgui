@@ -121,7 +121,8 @@ def load_mock_data(db: ZzDb):
 class databaseApp(ZzApp):
     def on_start(self):
         # self.form_order_lines().show_mdi_modal_grid()
-        self.orders()
+        # self.orders()
+        self.customers()
         # self.products()
 
     def create_database(self):
@@ -152,6 +153,7 @@ class databaseApp(ZzApp):
         form.add_action(
             "Orders", child_form=self.form_orders, child_where="customer_id={customer_id}", hotkey="F2"
         )
+        form.max_child_level = 2
         return form
 
     def customers(self):

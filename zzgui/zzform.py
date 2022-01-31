@@ -38,6 +38,7 @@ class ZzForm:
 
         self.children_forms = []  # forms inside this form
         self.i_am_child = None
+        self.max_child_level = 1  # max depth for child forms
 
         self.show_grid_action_top = True
         self.do_not_save_geometry = False
@@ -444,6 +445,7 @@ class ZzForm:
             action["child_form_object"].model.set_where(filter)
             action["child_form_object"].model.refresh()
             action["child_form_object"].set_grid_index()
+            action["child_form_object"].refresh_children()
 
     def show_child_form(self, action):
         child_form = action.get("child_form")()
@@ -644,7 +646,8 @@ class ZzFormWindow:
             stretch=100,
         )
         # place child forms
-        if not self.zz_form.i_am_child:
+        # if not self.zz_form.i_am_child:
+        if self.zz_form.max_child_level:
             for action in self.zz_form.actions:
                 if action.get("child_form"):
                     tmp_grid_form.add_control(
@@ -656,6 +659,7 @@ class ZzFormWindow:
                         self.zz_form.title + "_" + action["child_form_object"].title
                     )
                     action["child_form_object"].i_am_child = True
+                    action["child_form_object"].max_child_level = self.zz_form.max_child_level - 1
                     self.zz_form.children_forms.append(action)
                     tmp_grid_form.add_control(
                         f"child_grid__{action['text']}",
