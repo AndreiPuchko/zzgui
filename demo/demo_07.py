@@ -120,9 +120,10 @@ def load_mock_data(db: ZzDb):
 
 class databaseApp(ZzApp):
     def on_start(self):
-        # self.form_order_lines().show_mdi_modal_grid()
+        # self.form_order_lines().run()
         # self.orders()
-        self.customers()
+        # self.customers()
+        self.filter_orders()
         # self.products()
 
     def create_database(self):
@@ -138,7 +139,7 @@ class databaseApp(ZzApp):
         self.add_menu("File|Exit", self.close, toolbar=1)
         self.add_menu("Catalogs|Customers", self.customers, toolbar=1)
         self.add_menu("Catalogs|Products", self.products, toolbar=1)
-        self.add_menu("Documents|Orders", self.orders, toolbar=1)
+        self.add_menu("Documents|Orders", self.filter_orders, toolbar=1)
         return super().on_init()
 
     def form_customers(self):
@@ -157,7 +158,7 @@ class databaseApp(ZzApp):
         return form
 
     def customers(self):
-        self.form_customers().show_mdi_modal_grid()
+        self.form_customers().run()
 
     def form_products(self):
         form = ZzForm("Products")
@@ -175,7 +176,7 @@ class databaseApp(ZzApp):
         return form
 
     def products(self):
-        self.form_products().show_mdi_modal_grid()
+        self.form_products().run()
 
     def form_orders(self):
         form = ZzForm("Orders")
@@ -200,7 +201,7 @@ class databaseApp(ZzApp):
         return form
 
     def orders(self):
-        self.form_orders().show_mdi_modal_grid()
+        self.form_orders().run()
 
     def form_order_lines(self):
         form = ZzForm("Order lines")
@@ -229,6 +230,61 @@ class databaseApp(ZzApp):
 
         form.add_action("/crud")
         form.set_model(ZzCursorModel(self.db.table("order_lines")))
+        return form
+
+    def filter_orders(self):
+        self.form_filter_orders().run()
+
+    def form_filter_orders(self):
+        form = ZzForm("Filter orders")
+        form.add_control("/")
+        form.add_control("/h")
+        form.add_control("date1", "From date", datatype="date", data="2022-01-01")
+        form.add_control("date2", "To date", datatype="date", data="2022-01-31")
+        form.add_control("/")
+        form.add_control("/f")
+        form.add_control(
+            "customer_id",
+            "Customer",
+            datatype="int",
+            control="line",
+            to_table="customers",
+            to_column="customer_id",
+            to_form=self.form_customers,
+            related="name",
+            data=3,
+            check="*",
+        )
+
+        form.add_control(
+            "product_id",
+            "Product",
+            datatype="int",
+            control="line",
+            to_table="products",
+            to_column="product_id",
+            to_form=self.form_customers,
+            related="name",
+            check="*",
+        )
+
+        def show_filtered_orders():
+            filter_list = []
+            filter_list.append(f"date>='{form.s.date1}' and date<='{form.s.date2}'")
+            for x in [form.w.customer_id]:
+                if x.check.is_checked():
+                    filter_list.append(f'{x.meta.get("name")} = {x.get_text()}')
+            if form.w.product_id.check.is_checked():
+                filter_list.append(
+                    f"order_id in (select order_id from order_lines where product_id = {form.s.product_id}) "
+                )
+
+            form_orders = self.form_orders()
+            form_orders.model.set_where(" and ".join(filter_list))
+            form_orders.run()
+
+        form._valid = show_filtered_orders
+        form.add_ok_cancel_buttons()
         return form
 
 

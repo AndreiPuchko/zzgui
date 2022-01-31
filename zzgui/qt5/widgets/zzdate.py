@@ -15,11 +15,14 @@ from PyQt5.QtWidgets import (
     QCalendarWidget,
     QHBoxLayout,
     QPushButton,
+    QSizePolicy,
 )
+
 from PyQt5.QtGui import QValidator, QFontMetrics
 from PyQt5.QtCore import pyqtSignal, QDate, Qt
 
 from zzgui.qt5.zzwidget import ZzWidget
+
 
 class zzdate(QComboBox, ZzWidget):
     editingFinished = pyqtSignal()
@@ -31,6 +34,8 @@ class zzdate(QComboBox, ZzWidget):
         self.lineedit.setInputMask("99.99.9999")
         self.lineedit.setStyleSheet("QLineEdit")
         self.set_text(self.meta.get("data"))
+        self.setMinimumWidth(QFontMetrics(self.font()).width("0") * 14)
+        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
         class zzDateValidator(QValidator):
             def validate(self, text, pos):
@@ -60,9 +65,8 @@ class zzdate(QComboBox, ZzWidget):
         self.lineedit.cursorPositionChanged.connect(self.lineeditCursorPositionChanged)
         # zzWidget.__init__(self, meta)
 
-    def sizeHint(self):
-        self.setMaximumWidth(QFontMetrics(self.font()).width("0") * 16)
-        return super().sizeHint()
+    # def sizeHint(self):
+    #     return super().sizeHint()
 
     def lineeditCursorPositionChanged(self, old, new):
         if old in [3, 4] and (new < 3 or new > 4):
@@ -111,9 +115,7 @@ class zzdate(QComboBox, ZzWidget):
                 super().__init__(parent=parent, flags=Qt.Popup)
                 self.setLayout(QVBoxLayout())
                 self.clndr = QCalendarWidget(self)
-                self.clndr.setSelectedDate(
-                    QDate.fromString(self.parent().lineedit.text(), "dd.MM.yyyy")
-                )
+                self.clndr.setSelectedDate(QDate.fromString(self.parent().lineedit.text(), "dd.MM.yyyy"))
                 self.clndr.activated.connect(self.clndrActivated)
                 buttonLayout = QHBoxLayout()
 
@@ -151,7 +153,7 @@ class zzdate(QComboBox, ZzWidget):
 
     def set_text(self, text):
         if hasattr(self, "lineedit"):
-            self.lineedit.setText(QDate.fromString(text, "yyyy-MM-dd").toString("dd.MM.yyyy"))
+            self.lineedit.setText(QDate.fromString(f"{text}", "yyyy-MM-dd").toString("dd.MM.yyyy"))
             self.lineedit.setCursorPosition(0)
 
     def get_text(self):

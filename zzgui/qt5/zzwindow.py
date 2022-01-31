@@ -84,6 +84,12 @@ class ZzQtWindow(zzwindow.ZzWindow, ZzFrame):
         else:
             return (self.size().width(), self.size().height())
 
+    def set_disabled(self, arg=True):
+        self.setEnabled(True if not arg else False)
+
+    def set_enabled(self, arg=True):
+        self.setEnabled(True if arg else False)
+    
     def set_title(self, title):
         super().set_title(title)
         QWidget.setWindowTitle(self, title)

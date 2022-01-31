@@ -47,9 +47,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
             form.show()
         else:  # mdiarea modal window
             prev_focus_widget = qApp.focusWidget()
-            prev_mdi_window = (
-                self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
-            )
+            prev_mdi_window = self.main_window.zz_tabwidget.currentWidget().activeSubWindow()
             prev_tabbar_text = self.get_tabbar_text()
 
             if prev_mdi_window:
@@ -73,7 +71,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
             if prev_mdi_window:
                 prev_mdi_window.setEnabled(True)
 
-            if prev_focus_widget:
+            if prev_focus_widget is not None:
                 prev_focus_widget.setFocus()
             self.set_tabbar_text(prev_tabbar_text)
 
@@ -172,17 +170,13 @@ class ZzApp(zzapp.ZzApp, QApplication):
         return self.main_window.zz_tabwidget.tabBar().isVisible()
 
     def get_tabbar_text(self):
-        return self.main_window.zz_tabwidget.tabBar().tabText(
-            self.main_window.zz_tabwidget.currentIndex()
-        )
+        return self.main_window.zz_tabwidget.tabBar().tabText(self.main_window.zz_tabwidget.currentIndex())
 
     def show_statusbar_mess(self, text=""):
         self.main_window.statusBar().showMessage(f"{text}")
 
     def set_tabbar_text(self, text=""):
-        self.main_window.zz_tabwidget.tabBar().setTabText(
-            self.main_window.zz_tabwidget.currentIndex(), text
-        )
+        self.main_window.zz_tabwidget.tabBar().setTabText(self.main_window.zz_tabwidget.currentIndex(), text)
 
     def show_statusbar(self, mode=True):
         zzapp.ZzApp.show_statusbar(self)

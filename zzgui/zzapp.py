@@ -173,7 +173,9 @@ class ZzControls(list):
         to_column="",
         to_form=None,
         related="",
+        db=None,
         mask="",
+        opts="",
         valid=None,
         readonly=None,
         disabled=None,
@@ -297,6 +299,7 @@ class ZzApp:
         zzapp.zz_app = self
         self.window_title = title
         self.heap = ZzHeap()
+        self.db = None
         self.style_file = ""
         self.settings_file = ""
 
@@ -375,20 +378,20 @@ class ZzApp:
     def focus_changed(self, from_widget, to_widget):
         if from_widget.__class__.__name__ in (
             "zzline",
+            "zzrelation",
             "zzScriptEdit",
             "zzScriptSqlEdit",
         ):
             if from_widget.valid() is False:
-                from_widget.setFocus()
-            return
+                from_widget.set_focus()
+
         if to_widget.__class__.__name__ in (
             "zzline",
+            "zzrelation",
             "zzScriptEdit",
             "zzScriptSqlEdit",
         ):
             to_widget.when()
-
-        pass
 
     def lock(self):
         pass

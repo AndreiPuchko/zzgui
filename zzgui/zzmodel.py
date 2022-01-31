@@ -355,4 +355,5 @@ class ZzCursorModel(ZzModel):
 
     def set_where(self, where_text=""):
         self.cursor.set_where(where_text)
+        self.refresh()
         return super().set_where(where_text)

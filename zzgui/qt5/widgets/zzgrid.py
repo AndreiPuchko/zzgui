@@ -121,7 +121,7 @@ class zzgrid(QTableView):
         self.zz_form = self.meta.get("form")
         self.zz_model = self.zz_form.model
 
-        self.setModel(self.ZzTableModel(self.zz_form.model))
+        # self.setModel(self.ZzTableModel(self.zz_form.model))
         self.setItemDelegate(zzDelegate(self))
         self.setTabKeyNavigation(False)
 
@@ -133,6 +133,7 @@ class zzgrid(QTableView):
         self.horizontalHeader().setDefaultAlignment(zz_align["7"])
         self.doubleClicked.connect(self.zz_form.grid_double_clicked)
         self.horizontalHeader().sectionClicked.connect(self.zz_form.grid_header_clicked)
+        self.setModel(self.ZzTableModel(self.zz_form.model))
 
     def currentChanged(self, current, previous):
         # self.currentCellChangedSignal.emit(current.row(), current.column())

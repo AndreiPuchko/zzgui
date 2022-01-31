@@ -28,6 +28,7 @@ class ZzForm:
         self.controls = zzapp.ZzControls()
         self.system_controls = zzapp.ZzControls()
         self.model = None
+        self.db = zzapp.zz_app.db
         self._model_record = {}  # contains the data of the currently edited record
 
         # Shortcuts to elements
@@ -57,6 +58,12 @@ class ZzForm:
 
         self.current_row = 0
         self.current_column = 0
+
+    def run(self):
+        if self.model:
+            self.show_mdi_modal_grid()
+        else:
+            self.show_mdi_modal_form()
 
     def set_model(self, model):
         self.model: ZzModel = model
@@ -196,7 +203,7 @@ class ZzForm:
                             label=x["label"],
                             control=x["control"],
                             check=False if x["name"].startswith("/") else True,
-                            datalen=x["datalen"] 
+                            datalen=x["datalen"]
                         )
 
                     def before_form_show():
@@ -434,6 +441,7 @@ class ZzForm:
 
     def grid_index_changed(self, row, column):
         refresh_children_forms = row != self.current_row and row >= 0
+        refresh_children_forms = True
         self.current_row = row
         self.current_column = column
         if refresh_children_forms:
@@ -455,8 +463,15 @@ class ZzForm:
         self.refresh()
 
     def get_where_for_child(self, action):
-        current_record = self.model.get_record(self.current_row)
-        return action["child_where"].format(**current_record)
+        if self.current_row >= 0:
+            current_record = self.model.get_record(self.current_row)
+            if action["child_form_object"].grid_form:
+                action["child_form_object"].grid_form.set_enabled()
+            return action["child_where"].format(**current_record)
+        else:
+            if action["child_form_object"].grid_form:
+                action["child_form_object"].grid_form.set_disabled()
+            return "1=2"
 
     def grid_header_clicked(self, column):
         if self.model is not None:
@@ -475,7 +490,8 @@ class ZzForm:
             row = self.current_row
         if column is None:
             column = self.current_column
-        self.grid_form.set_grid_index(row, column)
+        if self.grid_form:
+            self.grid_form.set_grid_index(row, column)
 
     def move_grid_index(self, mode):
         self.grid_form.move_grid_index(mode)
@@ -510,7 +526,9 @@ class ZzForm:
         to_column="",
         to_form=None,
         related="",
+        db=None,
         mask="",
+        opts="",
         valid=None,
         readonly=None,
         disabled=None,
@@ -655,6 +673,7 @@ class ZzFormWindow:
                     )
                     #  create child form!
                     action["child_form_object"] = action.get("child_form")()
+
                     action["child_form_object"].title = (
                         self.zz_form.title + "_" + action["child_form_object"].title
                     )
@@ -673,7 +692,8 @@ class ZzFormWindow:
                 tmp_grid_form.controls[-1],
             )
         self.build_form(tmp_grid_form.get_controls())
-        self.move_grid_index(7)
+        self.zz_form.refresh_children()
+        self.move_grid_index(1)
 
     def build_form(self, controls=[]):
         frame_stack = [self]
@@ -681,7 +701,6 @@ class ZzFormWindow:
 
         if controls == []:
             controls = self.zz_form.get_controls()
-        # if controls and controls[0].get("name", "") != "/f":
         if controls and not controls[0].get("name", "").startswith("/"):
             controls.insert(0, {"name": "/f"})
         # Create widgets
@@ -809,6 +828,8 @@ class ZzFormWindow:
             label2add.add_managed_widget(widget2add)
             if not meta.get("data"):
                 widget2add.set_disabled()
+            else:
+                label2add.set_checked()
 
         self.widgets[meta.get("tag", "") if meta.get("tag", "") else name] = widget2add
 

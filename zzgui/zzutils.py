@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 from decimal import Decimal
+import datetime
 
 
 def is_sub_list(sublst, lst):
@@ -31,3 +32,7 @@ def num(tonum):
         return Decimal(f"{tonum}")
     except Exception:
         return 0
+
+
+def today():
+    return datetime.date.today()

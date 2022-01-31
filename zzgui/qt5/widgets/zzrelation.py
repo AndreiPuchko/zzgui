@@ -10,7 +10,6 @@ if __name__ == "__main__":
 
 from PyQt5.QtWidgets import QFrame
 
-import zzgui.zzapp as zzapp
 from zzgui.zzform import ZzForm
 from zzgui.zzutils import num
 from zzgui.qt5.zzwidget import ZzWidget
@@ -36,11 +35,12 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
         if self.meta.get("to_form"):
             self.to_form: ZzForm = self.meta.get("to_form")()
             self.to_form.max_child_level = 0
-            self.to_form.title += "*"
+            self.to_form.title += " ."
 
         self.add_widget(self.get)
         self.add_widget(self.button)
         self.add_widget(self.say)
+        self.set_text(self.meta.get("data", ""))
         self.get_valid()
 
     def show_related_form(self):
@@ -53,6 +53,7 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
 
             self.to_form._after_grid_create = seek
             self.to_form.show_mdi_modal_grid()
+            # self.set_related()
 
     def show_related_form_result(self):
         if self.to_form:
@@ -70,19 +71,33 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
         return self.set_related()
 
     def set_related(self):
-        rel = self.meta["form"].model._get_related(
-            self.get.text(), self.meta, do_not_show_value=1, reset_cache=1
-        )
+        if self.meta["form"].model:
+            rel = self.meta["form"].model._get_related(
+                self.get.text(), self.meta, do_not_show_value=1, reset_cache=1
+            )
+        elif self.meta["form"].db:  # datasource provided
+            rel = self.meta["form"].db.get(
+                self.meta["to_table"],
+                f"{self.meta['to_column']}='{self.get.text()}'",
+                self.meta["related"],
+            )
+            if rel == {}:
+                rel = None
+                self.say.set_text("")
+                self.show_related_form()
+                return True
+
         if rel is None:
-            self.say.set_text(" wrong key ")
+            self.say.set_text("")
             return False
         else:
             self.say.set_text(rel)
             return True
 
     def set_text(self, text):
-        self.get.set_text(text)
-        self.get_valid()
+        if hasattr(self, "get"):
+            self.get.set_text(text)
+            self.get_valid()
 
     def get_text(self):
         return self.get.get_text()
@@ -91,6 +106,9 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
         if "*" in text and self.meta.get("num") or text.startswith("*"):
             lookup_widget = zz_realtion_lookup(self, "")
             lookup_widget.show(self.meta)
+
+    def set_focus(self):
+        self.get.setFocus()
 
 
 class zz_realtion_lookup(zzlookup):

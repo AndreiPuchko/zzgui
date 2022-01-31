@@ -53,15 +53,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
             # in case the minimal size is begger than last saved in the settings - correction
             sizeAfter = paw.size()
-            wDelta = (
-                0
-                if sizeBefore.width() < sizeAfter.width()
-                else sizeBefore.width() - sizeAfter.width()
-            )
+            wDelta = 0 if sizeBefore.width() < sizeAfter.width() else sizeBefore.width() - sizeAfter.width()
             hDelta = (
-                0
-                if sizeBefore.height() < sizeAfter.height()
-                else sizeBefore.height() - sizeAfter.height()
+                0 if sizeBefore.height() < sizeAfter.height() else sizeBefore.height() - sizeAfter.height()
             )
             if wDelta or hDelta:
                 paw.resize(paw.size().width() + wDelta, paw.size().height() + hDelta)
@@ -96,41 +90,31 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         if not isinstance(self.parent(), QMdiSubWindow):
             self.escapeEnabled = False
 
-        first_widget = self.widgets[list(self.widgets.keys())[0]]
-        while (
-            not first_widget.isEnabled()
-            or (hasattr(first_widget, "isReadOnly") and first_widget.isReadOnly())
-            or first_widget.focusPolicy() == Qt.NoFocus
-        ):
-            first_widget = first_widget.nextInFocusChain()
-        first_widget.setFocus()
+        # first_widget = self.widgets[list(self.widgets.keys())[0]]
+        # while (
+        #     not first_widget.isEnabled()
+        #     or (hasattr(first_widget, "isReadOnly") and first_widget.isReadOnly())
+        #     or first_widget.focusPolicy() == Qt.NoFocus
+        # ):
+        #     # print(first_widget)
+        #     first_widget = first_widget.nextInFocusChain()
 
-        # mdi_height = (
-        #     self.parent().parent().parent().viewport().height()
-        #     - zzapp.zz_app.main_window.zz_tabwidget.tabBar().height()
-        # )
-        # mdi_width = self.parent().parent().parent().viewport().width()
+        # first_widget.setFocus()
+        # print(first_widget)
+        # set focus into first enabled widget
+        for widget_name in self.widgets:
+            widget = self.widgets[widget_name]
+            if widget.focusPolicy() == Qt.NoFocus:
+                continue
+            if hasattr(widget, "isReadOnly") and widget.isReadOnly():
+                continue
+            if widget.isEnabled():
+                widget.setFocus()
+                break
 
-        # size_before = self.size()
         if self.zz_form.do_not_save_geometry is False:
             self.restore_geometry(zzapp.zz_app.settings)
-        # size_after = self.size()
-        # width_delta = (
-        #     0
-        #     if size_before.width() < size_after.width()
-        #     else size_before.width() - size_after.width()
-        # )
-        # height_delta = (
-        #     0
-        #     if size_before.height() < size_after.height()
-        #     else size_before.height() - size_after.height()
-        # )
 
-        # paw = self.parent()
-        # if width_delta or height_delta:
-        #     paw.resize(size_after.width() + width_delta, size_after.height() + height_delta)
-        # if self.parent().height() +self.parent().y() > mdi_height:
-        #     self.parent().move(self.parent().x(),  0)
         self.shown = True
         if event:
             event.accept()
@@ -144,13 +128,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             event.ignore()
             # return
         elif self.mode == "form" and key in (Qt.Key_Up,):
-            QApplication.sendEvent(
-                self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.ShiftModifier)
-            )
+            QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.ShiftModifier))
         elif self.mode == "form" and key in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Down):
-            QApplication.sendEvent(
-                self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, event.modifiers())
-            )
+            QApplication.sendEvent(self, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, event.modifiers()))
         elif self.mode == "grid" and key in (Qt.Key_Return,):
             self.zz_form.grid_double_clicked()
         elif keyText in self.hotkey_widgets:  # is it form hotkey
@@ -188,3 +168,5 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 # Tells the module which engine to use
 zzgui.zzdialogs.ZzForm = ZzForm
 zzMess
+zzWait
+zzAskYN
