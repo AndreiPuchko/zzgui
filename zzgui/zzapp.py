@@ -257,14 +257,18 @@ class ZzControls(list):
 
 class ZzSettings:
     def __init__(self, filename=""):
-        self.filename = filename if filename else "zzGui.ini"
+        self.filename = filename if filename else "zz_gui.ini"
         self.config = ConfigParser()
         self.read()
 
     def read(self):
+        if self.filename == "none":
+            return
         self.config.read(self.filename)
 
     def write(self):
+        if self.filename == "none":
+            return
         with open(self.filename, "w") as configfile:
             self.config.write(configfile)
 
@@ -305,7 +309,7 @@ class ZzApp:
 
         self.style_file = self.get_argv("style")
         if self.style_file == "":
-            self.style_file = "zzGui.qss"
+            self.style_file = "zz_gui.qss"
         self.settings_file = self.get_argv("ini")
 
         self.set_style()
@@ -325,7 +329,6 @@ class ZzApp:
         for x in sys.argv:
             if x.startswith(f"/{argtext}:") or x.startswith(f"-{argtext}:"):
                 file_name = x[(len(argtext) + 2) :]  # noqa: E203
-                # print(file_name)
                 return file_name
         return ""
 
