@@ -16,11 +16,12 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
     QToolBar,
+    QLabel,
     QToolButton,
     QSizePolicy,
     QMenu,
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QMargins
 
 from zzgui.qt5.zzwidget import ZzWidget
 from zzgui.qt5.zzwindow import zz_align
@@ -32,7 +33,9 @@ class zztoolbar(QFrame, ZzWidget):
         self.setLayout(QVBoxLayout() if "v" in meta.get("control") else QHBoxLayout())
         self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().setAlignment(zz_align["7"])
-        self.toolBarButton = QToolBar()
+        self.layout().setSpacing(-1)
+        self.layout().setContentsMargins(QMargins(0, 0, 0, 0))
+        self.toolBarPanel = QToolBar()
 
         action_list = []
         if isinstance(meta.get("actions"), ZzActions):
@@ -63,9 +66,7 @@ class zztoolbar(QFrame, ZzWidget):
                 else:
                     if x + 1 == len(action_text_list):  # real action
 
-                        action["engineAction"] = cascade_action[action_key].addAction(
-                            action_text
-                        )
+                        action["engineAction"] = cascade_action[action_key].addAction(action_text)
                         action["engineAction"].setToolTip(action.get("mess", ""))
                         action["engineAction"].setStatusTip(action.get("mess", ""))
                         if worker:
@@ -78,24 +79,16 @@ class zztoolbar(QFrame, ZzWidget):
 
                                 return rd
 
-                            action["engineAction"].triggered.connect(
-                                getChildForm(action)
-                            )
+                            action["engineAction"].triggered.connect(getChildForm(action))
 
                         action["engineAction"].setShortcut(
-                            action["hotkey"]
-                            if not action["hotkey"] == "Spacebar"
-                            else Qt.Key_Space
+                            action["hotkey"] if not action["hotkey"] == "Spacebar" else Qt.Key_Space
                         )
-                        action["engineAction"].setShortcutContext(
-                            Qt.WidgetWithChildrenShortcut
-                        )
+                        action["engineAction"].setShortcutContext(Qt.WidgetWithChildrenShortcut)
                     else:  # cascade
                         subMenu = "|".join(action_text_list[: x + 1])
                         if subMenu not in cascade_action:
-                            cascade_action[subMenu] = cascade_action[
-                                action_key
-                            ].addMenu(
+                            cascade_action[subMenu] = cascade_action[action_key].addMenu(
                                 f"{action_text}  {'' if '|' in subMenu else '  '}"
                             )
 
@@ -103,25 +96,20 @@ class zztoolbar(QFrame, ZzWidget):
         self.main_button_action = self.main_button.addAction("☰")
         self.main_button_action.setToolTip(self.meta.get("mess", ""))
         self.main_button_action.setMenu(tool_bar_qt_actions)
-        self.main_button.widgetForAction(self.main_button_action).setPopupMode(
-            QToolButton.InstantPopup
-        )
+        self.main_button.widgetForAction(self.main_button_action).setPopupMode(QToolButton.InstantPopup)
         self.layout().addWidget(self.main_button)
         if actions.show_main_button is False:
             self.main_button.setVisible(False)
 
-        # self.toolBarButton.setOrientation(Qt.Orientation.Horizontal)
-        self.toolBarButton.addSeparator()
-        self.toolBarButton.addActions(tool_bar_qt_actions.actions())
-        for x in self.toolBarButton.actions():
-            if hasattr(self.toolBarButton.widgetForAction(x), "setPopupMode"):
-                self.toolBarButton.widgetForAction(x).setPopupMode(
-                    QToolButton.InstantPopup
-                )
+        self.toolBarPanel.addSeparator()
+        self.toolBarPanel.addActions(tool_bar_qt_actions.actions())
+        for x in self.toolBarPanel.actions():
+            if hasattr(self.toolBarPanel.widgetForAction(x), "setPopupMode"):
+                self.toolBarPanel.widgetForAction(x).setPopupMode(QToolButton.InstantPopup)
 
         if actions.show_actions:
-            self.layout().addWidget(self.toolBarButton)
+            self.layout().addWidget(self.toolBarPanel)
 
     def set_context_menu(self, widget):
         widget.setContextMenuPolicy(Qt.ActionsContextMenu)
-        widget.addActions(self.toolBarButton.actions())
+        widget.addActions(self.toolBarPanel.actions())

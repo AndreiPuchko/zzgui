@@ -122,8 +122,8 @@ class databaseApp(ZzApp):
     def on_start(self):
         # self.form_order_lines().run()
         # self.orders()
-        # self.customers()
-        self.filter_orders()
+        self.customers()
+        # self.filter_orders()
         # self.products()
 
     def create_database(self):

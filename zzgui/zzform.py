@@ -656,7 +656,6 @@ class ZzFormWindow:
             stretch=100,
         )
         # place child forms
-        # if not self.zz_form.i_am_child:
         if self.zz_form.max_child_level:
             for action in self.zz_form.actions:
                 if action.get("child_form"):
@@ -715,6 +714,7 @@ class ZzFormWindow:
                     if widget2add is not None:
                         current_frame.add_widget(widget2add)
                         if meta.get("control") == "toolbar":  # context menu for frame
+                            widget2add.hide()
                             widget2add.set_context_menu(current_frame)
                         if action2add is not None:  # context menu for widget
                             action2add.set_context_menu(widget2add)
@@ -823,7 +823,6 @@ class ZzFormWindow:
 
         actions2add = None
         if meta.get("actions") and meta.get("control") != "toolbar":
-            # print(self._get_widget("toolbar", "toolbar"))
             actions2add = self._get_widget("toolbar", "toolbar")(
                 {
                     "control": "toolbar",

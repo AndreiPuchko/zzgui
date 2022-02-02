@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QTextEdit
+from PyQt5.QtWidgets import QTextEdit, QSizePolicy
 
 from zzgui.qt5.zzwidget import ZzWidget
 
@@ -16,7 +16,7 @@ from zzgui.qt5.zzwidget import ZzWidget
 class zztext(QTextEdit, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
-        self.meta = meta
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
         self.set_text(meta.get('data'))
 
     def set_text(self, text):
