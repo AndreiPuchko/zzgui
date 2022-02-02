@@ -15,6 +15,7 @@ from zzgui.zzwindow import ZzWindow
 from zzgui.zzutils import num
 
 import re
+import io
 
 
 zz_app = None
@@ -262,15 +263,21 @@ class ZzSettings:
         self.read()
 
     def read(self):
-        if self.filename == "none":
-            return
-        self.config.read(self.filename)
+        if self.filename in ("none", "memory"):
+            self.filename = io.StringIO("")
+        if isinstance(self.filename, io.StringIO):
+            self.config.read_file(self.filename)
+        else:
+            self.config.read(self.filename)
 
     def write(self):
         if self.filename == "none":
             return
-        with open(self.filename, "w") as configfile:
-            self.config.write(configfile)
+        if isinstance(self.filename, io.StringIO):
+            self.config.write(self.filename)
+        else:
+            with open(self.filename, "w") as configfile:
+                self.config.write(configfile)
 
     def prepSection(self, section):
         return (
@@ -405,9 +412,6 @@ class ZzApp:
     def process_events(self):
         pass
 
-    # def focus_changed(self):
-    #     pass
-
     def on_init(self):
         pass
 
@@ -476,6 +480,9 @@ class ZzApp:
 
     def is_statusbar_visible(self):
         pass
+
+    def get_char_width(self, char = "W"):
+        return 9
 
     def run(self):
         self.main_window.restore_geometry(self.settings)

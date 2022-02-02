@@ -76,8 +76,8 @@ class ZzWindow(ZzFrame):
         left = num(settings.get(self.window_title, "left", "0"))
         top = num(settings.get(self.window_title, "top", "0"))
         self.set_position(left, top)
-        width = num(settings.get(self.window_title, "width", "800"))
-        height = num(settings.get(self.window_title, "height", "600"))
+        width = num(settings.get(self.window_title, "width", "1000"))
+        height = num(settings.get(self.window_title, "height", "800"))
         self.set_size(width, height)
         if num(settings.get(self.window_title, "is_max", "0")):
             self.show_maximized()

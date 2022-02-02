@@ -16,7 +16,7 @@ flake8 = "^4.0.1"
 black = "^21.10b0"
 pylint = "^2.11.1"
 pyinstaller = "^4.7"
-zzdb = "^0.1.4"
+zzdb = "^0.1.6"
 
 [tool.black]
 line-length = 110

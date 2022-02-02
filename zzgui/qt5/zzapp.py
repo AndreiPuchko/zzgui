@@ -27,7 +27,7 @@ from PyQt5.QtWidgets import (
 )
 
 from PyQt5.QtCore import QEvent, Qt
-
+from PyQt5.QtGui import QFontMetrics
 
 from zzgui.qt5.zzwindow import ZzQtWindow
 from zzgui.qt5.zzwindow import layout
@@ -187,6 +187,9 @@ class ZzApp(zzapp.ZzApp, QApplication):
 
     def is_statusbar_visible(self):
         return self.main_window.statusBar().isVisible()
+
+    def get_char_width(self, char="w"):
+        return QFontMetrics(self.font()).width(char)
 
     def run(self):
         self.main_window.restore_geometry(self.settings)

@@ -203,7 +203,7 @@ class ZzForm:
                             label=x["label"],
                             control=x["control"],
                             check=False if x["name"].startswith("/") else True,
-                            datalen=x["datalen"]
+                            datalen=x["datalen"],
                         )
 
                     def before_form_show():
@@ -213,9 +213,7 @@ class ZzForm:
                                 continue
                             column_name = x.split(" in ")[1].strip()
                             column_value = x.split(" in ")[0].strip()[1:-1]
-                            filter_form.w.__getattr__(column_name).set_text(
-                                column_value
-                            )
+                            filter_form.w.__getattr__(column_name).set_text(column_value)
                             filter_form.w.__getattr__(column_name).check.set_checked()
 
                     def valid():
@@ -223,22 +221,16 @@ class ZzForm:
                         filter_list = []
                         for x in filter_form.widgets_list():
                             if x.check and x.check.is_checked():
-                                filter_list.append(
-                                    f"'{x.get_text()}' in {x.meta['name']}"
-                                )
+                                filter_list.append(f"'{x.get_text()}' in {x.meta['name']}")
                         filter_string = " and ".join(filter_list)
                         self.model.set_where(filter_string)
 
                     filter_form.before_form_show = before_form_show
-                    filter_form.valid = lambda: self._zzdialogs.zzWait(
-                        valid, "Sorting..."
-                    )
+                    filter_form.valid = lambda: self._zzdialogs.zzWait(valid, "Sorting...")
                     filter_form.add_ok_cancel_buttons()
                     filter_form.show_mdi_modal_form()
 
-                self.actions.add_action(
-                    "Filter", worker=run_filter_data_form, hotkey="F9"
-                )
+                self.actions.add_action("Filter", worker=run_filter_data_form, hotkey="F9")
 
     def get_table_schema(self):
         rez = []
@@ -668,9 +660,7 @@ class ZzFormWindow:
         if self.zz_form.max_child_level:
             for action in self.zz_form.actions:
                 if action.get("child_form"):
-                    tmp_grid_form.add_control(
-                        "/t", action.get("text", "="), stretch=100
-                    )
+                    tmp_grid_form.add_control("/t", action.get("text", "="), stretch=100)
                     #  create child form!
                     action["child_form_object"] = action.get("child_form")()
 
@@ -822,9 +812,7 @@ class ZzFormWindow:
             if hasattr(widget2add, "label"):
                 widget2add.label = label2add
         if meta.get("check"):  # has checkbox
-            label2add = self._get_widget("check", "check")(
-                {"label": meta["label"], "stretch": 0}
-            )
+            label2add = self._get_widget("check", "check")({"label": meta["label"], "stretch": 0})
             label2add.add_managed_widget(widget2add)
             if not meta.get("data"):
                 widget2add.set_disabled()
@@ -876,26 +864,23 @@ class ZzFormWindow:
         zzapp.zz_app.show_form(self, modal)
 
     def get_grid_list(self):
-        return [
-            self.widgets[x]
-            for x in self.widgets
-            if type(self.widgets[x]).__name__ == "zzgrid"
-        ]
+        return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "zzgrid"]
 
     def get_sub_form_list(self):
-        return [
-            self.widgets[x]
-            for x in self.widgets
-            if type(self.widgets[x]).__name__ == "ZzFormWindow"
-        ]
+        return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "ZzFormWindow"]
 
     def restore_grid_columns(self):
         for grid in self.get_grid_list():
             col_settings = {}
-            for x in self.zz_form.model.headers:
-                data = zzapp.zz_app.settings.get(
-                    self.window_title, f"grid_column__'{x}'"
-                )
+            for count, x in enumerate(self.zz_form.model.headers):
+                data = zzapp.zz_app.settings.get(self.window_title, f"grid_column__'{x}'")
+                if data == "":
+                    if self.zz_form.model.meta[count].get("relation"):
+                        c_w = 35
+                    else:
+                        c_w = int_(self.zz_form.model.meta[count].get("datalen"))
+                    c_w = zzapp.zz_app.get_char_width() * (c_w if c_w < 35 else 35)
+                    data = f"{count}, {c_w}"
                 col_settings[x] = data
             grid.set_column_settings(col_settings)
         for x in self.get_sub_form_list():
@@ -933,8 +918,7 @@ class ZzFormWindow:
         return [
             x
             for x in self.widgets.keys()
-            if hasattr(self.widgets[x], "splitter")
-            and self.widgets[x].splitter is not None
+            if hasattr(self.widgets[x], "splitter") and self.widgets[x].splitter is not None
         ]
 
 
