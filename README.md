@@ -3,7 +3,9 @@
 # How to start 
 ## With docker && x11:
 ```bash
-cd /docker-x11 && ./build_and_run_menu.sh
+git clone https://github.com/AndreiPuchko/zzgui.git
+#                      sudo if necessary 
+cd zzgui/docker-x11 && ./build_and_run_menu.sh
 ```
 ## With PyPI package:
 ```bash
