@@ -35,6 +35,8 @@ $(ColorGreen '1)') basic: main menu, form & widgets
 $(ColorGreen '2)') forms and forms in form
 $(ColorGreen '3)') grid form (CSV data), automatic creation of forms based on data
 $(ColorGreen '4)') progressbar, data loading, sorting and filtering
+$(ColorGreen '5)') nonmodal form
+$(ColorGreen '6)') code editor
 $(ColorGreen '7)') database app (4 tables, mock data loading) - requires a zzdb package
 $(ColorGreen '8)') database app, requires a zzdb package, autoschema
 $(ColorGreen '0)') Exit
