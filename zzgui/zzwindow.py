@@ -20,6 +20,9 @@ class ZzFrame:
     def set_mode(self, mode="v"):
         self.frame_mode = mode
 
+    def set_title(self, title):
+        pass
+
     def add_widget(self, widget=None, label=None):
         if widget is None:
             return
