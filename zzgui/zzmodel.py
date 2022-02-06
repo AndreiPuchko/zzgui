@@ -145,6 +145,12 @@ class ZzModel:
                 value = self._get_related(value, meta)
             elif self.is_strign_for_num(meta):
                 value = meta.get("pic").split(";")[int(num(value)) - 1]
+            elif meta.get("num"):  # Numeric value
+                if num(value) == 0:  # do not show zero
+                    value = ""
+                elif meta.get("pic") == "F":  # financial format
+                    format_string = zzapp.FINANCIAL_FORMAT % meta.get("datadec", 0)
+                    value = format_string.format(num(value))
             elif meta["datatype"] == "date":
                 try:
                     value = datetime.datetime.strptime(value, "%Y-%m-%d").strftime(zzapp.DATA_FORMAT_STRING)
@@ -153,6 +159,8 @@ class ZzModel:
             return value
 
     def is_strign_for_num(self, meta):
+        """ return str data from numeric controls - radio, list, combo
+        """
         return meta.get("num") and ("radio" in meta["control"] or meta["control"] in ("list", "combo"))
 
     def alignment(self, col):

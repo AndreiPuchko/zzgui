@@ -75,6 +75,8 @@ CRUD_BUTTON_OK_MESSAGE = "save data"
 CRUD_BUTTON_CANCEL_TEXT = "Cancel"
 CRUD_BUTTON_CANCEL_MESSAGE = "Do not save data"
 
+FINANCIAL_FORMAT = r"{:,.%sf}"
+
 
 class ZzHeap:
     pass
