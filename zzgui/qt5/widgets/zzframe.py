@@ -41,7 +41,7 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
             self.splitter.addWidget(widget)
             if hasattr(widget, "meta"):
                 # print(widget.meta.get("stretch"), widget)
-                self.splitter.setStretchFactor(self.splitter.count()-1, widget.meta.get("stretch"))
+                self.splitter.setStretchFactor(self.splitter.count()-1, widget.meta.get("stretch", 0))
             # if hasattr(widget, "meta"):
             #     if "toolbar" in widget.meta.get("name", ""):
             #         widget.set_context_menu(self.splitter)
