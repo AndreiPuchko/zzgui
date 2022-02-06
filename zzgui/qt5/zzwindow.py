@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QGri
 
 from PyQt5.QtCore import Qt
 
-from zzgui import zzapp, zzwindow
+from zzgui import zzwindow
 
 zz_align = {
     "": Qt.AlignLeft | Qt.AlignTop,
@@ -32,16 +32,15 @@ zz_align = {
 def layout(arg="h"):
     if arg.lower().startswith("v"):
         layout = QVBoxLayout()
-        # layout = zzVBoxLayout()
         layout.setAlignment(zz_align["7"])
     elif arg.lower().startswith("f"):
         layout = QFormLayout()
-        layout.setLabelAlignment(Qt.AlignRight | Qt.AlignTop)
+        # layout.setLabelAlignment(Qt.AlignRight | Qt.AlignBottom)
+        layout.setLabelAlignment(zz_align["6"])
     elif arg.lower().startswith("g"):
         layout = QGridLayout()
     else:
         layout = QHBoxLayout()
-        # layout = zzHBoxLayout()
         layout.setAlignment(zz_align["7"])
     layout.layout().setContentsMargins(0, 0, 0, 0)
     layout.layout().setSpacing(0)
@@ -89,7 +88,7 @@ class ZzQtWindow(zzwindow.ZzWindow, ZzFrame):
 
     def set_enabled(self, arg=True):
         self.setEnabled(True if arg else False)
-    
+
     def set_title(self, title):
         super().set_title(title)
         QWidget.setWindowTitle(self, title)

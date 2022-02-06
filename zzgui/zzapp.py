@@ -1,3 +1,4 @@
+from os import stat
 import sys
 
 if __name__ == "__main__":
@@ -215,15 +216,11 @@ class ZzControls(list):
             else:
                 meta["datalen"] = 10
 
-        if re.match(
-            ".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE
-        ):
+        if re.match(".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE):
             meta["num"] = True
             if meta.get("pic", "") == "":
                 meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
-                    ""
-                    if num(meta["datadec"]) == 0
-                    else "." + "9" * int(num(meta["datadec"]))
+                    "" if num(meta["datadec"]) == 0 else "." + "9" * int(num(meta["datadec"]))
                 )
             if num(meta.get("alignment", 0)) == 0:
                 meta["alignment"] = 9
@@ -233,22 +230,17 @@ class ZzControls(list):
             and meta["control"] != "script"
         ):
             meta["datalen"] = 0
-            meta["control"] = "edit"
+            meta["control"] = "text"
 
-        if "***" == "".join(
-            ["*" if meta.get(x) else "" for x in ("to_table", "to_column", "related")]
-        ):
+
+        if "***" == "".join(["*" if meta.get(x) else "" for x in ("to_table", "to_column", "related")]):
             meta["relation"] = True
 
-        if re.match(
-            ".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE
-        ):
+        if re.match(".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE):
             meta["num"] = True
             if meta.get("pic", "") == "":
                 meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
-                    ""
-                    if num(meta["datadec"]) == 0
-                    else "." + "9" * int(num(meta["datadec"]))
+                    "" if num(meta["datadec"]) == 0 else "." + "9" * int(num(meta["datadec"]))
                 )
             if meta.get("alignment", -1) == -1:
                 meta["alignment"] = 9
@@ -280,13 +272,7 @@ class ZzSettings:
                 self.config.write(configfile)
 
     def prepSection(self, section):
-        return (
-            re.sub(r"\[.*\]", "", section)
-            .strip()
-            .split("\n")[0]
-            .replace("\n", "")
-            .strip()
-        )
+        return re.sub(r"\[.*\]", "", section).strip().split("\n")[0].replace("\n", "").strip()
 
     def get(self, section="", key="", defaultValue=""):
         section = self.prepSection(section)
@@ -344,9 +330,7 @@ class ZzApp:
             text = text[:-1]
         if text.startswith("|"):
             text = text[1:]
-        self.menu_list.append(
-            {"TEXT": text, "WORKER": worker, "BEFORE": before, "TOOLBAR": toolbar}
-        )
+        self.menu_list.append({"TEXT": text, "WORKER": worker, "BEFORE": before, "TOOLBAR": toolbar})
 
     def build_menu(self):
         self.menu_list = self.reorder_menu(self.menu_list)
@@ -367,9 +351,7 @@ class ZzApp:
                     "TOOLBAR": None,
                 }
             if tmp_dict[x].get("BEFORE") in re_ordered_list:
-                re_ordered_list.insert(
-                    re_ordered_list.index(tmp_dict[x].get("BEFORE")), x
-                )
+                re_ordered_list.insert(re_ordered_list.index(tmp_dict[x].get("BEFORE")), x)
             else:
                 re_ordered_list.append(x)
         return [tmp_dict[x] for x in re_ordered_list]
@@ -481,8 +463,15 @@ class ZzApp:
     def is_statusbar_visible(self):
         pass
 
-    def get_char_width(self, char = "W"):
+    def get_char_width(self, char="W"):
         return 9
+
+    def get_char_height(self):
+        return 9
+
+    @staticmethod
+    def get_open_file_dialoq(header="Open file", path="", filter=""):
+        pass
 
     def run(self):
         self.main_window.restore_geometry(self.settings)

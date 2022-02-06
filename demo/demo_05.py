@@ -14,22 +14,17 @@ import os
 
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
-
-import zzgui.zzdialogs
-from zzgui.zzdialogs import zzMess, zzWait, zzWaitMax, zzWaitStep
 from zzgui.zzmodel import ZzModel
 
-zzgui.zzdialogs.ZzForm = ZzForm
+from zzgui.zzdialogs import zzMess, zzWait, zzWaitMax, zzWaitStep
 
 
 class DemoApp(ZzApp):
     def on_start(self):
         def worker():
             def real_worker():
-                # ZzThread.set_max (60)
                 zzWaitMax(60)
                 for x in range(60):
-                    # ZzThread.step()
                     zzWaitStep()
                     time.sleep(0.06)
 

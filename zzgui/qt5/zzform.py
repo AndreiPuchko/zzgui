@@ -86,6 +86,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
         if self.zz_form.before_form_show() is False:
             self.zz_form.close()
+            return
 
         if not isinstance(self.parent(), QMdiSubWindow):
             self.escapeEnabled = False
@@ -118,6 +119,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         self.shown = True
         if event:
             event.accept()
+        self.zz_form.after_form_show()
 
     def keyPressEvent(self, event: QEvent):
         key = event.key()

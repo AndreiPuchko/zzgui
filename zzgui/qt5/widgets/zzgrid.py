@@ -207,6 +207,7 @@ class zzgrid(QTableView):
                 continue
             column_pos = int_(col_settings[x].split(",")[0])
             column_width = int_(col_settings[x].split(",")[1])
+            # column_width = column_width if column_width else 10
             self.setColumnWidth(headers.get(x), column_width)
             old_visual = self.horizontalHeader().visualIndex(int_(headers[x]))
             self.horizontalHeader().moveSection(old_visual, column_pos)

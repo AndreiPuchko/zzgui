@@ -27,7 +27,14 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
                 self.splitter.setOrientation(Qt.Orientation.Vertical)
             self.layout().addWidget(self.splitter)
         if meta.get("label"):
-            self.setTitle(meta.get("label"))
+            # self.setTitle(meta.get("label"))
+            self.set_title(meta.get("label"))
+
+    def set_title(self, title):
+        self.setTitle(title)
+
+    def get_widget_count(self):
+        return self.layout().count()
 
     def add_widget(self, widget=None, label=None):
         if self.splitter is not None:
@@ -54,10 +61,3 @@ class zzsplitter(QSplitter):
         if sizes:
             sizes = [int(x) for x in sizes.split(",")]
             self.setSizes(sizes)
-
-    # def resizeEvent(self, event: QResizeEvent):
-    #     self.setStretchFactor(0,0)
-    #     for x in range(1, self.count()):
-    #         self.setStretchFactor(x ,0)
-    #     # event.ignore()
-    #     return super().resizeEvent(event)

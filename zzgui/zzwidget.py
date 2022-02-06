@@ -42,6 +42,9 @@ class ZzWidget:
     def set_enabled(self, arg=True):
         pass
 
+    def set_visible(self, arg=True):
+        pass
+
     def set_tooltip(self, mess):
         pass
 

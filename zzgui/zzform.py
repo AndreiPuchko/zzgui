@@ -24,6 +24,7 @@ class ZzForm:
         super().__init__()
         self.title = title
         self.form_stack = []
+        self.heap = zzapp.ZzHeap()
         self.actions = zzapp.ZzActions()
         self.controls = zzapp.ZzControls()
         self.system_controls = zzapp.ZzControls()
@@ -247,6 +248,7 @@ class ZzForm:
                     "column": x["name"],
                     "datatype": x["datatype"],
                     "datalen": x["datalen"],
+                    "datadec": x["datadec"],
                     "to_table": x["to_table"],
                     "to_column": x["to_column"],
                     "related": x["related"],
@@ -500,6 +502,9 @@ class ZzForm:
     def before_form_show(self):
         pass
 
+    def after_form_show(self):
+        pass
+
     def add_control(
         self,
         name="",
@@ -571,7 +576,6 @@ class ZzFormWindow:
         self.shown = False
         self.zz_form = zz_form
         self.title = ""
-        self.heap = zzapp.ZzHeap()
         self.widgets = {}
         self.tab_widget = None
         # Must be defined in any subclass
@@ -690,12 +694,11 @@ class ZzFormWindow:
 
         if controls == []:
             controls = self.zz_form.get_controls()
+        # set deafault layout to Form if first line not a layout def
         if controls and not controls[0].get("name", "").startswith("/"):
             controls.insert(0, {"name": "/f"})
         # Create widgets
         for meta in controls:
-            if meta.get("noform"):
-                continue
             meta["form"] = self.zz_form
             if meta.get("noform", ""):
                 continue
@@ -705,10 +708,27 @@ class ZzFormWindow:
             if not (meta.get("name", "") == ("/t") and self.tab_widget is not None):
                 label2add, widget2add, action2add = self.widget(meta)
                 if current_frame.frame_mode == "f":  # form layout
+                    if label2add:
+                        label2add.setContentsMargins(0, zzapp.zz_app.get_char_height() / 4, 0, 0)
+                    if hasattr(widget2add, "frame_mode"):  # add any frame into form frame
+                        label2add = self._get_widget("label")({"label": meta.get("label", "")})
+                        widget2add.set_title("")
+                        widget2add.label = label2add
+                        label2add.setContentsMargins(0, zzapp.zz_app.get_char_height() / 2 - 1, 0, 0)
                     current_frame.add_row(label2add, widget2add)
                 else:  # v- h- box layout
                     if label2add is not None:
-                        current_frame.add_widget(label2add)
+                        if (
+                            current_frame != self
+                            and current_frame.get_widget_count() == 0
+                            and current_frame.label
+                            and frame_stack[-2].frame_mode == "f"
+                        ):
+                            current_frame.label.set_text(label2add.get_text())
+                            if widget2add:
+                                widget2add.label = current_frame.label
+                        else:
+                            current_frame.add_widget(label2add)
                     if action2add is not None:
                         current_frame.add_widget(action2add)
                     if widget2add is not None:
@@ -794,6 +814,8 @@ class ZzFormWindow:
             elif "/t" in name:  # Tabpage
                 label2add = None
                 control = "tab"
+            elif control.startswith("code"):
+                control = "code"
             elif "radio" in control:
                 control = "radio"
             elif "toolbar" in control:
@@ -802,12 +824,7 @@ class ZzFormWindow:
                 control = "space"
 
             widget_class = self._get_widget(control, class_name)
-
-            if widget_class:
-                if control == "grid":
-                    widget2add = widget_class(meta)
-                else:
-                    widget2add = widget_class(meta)
+            widget2add = widget_class(meta)
 
             if hasattr(widget2add, "label"):
                 widget2add.label = label2add

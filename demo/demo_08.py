@@ -62,21 +62,26 @@ class databaseApp(ZzApp):
 
         form.add_control(name="customer_id", label="Customer Id", datatype="int", pk="*")
         form.add_control("name", "Name", datatype="char", datalen=100)
+        form.add_control("/h", "3333")
+        form.add_control("ddd1", "T1", datatype="char", datalen=5)
+        form.add_control("ddd2", "T2", datatype="char", datalen=5)
+        form.add_control("/s")
+        form.add_control("/")
         form.add_control("vip", "VIP", datatype="char", datalen=1, control="check", pic="VIP client")
 
-        status_control_num = {"datatype": "int", "datalen": 1, "pic": "active;frozen;blocked"}
-        status_control_char = {"datatype": "char", "datalen": 15, "pic": "active;frozen;blocked"}
+        # status_control_num = {"datatype": "int", "datalen": 1, "pic": "active;frozen;blocked"}
+        # status_control_char = {"datatype": "char", "datalen": 15, "pic": "active;frozen;blocked"}
 
-        form.add_control("radio_status", "Num Radio Status", control="radio", **status_control_num)
-        form.add_control("radio_status_char", "Char Radio Status", control="radio", **status_control_char)
+        # form.add_control("radio_status", "Num Radio Status", control="radio", **status_control_num)
+        # form.add_control("radio_status_char", "Char Radio Status", control="radio", **status_control_char)
 
-        form.add_control("combo_status", "Num Combo Status", control="combo", **status_control_num)
-        form.add_control("combo_status", "Char Combo Status", control="combo", **status_control_char)
+        # form.add_control("combo_status", "Num Combo Status", control="combo", **status_control_num)
+        # form.add_control("combo_status", "Char Combo Status", control="combo", **status_control_char)
 
-        form.add_control("/")
-        form.add_control("/h")
-        form.add_control("list_status", "Num List Status", control="list", **status_control_num)
-        form.add_control("list_status_char", "Char List Status", control="list", **status_control_char)
+        # form.add_control("/")
+        # form.add_control("/h")
+        # form.add_control("list_status", "Num List Status", control="list", **status_control_num)
+        # form.add_control("list_status_char", "Char List Status", control="list", **status_control_char)
 
         cursor: ZzCursor = self.db.table(table_name="customers")
         model = ZzCursorModel(cursor)

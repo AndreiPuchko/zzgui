@@ -45,6 +45,9 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
     def is_enabled(self):
         return self.isEnabled()
 
+    def set_visible(self, arg=True):
+        self.setVisible(arg)
+
     def is_readonly(self):
         if hasattr(self, "isReadOnly"):
             return self.isReadOnly()

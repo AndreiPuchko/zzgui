@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QToolButton,
     QToolBar,
+    QFileDialog,
     QTabWidget,
     QTabBar,
     QMdiArea,
@@ -62,6 +63,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
                 self.disable_tabbar(True)
 
             form.exec_()
+            # form.show()
 
             if modal == "super":  # real modal dialog
                 self.disable_toolbar(False)
@@ -190,6 +192,13 @@ class ZzApp(zzapp.ZzApp, QApplication):
 
     def get_char_width(self, char="w"):
         return QFontMetrics(self.font()).width(char)
+
+    def get_char_height(self):
+        return QFontMetrics(self.font()).height()
+
+    @staticmethod
+    def get_open_file_dialoq(header="Open file", path="", filter=""):
+        return QFileDialog.getOpenFileName(None, header, path, filter)[0]
 
     def run(self):
         self.main_window.restore_geometry(self.settings)
