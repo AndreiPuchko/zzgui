@@ -22,6 +22,7 @@ class zzradio(QFrame, ZzWidget):
         self.setLayout(QVBoxLayout() if "v" in meta.get("control") else QHBoxLayout())
         self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().setAlignment(zz_align["7"])
+        
         self.button_list = []
         # self.meta = meta
         for item in meta.get("pic", "").split(";"):
@@ -30,16 +31,18 @@ class zzradio(QFrame, ZzWidget):
         self.button_list[0].setChecked(True)
 
     def set_text(self, text):
-        if self.meta.get("num"):
-            index = int_(text)
-            index = index - 1 if index else 0
-        else:
-            index_list = [x for x in range(len(self.button_list)) if self.button_list[x].get_text() == text]
-            if index_list:
-                index = index_list[0]
+        if hasattr(self, "button_list"):
+            if self.meta.get("num"):
+                index = int_(text)
+                index = index - 1 if index else 0
             else:
-                index = 0
-        self.button_list[index].setChecked(True)
+                
+                index_list = [x for x in range(len(self.button_list)) if self.button_list[x].get_text() == text]
+                if index_list:
+                    index = index_list[0]
+                else:
+                    index = 0
+            self.button_list[index].setChecked(True)
 
     def get_text(self):
         index_list = [x for x in range(len(self.button_list)) if self.button_list[x].isChecked()]
