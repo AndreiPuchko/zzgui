@@ -23,6 +23,12 @@ class ZzFrame:
     def set_title(self, title):
         pass
 
+    def hide_border(self):
+        pass
+        # self.setObjectName("grb")
+        # self.setStyleSheet("QGroupBox#grb {border:0}")
+        # self.set_title("")
+
     def add_widget(self, widget=None, label=None):
         if widget is None:
             return

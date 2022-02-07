@@ -59,7 +59,7 @@ class databaseApp(ZzApp):
         return super().on_init()
 
     def form_customers(self):
-        form = ZzForm("Customers900000331")
+        form = ZzForm("Customers")
 
         form.add_control(name="customer_id", label="Customer Id", datatype="int", pk="*")
         form.add_control("name", "Name", datatype="char", datalen=100)

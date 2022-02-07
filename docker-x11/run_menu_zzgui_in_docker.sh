@@ -1,16 +1,16 @@
 ##
 # Color  Variables
 ##
-green='\e[32m'
-blue='\e[34m'
-yellow='\e[33m\e[104m'
-clear='\e[0m'
+green=''
+blue=''
+yellow=''
+clear=''
 
 ColorGreen(){
 	echo  $green$1$clear
 }
 ColorTitle(){
-	echo  '\e[34m\e[103m'$1$clear
+	echo  ''$1$clear
 }
 
 ColorYellow(){
