@@ -712,9 +712,8 @@ class ZzFormWindow:
                         label2add.setContentsMargins(0, zzapp.zz_app.get_char_height() / 4, 0, 0)
                     if hasattr(widget2add, "frame_mode"):  # add any frame into form frame
                         label2add = self._get_widget("label")({"label": meta.get("label", "")})
-                        widget2add.set_title("")
+                        widget2add.hide_border()
                         widget2add.label = label2add
-                        label2add.setContentsMargins(0, zzapp.zz_app.get_char_height() / 2 - 1, 0, 0)
                     current_frame.add_row(label2add, widget2add)
                 else:  # v- h- box layout
                     if label2add is not None:
@@ -892,10 +891,10 @@ class ZzFormWindow:
                 data = zzapp.zz_app.settings.get(self.window_title, f"grid_column__'{x}'")
                 if data == "":
                     if self.zz_form.model.meta[count].get("relation"):
-                        c_w = 35
+                        c_w = zzapp.GRID_COLUMN_WIDTH
                     else:
                         c_w = int_(self.zz_form.model.meta[count].get("datalen"))
-                    c_w = zzapp.zz_app.get_char_width() * (c_w if c_w < 35 else 35)
+                    c_w = zzapp.zz_app.get_char_width() * (min(c_w, zzapp.GRID_COLUMN_WIDTH))
                     data = f"{count}, {c_w}"
                 col_settings[x] = data
             grid.set_column_settings(col_settings)

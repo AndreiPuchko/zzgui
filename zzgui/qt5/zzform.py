@@ -42,26 +42,72 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         if paw is not None:
             # save default == minimal size
             sizeBefore = paw.size()
-            left = num(settings.get(self.window_title, "left", "0"))
-            top = num(settings.get(self.window_title, "top", "0"))
+
+            width = num(settings.get(self.window_title, "width", "-1"))
+            height = num(settings.get(self.window_title, "height", "-1"))
+            if -1 in [width, height]:  # bad settings or first run
+                width = paw.parent().size().width()*0.9 if self.mode == "grid" else 0.5
+                height = paw.parent().size().height()*0.9 if self.mode == "grid" else 0.5
+            paw.resize(width, height)
+
+            sizeAfter = paw.size()
+            self.expand_size(paw, sizeBefore, sizeAfter)
+
+            left = num(settings.get(self.window_title, "left", "-1"))
+            top = num(settings.get(self.window_title, "top", "-1"))
+            if -1 in [left, top]:  # bad settings or first run
+                left, top = self.center_pos()
 
             paw.move(left, top)
-            width = num(settings.get(self.window_title, "width", "0"))
-            height = num(settings.get(self.window_title, "height", "0"))
-            if width > 0 and height > 0:
-                paw.resize(width, height)
 
-            # in case the minimal size is begger than last saved in the settings - correction
-            sizeAfter = paw.size()
-            wDelta = 0 if sizeBefore.width() < sizeAfter.width() else sizeBefore.width() - sizeAfter.width()
-            hDelta = (
-                0 if sizeBefore.height() < sizeAfter.height() else sizeBefore.height() - sizeAfter.height()
-            )
-            if wDelta or hDelta:
-                paw.resize(paw.size().width() + wDelta, paw.size().height() + hDelta)
+            self.fit_size_and_pos(paw)
+
             if num(settings.get(self.window_title, "is_max", "0")):
                 self.showMaximized()
                 paw.move(0, 0)
+
+    def center_pos(self):
+        left = (self.parent().parent().size().width() - self.parent().size().width()) / 2
+        top = (self.parent().parent().size().height() - self.parent().size().height()) / 2
+        return left, top
+
+    def expand_size(self, paw, sizeBefore, sizeAfter):
+        wDelta = 0 if sizeBefore.width() < sizeAfter.width() else sizeBefore.width() - sizeAfter.width()
+        hDelta = (
+                0 if sizeBefore.height() < sizeAfter.height() else sizeBefore.height() - sizeAfter.height()
+            )
+        if wDelta or hDelta:
+            paw.resize(paw.size().width() + wDelta, paw.size().height() + hDelta)
+
+    def fit_size_and_pos(self, paw):
+        """ ensure form fits outside window
+        """
+        parent_size = paw.parent().size()
+
+        size = paw.size()
+        original_size = paw.size()
+
+        pos = paw.pos()
+        orginal_pos = paw.pos()
+        # width
+        if parent_size.width() - (size.width()) < 0:
+            size.setWidth(parent_size.width())
+        if pos.x() + size.width() > parent_size.width():
+            pos.setX(parent_size.width() - size.width())
+        if pos.x() < 0:
+            pos.setX(0)
+        # height
+        if parent_size.height() - (size.height()) < 0:
+            size.setHeight(parent_size.height())
+
+        if pos.y() + size.height() > parent_size.height():
+            pos.setY(parent_size.height() - size.height())
+        if pos.y() < 0:
+            pos.setY(0)
+        if orginal_pos != pos:
+            paw.move(pos)
+        if size != original_size:
+            paw.resize(size)
 
     def set_position(self, left, top):
         paw = self.parent()

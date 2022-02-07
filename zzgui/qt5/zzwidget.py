@@ -19,6 +19,7 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
     def __init__(self, meta):
         super().__init__()
         zzwidget.ZzWidget.__init__(self, meta)
+        # self.setContentsMargins(0, 0, 0, 0)
 
     def set_tooltip(self, mess):
         self.setToolTip(mess)

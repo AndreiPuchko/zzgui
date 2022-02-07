@@ -22,9 +22,8 @@ class zzradio(QFrame, ZzWidget):
         self.setLayout(QVBoxLayout() if "v" in meta.get("control") else QHBoxLayout())
         self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().setAlignment(zz_align["7"])
-        
+        self.layout().setSpacing(0)
         self.button_list = []
-        # self.meta = meta
         for item in meta.get("pic", "").split(";"):
             self.button_list.append(zzRadioButton(item, self))
             self.layout().addWidget(self.button_list[-1])
@@ -36,8 +35,9 @@ class zzradio(QFrame, ZzWidget):
                 index = int_(text)
                 index = index - 1 if index else 0
             else:
-                
-                index_list = [x for x in range(len(self.button_list)) if self.button_list[x].get_text() == text]
+                index_list = [
+                    x for x in range(len(self.button_list)) if self.button_list[x].get_text() == text
+                ]
                 if index_list:
                     index = index_list[0]
                 else:

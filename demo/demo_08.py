@@ -35,6 +35,7 @@ def mock_data_load(db: ZzDb):
 class databaseApp(ZzApp):
     def on_start(self):
         self.customers()
+        pass
 
     def create_database(self):
         self.db = ZzDb("sqlite3", database_name=":memory:")
@@ -58,7 +59,7 @@ class databaseApp(ZzApp):
         return super().on_init()
 
     def form_customers(self):
-        form = ZzForm("Customers")
+        form = ZzForm("Customers900000331")
 
         form.add_control(name="customer_id", label="Customer Id", datatype="int", pk="*")
         form.add_control("name", "Name", datatype="char", datalen=100)
@@ -80,7 +81,7 @@ class databaseApp(ZzApp):
         form.add_control("combo_status", "Char Combo Status", control="combo", **status_control_char)
 
         form.add_control("/")
-        form.add_control("/h")
+        form.add_control("/h", "Group box title")
         form.add_control("list_status", "Num List Status", control="list", **status_control_num)
         form.add_control("list_status_char", "Char List Status", control="list", **status_control_char)
 

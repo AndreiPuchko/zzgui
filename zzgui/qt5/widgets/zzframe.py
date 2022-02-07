@@ -27,8 +27,12 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
                 self.splitter.setOrientation(Qt.Orientation.Vertical)
             self.layout().addWidget(self.splitter)
         if meta.get("label"):
-            # self.setTitle(meta.get("label"))
             self.set_title(meta.get("label"))
+
+    def hide_border(self):
+        self.setObjectName("grb")
+        self.setStyleSheet("QGroupBox#grb {border:0}")
+        self.set_title("")
 
     def set_title(self, title):
         self.setTitle(title)

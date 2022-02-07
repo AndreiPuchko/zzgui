@@ -1,4 +1,3 @@
-from os import stat
 import sys
 
 if __name__ == "__main__":
@@ -76,7 +75,7 @@ CRUD_BUTTON_CANCEL_TEXT = "Cancel"
 CRUD_BUTTON_CANCEL_MESSAGE = "Do not save data"
 
 FINANCIAL_FORMAT = r"{:,.%sf}"
-
+GRID_COLUMN_WIDTH = 18
 
 class ZzHeap:
     pass
@@ -294,7 +293,7 @@ class ZzSettings:
 
 
 class ZzApp:
-    def __init__(self, title=""):
+    def __init__(self, title="", main_window_class = None):
         zzapp.zz_app = self
         self.window_title = title
         self.heap = ZzHeap()
@@ -302,20 +301,19 @@ class ZzApp:
         self.style_file = ""
         self.settings_file = ""
 
+        self.settings = ZzSettings(self.settings_file)
+        if main_window_class:
+            self.main_window = main_window_class(title)
+        else:
+            self.main_window = ZzMainWindow(title)
+        self.menu_list = []
         self.style_file = self.get_argv("style")
         if self.style_file == "":
             self.style_file = "zz_gui.qss"
         self.settings_file = self.get_argv("ini")
 
         self.set_style()
-
-        self.settings = ZzSettings(self.settings_file)
-        self.main_window = ZzMainWindow(title)
-        self.menu_list = []
-        self.main_window.restore_geometry(self.settings)
         self.on_init()
-
-        self.main_window.show()
 
     def set_style(self):
         pass
@@ -476,7 +474,6 @@ class ZzApp:
         pass
 
     def run(self):
-        self.main_window.restore_geometry(self.settings)
         self.build_menu()
         self.on_start()
 
@@ -485,32 +482,16 @@ class ZzMainWindow(ZzWindow):
     def __init__(self, title=""):
         super().__init__()
         self.window_title = title
-        self.settings = ZzSettings()
+        # self.settings = ZzSettings()
         self.menu_list = []
         self._main_menu = {}
-        # self.on_init()
 
         self.zz_toolbar = None
         self.zz_tabwidget = None
 
-    # def zz_layout(self):
-    #     pass
-
-    # def _run(self):
-    #     self.restore_geometry(self.settings)
-    #     self.build_menu()
-    #     self.show_menubar(True)
-    #     self.on_start()
-    #     return self
-
     def show(self):
         pass
 
-    # def _close(self):
-    #     self.save_geometry(self.settings)
-
-    # def _on_init(self):
-    #     pass
-
-    def on_start(self):
+    def close(self):
         pass
+        # self.save_geometry(self.settings)

@@ -38,8 +38,7 @@ import zzgui.zzapp as zzapp
 class ZzApp(zzapp.ZzApp, QApplication):
     def __init__(self, title=""):
         QApplication.__init__(self, [])
-        super().__init__(title)
-        self.main_window = ZzMainWindow(title)
+        super().__init__(title, main_window_class=ZzMainWindow)
         qApp.focusChanged.connect(self.focus_changed)
 
     def show_form(self, form=None, modal="modal"):
@@ -55,6 +54,7 @@ class ZzApp(zzapp.ZzApp, QApplication):
                 prev_mdi_window.setDisabled(True)
 
             self.main_window.zz_tabwidget.currentWidget().addSubWindow(form)
+
             self.set_tabbar_text(form.window_title)
 
             if modal == "super":  # real modal dialog

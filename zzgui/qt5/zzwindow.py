@@ -35,15 +35,14 @@ def layout(arg="h"):
         layout.setAlignment(zz_align["7"])
     elif arg.lower().startswith("f"):
         layout = QFormLayout()
-        # layout.setLabelAlignment(Qt.AlignRight | Qt.AlignBottom)
         layout.setLabelAlignment(zz_align["6"])
+        layout.layout().setSpacing(2)
     elif arg.lower().startswith("g"):
         layout = QGridLayout()
     else:
         layout = QHBoxLayout()
         layout.setAlignment(zz_align["7"])
     layout.layout().setContentsMargins(0, 0, 0, 0)
-    layout.layout().setSpacing(0)
     return layout
 
 
@@ -56,9 +55,16 @@ class ZzFrame(zzwindow.ZzFrame, QWidget):
         self.setLayout(layout(mode))
 
     def insert_widget(self, pos=None, widget=None):
+        # if widget:
+        #     # widget.setContentsMargins(0,20, 0, 0)
+        #     if widget.label:
+        #         print("--",widget, widget.label.get_text())
         self.layout().addWidget(widget)
 
     def add_row(self, label=None, widget=None):
+        # if widget:
+        #     widget.setContentsMargins(0, 0, 0, 0)
+        #     print("f", widget, widget.label.get_text())
         self.layout().addRow(label, widget)
 
 
