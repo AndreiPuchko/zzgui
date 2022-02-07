@@ -300,6 +300,7 @@ class ZzApp:
         self.db = None
         self.style_file = ""
         self.settings_file = ""
+        self.settings_file = self.get_argv("ini")
 
         self.settings = ZzSettings(self.settings_file)
         if main_window_class:
@@ -310,7 +311,6 @@ class ZzApp:
         self.style_file = self.get_argv("style")
         if self.style_file == "":
             self.style_file = "zz_gui.qss"
-        self.settings_file = self.get_argv("ini")
 
         self.set_style()
         self.on_init()
