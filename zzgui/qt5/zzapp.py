@@ -198,7 +198,11 @@ class ZzApp(zzapp.ZzApp, QApplication):
 
     @staticmethod
     def get_open_file_dialoq(header="Open file", path="", filter=""):
-        return QFileDialog.getOpenFileName(None, header, path, filter)[0]
+        return QFileDialog.getOpenFileName(None, header, path, filter)
+
+    @staticmethod
+    def get_save_file_dialoq(header="Save file", path="", filter=""):
+        return QFileDialog.getSaveFileName(None, header, path, filter)
 
     def run(self):
         self.main_window.restore_geometry(self.settings)

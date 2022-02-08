@@ -32,8 +32,15 @@ class ZzModel:
 
         self.meta = []
 
+        # CRUD flags
         self.readonly = True
+
+        self.delete_enabled = False
+        self.insert_enabled = False
+        self.update_enabled = False
+
         self.filterable = False
+        
         self.data_changed = False
 
         self.order_text = ""
@@ -159,8 +166,7 @@ class ZzModel:
             return value
 
     def is_strign_for_num(self, meta):
-        """ return str data from numeric controls - radio, list, combo
-        """
+        """return str data from numeric controls - radio, list, combo"""
         return meta.get("num") and ("radio" in meta["control"] or meta["control"] in ("list", "combo"))
 
     def alignment(self, col):
@@ -217,12 +223,17 @@ class ZzModel:
                 rez.append([x, model_value])
         return rez
 
+    def data_export(self, file):
+        pass
+
+    def data_import(self, file):
+        pass
+
 
 class ZzCsvModel(ZzModel):
     def __init__(self, csv_file_object=None):
         super().__init__()
         csv_dict = csv.DictReader(csv_file_object)
-
         # If there are names with space -  replace spaces in columns names
         if [filename for filename in csv_dict.fieldnames if " " in filename]:
             fieldnames = [x.replace(" ", "_") for x in csv_dict.fieldnames]
@@ -296,7 +307,11 @@ class ZzCursorModel(ZzModel):
     def __init__(self, cursor: ZzCursor = None):
         super().__init__()
         self.cursor = cursor
-        # print("init",self, self.cursor.table_name)
+
+        self.readonly = False
+        self.delete_enabled = False
+        self.insert_enabled = False
+        self.update_enabled = False
 
     def get_table_name(self):
         return self.cursor.table_name
@@ -315,8 +330,8 @@ class ZzCursorModel(ZzModel):
     def delete(self, current_row=0):
         self.set_data_error()
         record = self.get_record(current_row)
-        if self.cursor.delete(record):
-            self.refresh()
+        if self.cursor.delete(record, refresh=False):
+            # self.refresh()
             return True
         else:
             self.set_data_error(self.cursor.last_sql_error())
@@ -365,3 +380,16 @@ class ZzCursorModel(ZzModel):
         self.cursor.set_where(where_text)
         self.refresh()
         return super().set_where(where_text)
+
+    def data_export(self, file: str):
+        if file.lower().endswith(".csv"):
+            self.cursor.export_csv(file)
+        else:
+            self.cursor.export_json(file)
+
+    def data_import(self, file: str):
+        if file.lower().endswith(".csv"):
+            self.cursor.import_csv(file)
+        else:
+            self.cursor.import_json(file)
+        self.refresh()

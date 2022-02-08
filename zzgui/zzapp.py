@@ -21,6 +21,9 @@ import io
 zz_app = None
 
 ASK_REMOVE_RECORD_TEXT = "You are about to remove current record! Are You Sure?"
+ASK_REMOVE_RECORDS_TEXT = "You are about to remove records<b>(%s)</b>! Are You Sure?"
+REMOVE_RECORD_ERROR_TEXT = "Remove record error"
+
 DATA_FORMAT_STRING = "%d.%m.%Y"
 
 ACTION_VIEW_TEXT = "View"
@@ -76,6 +79,7 @@ CRUD_BUTTON_CANCEL_MESSAGE = "Do not save data"
 
 FINANCIAL_FORMAT = r"{:,.%sf}"
 GRID_COLUMN_WIDTH = 18
+
 
 class ZzHeap:
     pass
@@ -233,7 +237,6 @@ class ZzControls(list):
             meta["datalen"] = 0
             meta["control"] = "text"
 
-
         if "***" == "".join(["*" if meta.get(x) else "" for x in ("to_table", "to_column", "related")]):
             meta["relation"] = True
 
@@ -293,7 +296,7 @@ class ZzSettings:
 
 
 class ZzApp:
-    def __init__(self, title="", main_window_class = None):
+    def __init__(self, title="", main_window_class=None):
         zzapp.zz_app = self
         self.window_title = title
         self.heap = ZzHeap()
@@ -471,6 +474,10 @@ class ZzApp:
 
     @staticmethod
     def get_open_file_dialoq(header="Open file", path="", filter=""):
+        pass
+
+    @staticmethod
+    def get_save_file_dialoq(header="Save file", path="", filter=""):
         pass
 
     def run(self):

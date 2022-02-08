@@ -177,11 +177,16 @@ class zzgrid(QTableView):
             event.text()
             and event.key() not in (Qt.Key_Escape, Qt.Key_Enter, Qt.Key_Return)
             and self.model().rowCount() >= 1
+            and event.modifiers() != Qt.ControlModifier
+            and event.modifiers() != Qt.AltModifier
         ):
             lookup_widget = zz_grid_lookup(self, event.text())
             lookup_widget.show(self, self.currentIndex().column())
         else:
             super().keyPressEvent(event)
+
+    def get_selected_rows(self):
+        return [x.row() for x in self.selectionModel().selectedRows()]
 
     def get_columns_headers(self):
         rez = {}

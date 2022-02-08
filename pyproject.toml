@@ -7,7 +7,7 @@ license = "Apache 2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.6"
+python = ">=3.7"
 PyQt5 = "^5.15.6"
 QScintilla = "^2.13.1"
 

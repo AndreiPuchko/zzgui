@@ -147,7 +147,7 @@ class ZzForm:
                 hotkey=zzapp.ACTION_VIEW_HOTKEY,
                 tag="view",
             )
-        if is_crud and self.model.readonly:
+        if is_crud and not self.model.readonly:
             tmp_actions.add_action(
                 text=zzapp.ACTION_NEW_TEXT,
                 worker=lambda: self.show_crud_form(NEW),
@@ -358,15 +358,34 @@ class ZzForm:
         self.set_crud_form_data()
 
     def crud_delete(self):
-        if self._zzdialogs.zzAskYN(zzapp.ASK_REMOVE_RECORD_TEXT):
-            if self.model.delete(self.current_row) is not True:
-                self._zzdialogs.zzMess(self.model.get_data_error())
-            else:
-                self.set_grid_index(self.current_row)
+        selected_rows = self.grid_form.get_grid_selected_rows()
+        if len(selected_rows) == 1:
+            ask_text = zzapp.ASK_REMOVE_RECORD_TEXT
+        else:
+            ask_text = zzapp.ASK_REMOVE_RECORDS_TEXT % len(selected_rows)
+        if selected_rows and self._zzdialogs.zzAskYN(ask_text):
+            show_error_messages = True
+            for row in selected_rows:
+                if self.model.delete(row) is not True and show_error_messages:
+                    if selected_rows.index(row) == len(selected_rows) - 1:
+                        self._zzdialogs.zzMess(self.model.get_data_error())
+                    else:
+                        if (
+                            self._zzdialogs.zzAskYN(
+                                zzapp.REMOVE_RECORD_ERROR_TEXT
+                                + "<br>"
+                                + self.model.get_data_error()
+                                + "<br>"
+                                + "Do not show next errors?"
+                            )
+                            == 2
+                        ):
+                            show_error_messages = False
+            self.model.refresh()
+            self.set_grid_index(row)
 
     def crud_save(self):
         crud_data = self.get_crud_form_data()
-        # print(crud_data)
         if self.crud_mode in [EDIT, VIEW]:
             rez = self.model.update(crud_data, self.current_row)
             self.set_grid_index(self.current_row)
@@ -569,6 +588,31 @@ class ZzForm:
         del d["self"]
         self.actions.add_action(**d)
 
+    def validate_impexp_file_name(self, file, filetype):
+        filetype = f".{filetype[:3].lower()}"
+        file += "" if file.lower().endswith(filetype) else filetype
+        return file
+
+    def grid_data_export(self):
+        file, filetype = zzapp.zz_app.get_save_file_dialoq("Export data", filter="CSV (*.csv);;JSON(*.json)")
+        if not file:
+            return
+        file = self.validate_impexp_file_name(file, filetype)
+        try:
+            self.model.data_export(file)
+        except Exception:
+            self._zzdialogs.zzMess(f"Export error: {file}")
+
+    def grid_data_import(self):
+        file, filetype = zzapp.zz_app.get_open_file_dialoq("Export data", filter="CSV (*.csv);;JSON(*.json)")
+        if not file:
+            return
+        file = self.validate_impexp_file_name(file, filetype)
+        try:
+            self.model.data_import(file)
+        except Exception:
+            self._zzdialogs.zzMess(f"Export error: {file}")
+
 
 class ZzFormWindow:
     def __init__(self, zz_form: ZzForm):
@@ -618,6 +662,10 @@ class ZzFormWindow:
             icon=zzapp.ACTION_LAST_ROW_ICON,
             hotkey=zzapp.ACTION_LAST_ROW_HOTKEY,
         )
+        actions.add_action(text="-")
+        actions.add_action(text="Extra|Exp", worker=self.zz_form.grid_data_export)
+        actions.add_action(text="Extra|Imp", worker=self.zz_form.grid_data_import)
+
         if not self.zz_form.i_am_child:
             actions.add_action(text="-")
             actions.add_action(
@@ -625,6 +673,7 @@ class ZzFormWindow:
                 worker=self.close,
                 icon=zzapp.ACTION_CLOSE_ICON,
             )
+
         return actions
 
     def move_grid_index(self, direction=None):
@@ -643,6 +692,9 @@ class ZzFormWindow:
 
     def get_grid_index(self):
         return self.widgets["form__grid"].current_index()
+
+    def get_grid_selected_rows(self):
+        return self.widgets["form__grid"].get_selected_rows()
 
     def get_grid_row_count(self):
         return self.widgets["form__grid"].row_count()
