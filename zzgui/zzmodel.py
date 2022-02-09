@@ -323,7 +323,6 @@ class ZzCursorModel(ZzModel):
         return self.cursor.record(row)
 
     def refresh(self):
-        # print("refre",self, self.cursor.table_name)
         super().refresh()
         self.cursor.refresh()
 
@@ -331,7 +330,6 @@ class ZzCursorModel(ZzModel):
         self.set_data_error()
         record = self.get_record(current_row)
         if self.cursor.delete(record, refresh=False):
-            # self.refresh()
             return True
         else:
             self.set_data_error(self.cursor.last_sql_error())
@@ -360,9 +358,9 @@ class ZzCursorModel(ZzModel):
         return db.get(to_table, filter, related)
 
     def set_order(self, order_data):
-        super().set_order(order_data=order_data)
-        colname = self.order_text
-        self.cursor.set_order(colname)
+        if self.cursor.table_name:
+            super().set_order(order_data=order_data)
+            self.cursor.set_order(self.order_text)
 
     def add_column(self, meta):
         """update metadata from db"""

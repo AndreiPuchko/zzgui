@@ -175,7 +175,7 @@ class zzgrid(QTableView):
         # if event.key() in [Qt.Key_Asterisk]:
         if (
             event.text()
-            and event.key() not in (Qt.Key_Escape, Qt.Key_Enter, Qt.Key_Return)
+            and event.key() not in (Qt.Key_Escape, Qt.Key_Enter, Qt.Key_Return, Qt.Key_Space)
             and self.model().rowCount() >= 1
             and event.modifiers() != Qt.ControlModifier
             and event.modifiers() != Qt.AltModifier

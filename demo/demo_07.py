@@ -1,5 +1,5 @@
+import sys
 if __name__ == "__main__":
-    import sys
 
     sys.path.insert(0, ".")
 
@@ -122,9 +122,10 @@ class databaseApp(ZzApp):
     def on_start(self):
         # self.form_order_lines().run()
         # self.orders()
-        self.customers()
+        # self.customers()
         # self.filter_orders()
         # self.products()
+        self.show_sales()
 
     def create_database(self):
         self.db = ZzDb("sqlite3", database_name=":memory:")
@@ -140,6 +141,7 @@ class databaseApp(ZzApp):
         self.add_menu("Catalogs|Customers", self.customers, toolbar=1)
         self.add_menu("Catalogs|Products", self.products, toolbar=1)
         self.add_menu("Documents|Orders", self.filter_orders, toolbar=1)
+        self.add_menu("Reports|Sales", lambda:self.show_sales(), toolbar=1)
         return super().on_init()
 
     def form_customers(self):
@@ -287,6 +289,42 @@ class databaseApp(ZzApp):
         form.add_ok_cancel_buttons()
         return form
 
+    def show_sales(self):
+        cursor = self.db.cursor("""
+                                select
+                                    product_id,
+                                    customer_id,
+                                    sum(quantity) as quantity,
+                                    sum(quantity*price) as totalsum,
+                                    sum(quantity*price) / sum(quantity*0.1) as av_price
+                                from orders, order_lines
+                                where orders.order_id = order_lines.order_id
+                                group by customer_id, product_id
+                                """)
+        form = ZzForm("Total sales")
+        form.add_control(
+            name="product_id",
+            label="Product",
+            control="line",
+            to_table="products",
+            to_column="product_id",
+            to_form=self.form_products,
+            related="name",
+        )
+        form.add_control(
+            name="customer_id",
+            label="Customer",
+            datatype="int",
+            control="line",
+            to_table="customers",
+            to_column="customer_id",
+            to_form=self.form_customers,
+            related="name",
+        )
+        form.add_control("quantity", "Quantity")
+        form.add_control("totalsum", "Totalsum")
+        form.set_model(ZzCursorModel(cursor))
+        form.run()
 
 def demo():
     app = databaseApp("zzgui - the database (zzdb) app")

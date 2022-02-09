@@ -135,7 +135,8 @@ class ZzForm:
         return self.grid_form
 
     def get_grid_crud_actions(self):
-        is_view = self.a.__getattr__("/view")
+        # is_view = self.a.__getattr__("/view")
+        is_view = True
         is_crud = self.a.__getattr__("/crud")
 
         tmp_actions = zzapp.ZzActions()
