@@ -777,7 +777,8 @@ class ZzFormWindow:
                 if current_frame.frame_mode == "f":  # form layout
                     if label2add:
                         label2add.setContentsMargins(0, zzapp.zz_app.get_char_height() / 4, 0, 0)
-                    if hasattr(widget2add, "frame_mode") and not meta.get("relation"):  # add any frame into form frame
+                    if hasattr(widget2add, "frame_mode") and not meta.get("relation"):
+                        # add any frame into form frame
                         label2add = self._get_widget("label")({"label": meta.get("label", "")})
                         widget2add.hide_border()
                         widget2add.label = label2add

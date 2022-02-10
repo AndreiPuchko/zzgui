@@ -29,7 +29,7 @@ class DemoApp(ZzApp):
         form.add_control("/h")
 
         def open_file():
-            file_name = ZzApp.get_open_file_dialoq(filter="Python file(*.py);; Toml file(*.toml *.ini)")
+            file_name = ZzApp.get_open_file_dialoq(filter="Python file(*.py);; Toml file(*.toml *.ini)")[0]
             if file_name:
                 form.s.code = open(file_name).read()
 
