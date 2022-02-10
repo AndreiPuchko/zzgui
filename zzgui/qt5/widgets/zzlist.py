@@ -21,6 +21,7 @@ class zzlist(QListWidget, ZzWidget):
         # self.meta = meta
         for item in meta.get("pic", "").split(";"):
             self.addItem(QListWidgetItem(item))
+        self.currentRowChanged.connect(self.valid)
 
     def set_text(self, text):
         if self.meta.get("num"):

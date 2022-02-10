@@ -16,6 +16,7 @@ class ZzWidget:
         self.form = None
         self.label = None
         self.check = None
+        self.style_sheet = ""
         if self.meta.get("readonly"):
             self.set_readonly(True)
         if self.meta.get("disabled"):
@@ -77,3 +78,8 @@ class ZzWidget:
 
     def set_alignment(self, alignment):
         pass
+
+    def set_style_sheet(self, css: str):
+        if css.strip().startswith("{"):
+            css = type(self).__name__ + css
+        self.style_sheet = css

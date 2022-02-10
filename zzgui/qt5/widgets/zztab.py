@@ -8,7 +8,9 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QTabBar, QTabWidget
+from PyQt5.QtWidgets import QTabBar, QTabWidget, QShortcut
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtCore import Qt
 
 from zzgui.qt5.zzwindow import ZzFrame
 from zzgui.qt5.zzwidget import ZzWidget
@@ -24,6 +26,16 @@ class zztab(QTabWidget, ZzWidget, ZzFrame):
         super().__init__(meta)
         self.setTabBar(ZzTabBar())
         self.meta = meta
+
+        self.next_tab_hotkey = QShortcut(QKeySequence("Ctrl+PgDown"), self)
+        self.next_tab_hotkey.activated.connect(lambda tab=self: self.setCurrentIndex(self.currentIndex()+1))
+
+        self.prev_tab_hotkey = QShortcut(QKeySequence("Ctrl+PgUp"), self)
+        self.prev_tab_hotkey.activated.connect(lambda tab=self: tab.setCurrentIndex(tab.currentIndex() - 1))
+
+    def set_shortcuts_local(self):
+        self.next_tab_hotkey.setContext(Qt.WidgetWithChildrenShortcut)
+        self.prev_tab_hotkey.setContext(Qt.WidgetWithChildrenShortcut)
 
     def add_tab(self, widget, text=""):
         self.addTab(widget, text)

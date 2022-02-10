@@ -1,7 +1,8 @@
-import sys
-if __name__ == "__main__":
+# import sys
 
-    sys.path.insert(0, ".")
+# if __name__ == "__main__":
+
+#     sys.path.insert(0, ".")
 
 
 from zzgui.qt5.zzapp import ZzApp
@@ -118,14 +119,15 @@ def load_mock_data(db: ZzDb):
     assert db.cursor(table_name="orders").row_count() == order_qt - 1
 
 
-class databaseApp(ZzApp):
+class DemoApp(ZzApp):
     def on_start(self):
         # self.form_order_lines().run()
         # self.orders()
         # self.customers()
         # self.filter_orders()
         # self.products()
-        self.show_sales()
+        # self.show_sales()
+        pass
 
     def create_database(self):
         self.db = ZzDb("sqlite3", database_name=":memory:")
@@ -137,11 +139,11 @@ class databaseApp(ZzApp):
 
         self.add_menu("File|About", lambda: zzMess("First application!"))
         self.add_menu("File|-")
-        self.add_menu("File|Exit", self.close, toolbar=1)
-        self.add_menu("Catalogs|Customers", self.customers, toolbar=1)
-        self.add_menu("Catalogs|Products", self.products, toolbar=1)
-        self.add_menu("Documents|Orders", self.filter_orders, toolbar=1)
-        self.add_menu("Reports|Sales", lambda:self.show_sales(), toolbar=1)
+        self.add_menu("File|Exit", lambda: self.close(), toolbar=1)
+        self.add_menu("Catalogs|Customers", lambda: self.customers(), toolbar=1)
+        self.add_menu("Catalogs|Products", lambda: self.products(), toolbar=1)
+        self.add_menu("Documents|Orders", lambda: self.filter_orders(), toolbar=1)
+        self.add_menu("Reports|Sales", lambda: self.show_sales(), toolbar=1)
         return super().on_init()
 
     def form_customers(self):
@@ -290,7 +292,8 @@ class databaseApp(ZzApp):
         return form
 
     def show_sales(self):
-        cursor = self.db.cursor("""
+        cursor = self.db.cursor(
+            """
                                 select
                                     product_id,
                                     customer_id,
@@ -300,8 +303,9 @@ class databaseApp(ZzApp):
                                 from orders, order_lines
                                 where orders.order_id = order_lines.order_id
                                 group by customer_id, product_id
-                                """)
-        form = ZzForm("Total sales")
+                                """
+        )
+        form = ZzForm("Total sales!")
         form.add_control(
             name="product_id",
             label="Product",
@@ -326,8 +330,9 @@ class databaseApp(ZzApp):
         form.set_model(ZzCursorModel(cursor))
         form.run()
 
+
 def demo():
-    app = databaseApp("zzgui - the database (zzdb) app")
+    app = DemoApp("zzgui - the database (zzdb) app")
     app.run()
 
 

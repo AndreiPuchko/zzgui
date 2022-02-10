@@ -1,7 +1,7 @@
-if __name__ == "__main__":
-    import sys
+# if __name__ == "__main__":
+#     import sys
 
-    sys.path.insert(0, ".")
+#     sys.path.insert(0, ".")
 
 
 from urllib import request
@@ -23,15 +23,15 @@ class DemoApp(ZzApp):
     def on_start(self):
         def worker():
             def real_worker():
-                zzWaitMax(60)
-                for x in range(60):
+                zzWaitMax(300)
+                for x in range(300):
                     zzWaitStep()
-                    time.sleep(0.06)
+                    time.sleep(0.03)
 
             return real_worker
 
         zzWait(worker(), "W o r k i n g")
-        self.show_grid_form()
+        # self.show_grid_form()
 
     def on_init(self):
         self.add_menu("File|Grid", self.show_grid_form, toolbar="*")

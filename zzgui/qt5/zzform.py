@@ -1,8 +1,6 @@
 if __name__ == "__main__":
-    import sys
-
-    sys.path.insert(0, ".")
-
+    # import sys
+    # sys.path.insert(0, ".")
     from demo.demo import demo
 
     demo()
@@ -39,24 +37,32 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
     def restore_geometry(self, settings):
         paw = self.parent()
+
         if paw is not None:
             # save default == minimal size
             sizeBefore = paw.size()
 
-            width = num(settings.get(self.window_title, "width", "-1"))
-            height = num(settings.get(self.window_title, "height", "-1"))
+            if self.zz_form.do_not_save_geometry:
+                width, height = 1, 1
+            else:
+                width = num(settings.get(self.window_title, "width", "-1"))
+                height = num(settings.get(self.window_title, "height", "-1"))
+
             if -1 in [width, height]:  # bad settings or first run
-                width = paw.parent().size().width()*0.9 if self.mode == "grid" else 0.5
-                height = paw.parent().size().height()*0.9 if self.mode == "grid" else 0.5
+                width = paw.parent().size().width() * 0.9 if self.mode == "grid" else 0.5
+                height = paw.parent().size().height() * 0.9 if self.mode == "grid" else 0.5
             paw.resize(width, height)
 
             sizeAfter = paw.size()
             self.expand_size(paw, sizeBefore, sizeAfter)
 
-            left = num(settings.get(self.window_title, "left", "-1"))
-            top = num(settings.get(self.window_title, "top", "-1"))
-            if -1 in [left, top]:  # bad settings or first run
+            if self.zz_form.do_not_save_geometry:
                 left, top = self.center_pos()
+            else:
+                left = num(settings.get(self.window_title, "left", "-1"))
+                top = num(settings.get(self.window_title, "top", "-1"))
+                if -1 in [left, top]:  # bad settings or first run
+                    left, top = self.center_pos()
 
             paw.move(left, top)
 
@@ -73,15 +79,12 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
     def expand_size(self, paw, sizeBefore, sizeAfter):
         wDelta = 0 if sizeBefore.width() < sizeAfter.width() else sizeBefore.width() - sizeAfter.width()
-        hDelta = (
-                0 if sizeBefore.height() < sizeAfter.height() else sizeBefore.height() - sizeAfter.height()
-            )
+        hDelta = 0 if sizeBefore.height() < sizeAfter.height() else sizeBefore.height() - sizeAfter.height()
         if wDelta or hDelta:
             paw.resize(paw.size().width() + wDelta, paw.size().height() + hDelta)
 
     def fit_size_and_pos(self, paw):
-        """ ensure form fits outside window
-        """
+        """ensure form fits outside window"""
         parent_size = paw.parent().size()
 
         size = paw.size()
@@ -159,10 +162,25 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
                 widget.setFocus()
                 break
 
-        if self.zz_form.do_not_save_geometry is False:
-            self.restore_geometry(zzapp.zz_app.settings)
-
         self.shown = True
+        self.restore_geometry(zzapp.zz_app.settings)
+
+        if self.mode == "form":
+            self.parent().setWindowFlag(Qt.WindowMaximizeButtonHint, False)
+
+        self.parent().setWindowFlag(Qt.WindowMinimizeButtonHint, False)
+
+        if self.zz_form.hide_title:
+            # self.setWindowFlag(0)
+            self.parent().setWindowFlags(
+                Qt.CustomizeWindowHint
+                | Qt.FramelessWindowHint
+                | Qt.WindowStaysOnBottomHint
+                | Qt.WindowCloseButtonHint
+            )
+        if self.zz_form.maximized:
+            self.showMaximized()
+
         if event:
             event.accept()
         self.zz_form.after_form_show()
@@ -198,6 +216,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         #         if wi.isEnabled():
         # else:
         # event.acc5ept()
+        pass
 
     def close(self):
         super().close()
@@ -211,6 +230,9 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         self.zz_form.close()
         if event:
             event.accept()
+
+    def set_style_sheet(self, css):
+        self.setStyleSheet(css)
 
 
 # Tells the module which engine to use

@@ -27,7 +27,7 @@ from PyQt5.QtWidgets import (
     qApp,
 )
 
-from PyQt5.QtCore import QEvent, Qt
+from PyQt5.QtCore import QEvent, Qt, QCoreApplication
 from PyQt5.QtGui import QFontMetrics
 
 from zzgui.qt5.zzwindow import ZzQtWindow
@@ -37,7 +37,8 @@ import zzgui.zzapp as zzapp
 
 class ZzApp(zzapp.ZzApp, QApplication):
     def __init__(self, title=""):
-        QApplication.__init__(self, [])
+        if QCoreApplication.startingUp():  # one and only qApp allowed
+            QApplication.__init__(self, [])
         super().__init__(title, main_window_class=ZzMainWindow)
         qApp.focusChanged.connect(self.focus_changed)
 
@@ -111,10 +112,10 @@ class ZzApp(zzapp.ZzApp, QApplication):
     def focus_widget(self):
         return qApp.focusWidget()
 
-    def set_style(self):
+    def set_style_sheet(self):
         if os.path.isfile(self.style_file):
             try:
-                with open(self.style_file) as style_data:
+                with open(self.style_file, "r") as style_data:
                     self.setStyleSheet(style_data.read())
             except Exception:
                 print(f"File {self.style_file} reading error...")
@@ -207,15 +208,19 @@ class ZzApp(zzapp.ZzApp, QApplication):
     def run(self):
         self.main_window.restore_geometry(self.settings)
         self.main_window.show()
+        # z = super().run
+        # QTimer.singleShot(100, lambda:z )
         super().run()
-        self.exec_()
+        if len(QApplication.allWindows()) == 1:
+            self.exec_()
 
 
 class ZzMainWindow(QMainWindow, zzapp.ZzMainWindow, ZzQtWindow):
     class ZzTabWidget(QTabWidget):
         def __init__(self, parent):
             super().__init__(parent)
-            self.addTab(QWidget(parent), "")
+            self.main_window = parent
+            self.addTab(QWidget(), "")
             self.setAttribute(Qt.WA_DeleteOnClose)
             self.addTabButton = QToolButton(self)
             self.addTabButton.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -230,8 +235,8 @@ class ZzMainWindow(QMainWindow, zzapp.ZzMainWindow, ZzQtWindow):
             self.setCornerWidget(self.closeButton)
             self.currentChanged.connect(self._currentChanged)
 
-            self.addTab()
-            self.setCurrentIndex(0)
+            # self.addTab()
+            # self.setCurrentIndex(0)
 
         def _currentChanged(self, index: int):
             # bug path when subwindow in tab 0 lost focus if we close subwindow in other tab
@@ -255,9 +260,13 @@ class ZzMainWindow(QMainWindow, zzapp.ZzMainWindow, ZzQtWindow):
 
             self.insertTab(self.count() - 1, widget, label)
             self.setCurrentIndex(self.count() - 2)
+            if self.count() > 1:
+                self.main_window.on_new_tab()
 
     def __init__(self, title=""):
-        self._core_app = QApplication([])
+        if not hasattr(qApp, "_mw_count"):
+            qApp._mw_count = 0
+        qApp._mw_count += 1
         super().__init__()
         self.zz_toolbar = QToolBar(self)
         self.zz_tabwidget = self.ZzTabWidget(self)
@@ -268,14 +277,22 @@ class ZzMainWindow(QMainWindow, zzapp.ZzMainWindow, ZzQtWindow):
         self.statusBar().setVisible(True)
         self.set_title(title)
 
+    def add_new_tab(self):
+        self.zz_tabwidget.addTab()
+
     def show(self):
         QMainWindow.show(self)
+
+    def on_new_tab(self):
+        return super().on_new_tab()
 
     def closeEvent(self, event: QEvent):
         event.accept()
         zzapp.zz_app.close()
 
     def close(self):
-        QMainWindow.close(self)
-        super().close()
-        os._exit(0)
+        # QMainWindow.close(self)
+        qApp._mw_count -= 1
+        if qApp._mw_count <= 0:
+            super().close()
+            os._exit(0)

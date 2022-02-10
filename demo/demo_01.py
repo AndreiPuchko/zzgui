@@ -3,11 +3,6 @@ defining the main menu and toolbar shortcuts
 the possibilities for creating complex user interface forms
 managing main window appearance
 """
-if __name__ == "__main__":
-    import sys
-
-    sys.path.insert(0, ".")
-
 from zzgui import zzapp
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
@@ -26,9 +21,7 @@ class DemoApp(ZzApp):
         self.add_menu("File|Toogle toolbar", self.show_hide_toolbar, toolbar="*")
         self.add_menu("File|Toogle menubar", self.show_hide_menubar, toolbar="*")
         self.add_menu("File|Toogle tabbar", self.show_hide_tabbar, toolbar="*")
-        self.add_menu(
-            "File|Toogle statusbar", self.show_hide_statusbar, toolbar="*"
-        )
+        self.add_menu("File|Toogle statusbar", self.show_hide_statusbar, toolbar="*")
         self.add_menu("File|-", None)
         self.add_menu("Documents|Personal", None)
         self.add_menu("Documents|Business", None)
@@ -39,7 +32,7 @@ class DemoApp(ZzApp):
         form = ZzForm("First form ever")
         form.add_control("/")
         actions = ZzActions()
-        # # actions.show_main_button = False
+        # actions.show_main_button = False
         # actions.show_actions = False
         actions.add_action(
             text="Action 1",
@@ -65,9 +58,7 @@ class DemoApp(ZzApp):
 
         actions.add_action("Action 2", worker=action2)
 
-        form.add_control(
-            "toolbar", "", actions=actions, control="toolbar", mess="Form's actions"
-        )
+        form.add_control("toolbar", "", actions=actions, control="toolbar", mess="Form's actions")
         if form.add_control("/h", "main window control"):
             form.add_control(
                 label="Main menu on/off",
@@ -116,10 +107,13 @@ class DemoApp(ZzApp):
         if form.add_control("/t", "Tab2"):
             form.add_control("", "Just label on Tab2")
         form.add_control("/")
-        form.add_control("/")
 
         if form.add_control("/t", "Tab3"):
-            form.add_control("", "Label on tab3")
+            if form.add_control("/h"):
+                form.add_control("", "Label on tab3")
+                form.add_control("z1", "Decimal input", datatype="dec", datalen=15, datadec=2, pic="F")
+                form.add_control("/s")
+                form.add_control("/")
 
         if form.add_control("/t", "Tab4"):
             form.add_control("", "2222222222222222222")
@@ -155,15 +149,9 @@ class DemoApp(ZzApp):
                     data="*",
                 )
 
-                form.add_control(
-                    "f1", label="F1", control="line", data="f1 label content"
-                )
-                form.add_control(
-                    "f2", label="F2", control="line", data="f2 label content"
-                )
-                form.add_control(
-                    "bdate", label="Birthday", control="date", data="2011-01-15"
-                )
+                form.add_control("f1", label="F1", control="line", data="f1 label content")
+                form.add_control("f2", label="F2", control="line", data="f2 label content")
+                form.add_control("bdate", label="Birthday", control="date", data="2011-01-15")
             form.add_control("/")
         form.add_control("/")
 
@@ -196,17 +184,11 @@ class DemoApp(ZzApp):
             )
             form.add_control("/s")
             form.add_ok_cancel_buttons()
-            form.system_controls.c._ok_button[
-                "label"
-            ] = "I am a system button,\ni have been renamed"
+            form.system_controls.c._ok_button["label"] = "I am a system button,\ni have been renamed"
 
             form.valid = (
-                lambda: zzAskYN(
-                    "<font color=darkcyan size=+4>" "Are you really want to close ME?"
-                )
-                == 2
+                lambda: zzAskYN("<font color=darkcyan size=+4>" "Are you really want to close ME?") == 2
             )
-
         form.add_control("/")
 
         form.show_mdi_modal_form()

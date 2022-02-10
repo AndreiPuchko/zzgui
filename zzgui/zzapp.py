@@ -136,6 +136,7 @@ class ZzActions(list):
     #     actionIndex = safe_index([x["text"] for x in self.action_list], text)
     #     if actionIndex is not None:
     #         self.action_list.pop(actionIndex)
+    pass
 
 
 class ZzControls(list):
@@ -310,15 +311,14 @@ class ZzApp:
             self.main_window = main_window_class(title)
         else:
             self.main_window = ZzMainWindow(title)
-        self.menu_list = []
         self.style_file = self.get_argv("style")
         if self.style_file == "":
             self.style_file = "zz_gui.qss"
-
-        self.set_style()
+        self.set_style_sheet()
+        self.menu_list = []
         self.on_init()
 
-    def set_style(self):
+    def set_style_sheet(self):
         pass
 
     def get_argv(self, argtext: str):
@@ -362,7 +362,7 @@ class ZzApp:
     def close(self):
         self.main_window.save_geometry(self.settings)
         self.main_window.close()
-        sys.exit(0)
+        # sys.exit(0)
 
     def show_statusbar_mess(self, text=""):
         pass
@@ -401,6 +401,9 @@ class ZzApp:
         pass
 
     def on_start(self):
+        pass
+
+    def on_new_tab(self):
         pass
 
     def show_menubar(self, mode=True):
@@ -482,6 +485,7 @@ class ZzApp:
 
     def run(self):
         self.build_menu()
+        self.main_window.add_new_tab()
         self.on_start()
 
 
@@ -489,12 +493,18 @@ class ZzMainWindow(ZzWindow):
     def __init__(self, title=""):
         super().__init__()
         self.window_title = title
-        # self.settings = ZzSettings()
         self.menu_list = []
         self._main_menu = {}
 
         self.zz_toolbar = None
         self.zz_tabwidget = None
+
+    def add_new_tab(self):
+        pass
+
+    def on_new_tab(self):
+        zzapp.zz_app.on_new_tab()
+        pass
 
     def show(self):
         pass

@@ -1,7 +1,7 @@
-if __name__ == "__main__":
-    import sys
+# if __name__ == "__main__":
+#     import sys
 
-    sys.path.insert(0, ".")
+#     sys.path.insert(0, ".")
 
 
 from zzgui.qt5.zzapp import ZzApp
@@ -32,7 +32,7 @@ def mock_data_load(db: ZzDb):
         )
 
 
-class databaseApp(ZzApp):
+class DemoApp(ZzApp):
     def on_start(self):
         self.customers()
         pass
@@ -96,7 +96,7 @@ class databaseApp(ZzApp):
 
 
 def demo():
-    app = databaseApp("zzgui - the database app")
+    app = DemoApp("zzgui - the database app")
     app.run()
 
 

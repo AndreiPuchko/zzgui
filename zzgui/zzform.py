@@ -24,6 +24,11 @@ class ZzForm:
         super().__init__()
         self.title = title
         self.form_stack = []
+        self.style_sheet = ""
+
+        self.hide_title = False
+        self.maximized = False
+
         self.heap = zzapp.ZzHeap()
         self.actions = zzapp.ZzActions()
         self.controls = zzapp.ZzControls()
@@ -479,8 +484,9 @@ class ZzForm:
     def get_where_for_child(self, action):
         if self.current_row >= 0:
             current_record = self.model.get_record(self.current_row)
-            if action["child_form_object"].grid_form:
-                action["child_form_object"].grid_form.set_enabled()
+            if action.get("child_form_object"):
+                if action.get("child_form_object").grid_form:
+                    action["child_form_object"].grid_form.set_enabled()
             return action["child_where"].format(**current_record)
         else:
             if action["child_form_object"].grid_form:
@@ -614,6 +620,11 @@ class ZzForm:
         except Exception:
             self._zzdialogs.zzMess(f"Export error: {file}")
 
+    def set_style_sheet(self, css: str):
+        self.style_sheet = css
+        for x in self.form_stack:
+            x.set_style_sheet(self.style_sheet)
+
 
 class ZzFormWindow:
     def __init__(self, zz_form: ZzForm):
@@ -622,6 +633,7 @@ class ZzFormWindow:
         self.zz_form = zz_form
         self.title = ""
         self.widgets = {}
+        self.tab_widget_list = []
         self.tab_widget = None
         # Must be defined in any subclass
         self._widgets_package = None
@@ -752,6 +764,7 @@ class ZzFormWindow:
             controls.insert(0, {"name": "/f"})
         # Create widgets
         for meta in controls:
+            # print(frame_stack)
             meta["form"] = self.zz_form
             if meta.get("noform", ""):
                 continue
@@ -763,7 +776,7 @@ class ZzFormWindow:
                 if current_frame.frame_mode == "f":  # form layout
                     if label2add:
                         label2add.setContentsMargins(0, zzapp.zz_app.get_char_height() / 4, 0, 0)
-                    if hasattr(widget2add, "frame_mode"):  # add any frame into form frame
+                    if hasattr(widget2add, "frame_mode") and not meta.get("relation"):  # add any frame into form frame
                         label2add = self._get_widget("label")({"label": meta.get("label", "")})
                         widget2add.hide_border()
                         widget2add.label = label2add
@@ -786,7 +799,7 @@ class ZzFormWindow:
                     if widget2add is not None:
                         current_frame.add_widget(widget2add)
                         if meta.get("control") == "toolbar":  # context menu for frame
-                            widget2add.hide()
+                            # widget2add.hide()
                             widget2add.set_context_menu(current_frame)
                         if action2add is not None:  # context menu for widget
                             action2add.set_context_menu(widget2add)
@@ -800,6 +813,7 @@ class ZzFormWindow:
                 if self.tab_widget is None:
                     self.tab_widget = widget2add
                     frame_stack.append(widget2add)
+                    self.tab_widget_list.append(widget2add)
                 else:
                     if tmp_frame in frame_stack:
                         frame_stack = frame_stack[: frame_stack.index(tmp_frame)]
@@ -812,12 +826,17 @@ class ZzFormWindow:
                 if len(frame_stack) > 1:
                     frame_stack.pop()
                     # Remove tab widget if it is at the end of stack
-                    if "tab.tab" in f"{type(frame_stack[-1])}":
+                    if "zztab.zztab" in f"{type(frame_stack[-1])}":
                         self.tab_widget = None
                         frame_stack.pop()
             elif meta.get("name", "").startswith("/"):
                 frame_stack.append(widget2add)
         # Make it no more working
+
+        if len(self.tab_widget_list) > 1:
+            for x in self.tab_widget_list:
+                x.set_shortcuts_local()
+
         self.build_grid = lambda: None
         self.build_form = lambda: None
 
@@ -918,6 +937,7 @@ class ZzFormWindow:
     def show_form(self, modal="modal", no_build=False):
         if no_build is False:
             self.build_form()
+        self.set_style_sheet(self.zz_form.style_sheet)
         # Restore splitters sizes
         for x in self.get_splitters():
             sizes = zzapp.zz_app.settings.get(
@@ -931,14 +951,18 @@ class ZzFormWindow:
         self.zz_form._after_grid_create()
         zzapp.zz_app.show_form(self, modal)
 
-    def get_grid_list(self):
-        return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "zzgrid"]
+    def get_controls_list(self, name: str):
+        return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == name]
 
-    def get_sub_form_list(self):
-        return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "ZzFormWindow"]
+    # def get_grid_list(self):
+    #     return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "zzgrid"]
+
+    # def get_sub_form_list(self):
+    #     return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "ZzFormWindow"]
 
     def restore_grid_columns(self):
-        for grid in self.get_grid_list():
+        # for grid in self.get_grid_list():
+        for grid in self.get_controls_list("zzgrid"):
             col_settings = {}
             for count, x in enumerate(self.zz_form.model.headers):
                 data = zzapp.zz_app.settings.get(self.window_title, f"grid_column__'{x}'")
@@ -951,11 +975,12 @@ class ZzFormWindow:
                     data = f"{count}, {c_w}"
                 col_settings[x] = data
             grid.set_column_settings(col_settings)
-        for x in self.get_sub_form_list():
+        for x in self.get_controls_list("ZzFormWindow"):
             x.restore_grid_columns()
 
     def save_grid_columns(self):
-        for grid in self.get_grid_list():
+        # for grid in self.get_grid_list():
+        for grid in self.get_controls_list("zzgrid"):
             for x in grid.get_columns_settings():
                 zzapp.zz_app.settings.set(
                     self.window_title,
@@ -964,7 +989,7 @@ class ZzFormWindow:
                 )
         # for x in self.zz_form.children_forms:
         #     x["child_form_object"].close()
-        for x in self.get_sub_form_list():
+        for x in self.get_controls_list("ZzFormWindow"):
             x.close()
 
     def close(self):

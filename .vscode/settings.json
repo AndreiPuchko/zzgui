@@ -15,4 +15,10 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "workbench.colorCustomizations": {
+        "editor.lineHighlightBorder": "#08d43b70",
+        "editor.selectionHighlightBorder": "#ff0000",
+        "editor.findMatchBorder":"#acbb29"
+    },
+    
 }

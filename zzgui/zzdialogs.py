@@ -48,9 +48,7 @@ def zzAskYN(mess, title="Ask"):
     form.choice = 0
     form.add_control("/")
 
-    form.controls.add_control(
-        "mess", control="text", data=f"{mess}", readonly="*", disabled="*"
-    )
+    form.controls.add_control("mess", control="text", data=f"{mess}", readonly="*", disabled="*")
 
     if form.add_control("/h"):
         form.add_control("/s")
@@ -133,7 +131,8 @@ class ZzWaitForm:
         self.tick = {}
         self.worker_thread = worker_thread
         self.wait_window = ZzForm("Wait...")
-        self.wait_window.add_control("/s")
+        self.wait_window.do_not_save_geometry = True
+        # self.wait_window.add_control("/s")
         self.wait_window.add_control("/h")
         self.wait_window.add_control("/s")
         self.wait_window.add_control("", label=mess, control="label")
@@ -152,7 +151,6 @@ class ZzWaitForm:
             self.wait_window.add_control("max", "", control="label")
             self.wait_window.add_control("time", "", control="label")
         self.wait_window.add_control("/")
-        self.wait_window.add_control("/s")
         self.show()
 
         if self.worker_thread.min != 0:
@@ -179,9 +177,11 @@ class ZzWaitForm:
     def show(self):
         self.wait_window.show_mdi_form()
         zzapp.zz_app.process_events()
-        w, h = zzapp.zz_app.main_window.get_size()
-        self.wait_window.form_stack[0].set_size(w * 0.8, h * 0.15)
-        self.wait_window.form_stack[0].set_position(w * 0.1, h * 0.3)
+        w = zzapp.zz_app.main_window.get_size()[0]
+        fh = self.wait_window.form_stack[0].get_size()[1]
+        self.wait_window.form_stack[0].set_size(w * 0.9, fh)
+        left, top = self.wait_window.form_stack[0].center_pos()
+        self.wait_window.form_stack[0].set_position(left, top)
         zzapp.zz_app.process_events()
 
     def close(self):
@@ -213,10 +213,7 @@ def zzWait(worker, mess=""):
             wait_window = ZzWaitForm(mess, worker_thread)
         if wait_window_on is True:
             if worker_thread.min < worker_thread.max:
-                if (
-                    worker_thread.value != 0
-                    and last_progressbar_value != worker_thread.value
-                ):
+                if worker_thread.value != 0 and last_progressbar_value != worker_thread.value:
                     wait_window.step()
             elif worker_thread.time() - last_progressbar_time > 1:
                 wait_window.step()

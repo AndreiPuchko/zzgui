@@ -79,3 +79,7 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
             return self.meta.get("when", lambda: True)()
         else:
             return True
+
+    def set_style_sheet(self, css: str):
+        super().set_style_sheet(css)
+        self.setStyleSheet(self.style_sheet)

@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "zzgui"
-version = "0.1.12"
+version = "0.1.13"
 description = "Python GUI toolkit"
 authors = ["Andrei Puchko <andrei.puchko@gmx.de>"]
 license = "Apache 2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = "^3.7"
 PyQt5 = "^5.15.6"
 QScintilla = "^2.13.1"
 
@@ -16,7 +16,8 @@ flake8 = "^4.0.1"
 black = "^21.10b0"
 pylint = "^2.11.1"
 pyinstaller = "^4.7"
-zzdb = "latest"
+pytest = "^7.0.0"
+zzdb = "^0.1.8"
 
 [tool.black]
 line-length = 110

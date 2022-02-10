@@ -8,7 +8,7 @@ from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.qt5.zzform import zzMess
 
 
-class firstApp(ZzApp):
+class DemoApp(ZzApp):
     def on_start(self):
         self.first_form()
 
@@ -45,7 +45,7 @@ class firstApp(ZzApp):
 
 
 def demo():
-    app = firstApp("zzgui - the first app")
+    app = DemoApp("zzgui - the first app")
     app.run()
 
 
