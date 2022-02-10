@@ -3,6 +3,11 @@ defining the main menu and toolbar shortcuts
 the possibilities for creating complex user interface forms
 managing main window appearance
 """
+if __name__ == "__main__":
+    import sys
+
+    sys.path.insert(0, ".")
+
 from zzgui import zzapp
 from zzgui.qt5.zzapp import ZzApp as ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
@@ -12,8 +17,8 @@ from zzgui.zzdialogs import zzAskYN
 
 
 class DemoApp(ZzApp):
-    def on_start(self):
-        self.first_form()
+    # def on_start(self):
+    #     self.first_form()
 
     def on_init(self):
         self.add_menu("File|First", self.first_form, toolbar="*")
@@ -29,7 +34,8 @@ class DemoApp(ZzApp):
         self.add_menu("File|Quit", self.close, toolbar="*")
 
     def first_form(self):
-        form = ZzForm("First form ever")
+        form = ZzForm("First form ever333")
+        form.init_size = [80, 80]
         form.add_control("/")
         actions = ZzActions()
         # actions.show_main_button = False

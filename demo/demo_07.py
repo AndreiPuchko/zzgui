@@ -1,8 +1,7 @@
-# import sys
+if __name__ == "__main__":
+    import sys
 
-# if __name__ == "__main__":
-
-#     sys.path.insert(0, ".")
+    sys.path.insert(0, ".")
 
 
 from zzgui.qt5.zzapp import ZzApp

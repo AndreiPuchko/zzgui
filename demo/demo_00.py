@@ -1,3 +1,8 @@
+if __name__ == "__main__":
+    import sys
+
+    sys.path.insert(0, ".")
+
 from zzgui.qt5.zzapp import ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 import imp

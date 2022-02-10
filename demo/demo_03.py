@@ -20,8 +20,8 @@ from zzgui.zzmodel import ZzCsvModel
 
 
 class DemoApp(ZzApp):
-    def on_start(self):
-        self.show_grid_form()
+    # def on_start(self):
+    #     self.show_grid_form()
 
     def on_init(self):
         self.add_menu("File|Grid", self.show_grid_form, toolbar="*")

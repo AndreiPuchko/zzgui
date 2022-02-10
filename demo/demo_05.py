@@ -1,7 +1,7 @@
-# if __name__ == "__main__":
-#     import sys
+if __name__ == "__main__":
+    import sys
 
-#     sys.path.insert(0, ".")
+    sys.path.insert(0, ".")
 
 
 from urllib import request

@@ -49,8 +49,13 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
                 height = num(settings.get(self.window_title, "height", "-1"))
 
             if -1 in [width, height]:  # bad settings or first run
-                width = paw.parent().size().width() * 0.9 if self.mode == "grid" else 0.5
-                height = paw.parent().size().height() * 0.9 if self.mode == "grid" else 0.5
+                if self.mode != "grid" and sum(self.zz_form.init_size) > 0:
+                    # init size given
+                    width, height = self.get_init_size()
+                else:
+                    width = paw.parent().size().width() * 0.9 if self.mode == "grid" else 0.5
+                    height = paw.parent().size().height() * 0.9 if self.mode == "grid" else 0.5
+
             paw.resize(width, height)
 
             sizeAfter = paw.size()
@@ -82,6 +87,11 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         hDelta = 0 if sizeBefore.height() < sizeAfter.height() else sizeBefore.height() - sizeAfter.height()
         if wDelta or hDelta:
             paw.resize(paw.size().width() + wDelta, paw.size().height() + hDelta)
+
+    def get_init_size(self):
+        w, h = self.zz_form.init_size
+        parent_size = self.parent().parent().size()
+        return [parent_size.width() * w / 100, parent_size.height() * h / 100]
 
     def fit_size_and_pos(self, paw):
         """ensure form fits outside window"""

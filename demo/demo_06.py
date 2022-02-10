@@ -9,8 +9,8 @@ from zzgui.qt5.zzform import zzMess
 
 
 class DemoApp(ZzApp):
-    def on_start(self):
-        self.first_form()
+    # def on_start(self):
+    #     self.first_form()
 
     def on_init(self):
         self.add_menu("File|About", lambda: zzMess("First application!"), toolbar=1)
@@ -21,6 +21,7 @@ class DemoApp(ZzApp):
 
     def first_form(self):
         form = ZzForm("FirstForm")
+        form.init_size = [90, 90]
         form.add_control("", "First Label")
         form.add_control("field", "First Field")
         form.add_control("/")

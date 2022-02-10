@@ -19,8 +19,8 @@ Then downloads selected file and shows it in the grid (sortable and filterable)
 
 
 class DemoApp(ZzApp):
-    def on_start(self):
-        self.file_select_form()
+    # def on_start(self):
+    #     self.file_select_form()
 
     def on_init(self):
         self.add_menu("File|Links", self.file_select_form, toolbar="*")

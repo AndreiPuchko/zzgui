@@ -28,6 +28,7 @@ class ZzForm:
 
         self.hide_title = False
         self.maximized = False
+        self.init_size = [0, 0]
 
         self.heap = zzapp.ZzHeap()
         self.actions = zzapp.ZzActions()
