@@ -14,7 +14,7 @@ import zzgui.zzapp as zzapp
 
 
 def center_window(form: ZzForm):
-    w, h = zzapp.zz_app.main_window.get_size()
+    w, h = zzapp.zz_app.get_size()
     form.form_stack[0].set_size(w * 0.33, h * 0.5)
     form.form_stack[0].set_position(w * 0.33, h * 0.15)
 
@@ -177,7 +177,7 @@ class ZzWaitForm:
     def show(self):
         self.wait_window.show_mdi_form()
         zzapp.zz_app.process_events()
-        w = zzapp.zz_app.main_window.get_size()[0]
+        w = zzapp.zz_app.get_size()[0]
         fh = self.wait_window.form_stack[0].get_size()[1]
         self.wait_window.form_stack[0].set_size(w * 0.9, fh)
         left, top = self.wait_window.form_stack[0].center_pos()

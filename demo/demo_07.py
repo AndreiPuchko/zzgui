@@ -119,10 +119,11 @@ def load_mock_data(db: ZzDb):
 
 
 class DemoApp(ZzApp):
-    def on_start(self):
+    def on_new_tab(self):
+    # def on_start(self):
         # self.form_order_lines().run()
         # self.orders()
-        # self.customers()
+        self.customers()
         # self.filter_orders()
         # self.products()
         # self.show_sales()
@@ -138,11 +139,11 @@ class DemoApp(ZzApp):
 
         self.add_menu("File|About", lambda: zzMess("First application!"))
         self.add_menu("File|-")
-        self.add_menu("File|Exit", lambda: self.close(), toolbar=1)
-        self.add_menu("Catalogs|Customers", lambda: self.customers(), toolbar=1)
-        self.add_menu("Catalogs|Products", lambda: self.products(), toolbar=1)
-        self.add_menu("Documents|Orders", lambda: self.filter_orders(), toolbar=1)
-        self.add_menu("Reports|Sales", lambda: self.show_sales(), toolbar=1)
+        self.add_menu("File|Exit", self.close, toolbar=1)
+        self.add_menu("Catalogs|Customers", self.customers, toolbar=1)
+        self.add_menu("Catalogs|Products", self.products, toolbar=1)
+        self.add_menu("Documents|Orders", self.filter_orders, toolbar=1)
+        self.add_menu("Reports|Sales", self.show_sales, toolbar=1)
         return super().on_init()
 
     def form_customers(self):

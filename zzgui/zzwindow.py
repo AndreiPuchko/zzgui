@@ -82,12 +82,14 @@ class ZzWindow(ZzFrame):
         pass
 
     def restore_geometry(self, settings):
-        left = num(settings.get(self.window_title, "left", "0"))
-        top = num(settings.get(self.window_title, "top", "0"))
-        self.set_position(left, top)
         width = num(settings.get(self.window_title, "width", "1000"))
         height = num(settings.get(self.window_title, "height", "800"))
         self.set_size(width, height)
+
+        left = num(settings.get(self.window_title, "left", "-9999"))
+        top = num(settings.get(self.window_title, "top", "-9999"))
+        self.set_position(left, top)
+
         if num(settings.get(self.window_title, "is_max", "0")):
             self.show_maximized()
 

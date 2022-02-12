@@ -297,7 +297,7 @@ class ZzSettings:
 
 
 class ZzApp:
-    def __init__(self, title="", main_window_class=None):
+    def __init__(self, title=""):
         zzapp.zz_app = self
         self.window_title = title
         self.heap = ZzHeap()
@@ -306,11 +306,10 @@ class ZzApp:
         self.settings_file = ""
         self.settings_file = self.get_argv("ini")
 
+        self.menu_list = []
+        self._main_menu = {}
+
         self.settings = ZzSettings(self.settings_file)
-        if main_window_class:
-            self.main_window = main_window_class(title)
-        else:
-            self.main_window = ZzMainWindow(title)
         self.style_file = self.get_argv("style")
         if self.style_file == "":
             self.style_file = "zz_gui.qss"
@@ -360,9 +359,13 @@ class ZzApp:
         return [tmp_dict[x] for x in re_ordered_list]
 
     def close(self):
-        self.main_window.save_geometry(self.settings)
-        self.main_window.close()
-        # sys.exit(0)
+        self.save_geometry(self.settings)
+
+    def save_geometry(self, settings):
+        pass
+
+    def restore_geometry(self, settings):
+        pass
 
     def show_statusbar_mess(self, text=""):
         pass
@@ -483,32 +486,8 @@ class ZzApp:
     def get_save_file_dialoq(header="Save file", path="", filter=""):
         pass
 
-    def run(self):
-        self.build_menu()
-        self.main_window.add_new_tab()
-        self.on_start()
-
-
-class ZzMainWindow(ZzWindow):
-    def __init__(self, title=""):
-        super().__init__()
-        self.window_title = title
-        self.menu_list = []
-        self._main_menu = {}
-
-        self.zz_toolbar = None
-        self.zz_tabwidget = None
-
     def add_new_tab(self):
         pass
 
-    def on_new_tab(self):
-        zzapp.zz_app.on_new_tab()
-        pass
-
-    def show(self):
-        pass
-
-    def close(self):
-        pass
-        # self.save_geometry(self.settings)
+    def run(self):
+        self.build_menu()

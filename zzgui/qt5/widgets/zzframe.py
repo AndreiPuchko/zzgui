@@ -45,7 +45,7 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
             self.splitter.addWidget(widget)
             if hasattr(widget, "meta"):
                 # print(widget.meta.get("stretch"), widget)
-                self.splitter.setStretchFactor(self.splitter.count()-1, widget.meta.get("stretch", 0))
+                self.splitter.setStretchFactor(self.splitter.count() - 1, widget.meta.get("stretch", 0))
             # if hasattr(widget, "meta"):
             #     if "toolbar" in widget.meta.get("name", ""):
             #         widget.set_context_menu(self.splitter)
@@ -62,6 +62,11 @@ class zzsplitter(QSplitter):
         return ",".join([f"{x}" for x in self.sizes()])
 
     def set_sizes(self, sizes):
+        if sizes == "":
+            init_sizes = [self.widget(x).meta.get("stretch", 1) for x in range(self.count())]
+            widget_size = self.width() if self.orientation() is Qt.Horizontal else self.height()
+            init_sizes = [str(int(x * widget_size / sum(init_sizes))) for x in init_sizes]
+            sizes = ",".join(init_sizes)
         if sizes:
             sizes = [int(x) for x in sizes.split(",")]
             self.setSizes(sizes)

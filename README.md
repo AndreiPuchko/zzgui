@@ -21,6 +21,7 @@ cd zzgui
 pip3 install poetry
 poetry shell
 poetry install
+python3 demo/demo_00.py     # All demo launcher
 python3 demo/demo_01.py     # basic: main menu, form & widgets
 python3 demo/demo_02.py     # forms and forms in form
 python3 demo/demo_03.py     # grid form (CSV data), automatic creation of forms based on data

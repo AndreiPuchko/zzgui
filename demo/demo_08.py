@@ -33,9 +33,8 @@ def mock_data_load(db: ZzDb):
 
 
 class DemoApp(ZzApp):
-    # def on_start(self):
-    #     self.customers()
-    #     pass
+    def on_start(self):
+        self.customers()
 
     def create_database(self):
         self.db = ZzDb("sqlite3", database_name=":memory:")
@@ -55,8 +54,7 @@ class DemoApp(ZzApp):
 
         self.db.set_schema(data_schema)
         mock_data_load(self.db)
-
-        return super().on_init()
+        # self.customers()
 
     def form_customers(self):
         form = ZzForm("Customers")

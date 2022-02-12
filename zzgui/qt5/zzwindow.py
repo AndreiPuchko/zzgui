@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QGridLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QGridLayout, QDesktopWidget
 
 from PyQt5.QtCore import Qt
 
@@ -74,8 +74,18 @@ class ZzQtWindow(zzwindow.ZzWindow, ZzFrame):
         self.set_title(title)
 
     def set_position(self, left, top):
+        if left == -9999 and top == -9999:
+            self.center_position()
+        else:
+            self.move(left, top)
+
+    def center_position(self):
+        sw, sh = (QDesktopWidget().size().width(), QDesktopWidget().size().height())
+        ww, wh = self.get_size()
+
+        left = (sw - ww) / 2
+        top = (sh - wh) / 2
         self.move(left, top)
-        # self.move(100, 100)
 
     def set_size(self, width, height):
         self.resize(width, height)
