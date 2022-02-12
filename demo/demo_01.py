@@ -17,8 +17,8 @@ from zzgui.zzdialogs import zzAskYN
 
 
 class DemoApp(ZzApp):
-    # def on_start(self):
-    #     self.first_form()
+    def on_start(self):
+        self.first_form()
 
     def on_init(self):
         self.add_menu("File|First", self.first_form, toolbar="*")

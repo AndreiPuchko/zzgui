@@ -20,8 +20,8 @@ from zzgui.zzmodel import ZzCsvModel
 
 
 class DemoApp(ZzApp):
-    # def on_start(self):
-    #     self.show_grid_form()
+    def on_start(self):
+        self.show_grid_form()
 
     def on_init(self):
         self.add_menu("File|Grid", self.show_grid_form, toolbar="*")
@@ -47,6 +47,7 @@ class DemoApp(ZzApp):
         else:
             csv_file_object = open(file_name)
         # Define form
+        # self.process_events()
         form = ZzForm("Grid form")
         form.set_model(ZzCsvModel(csv_file_object=csv_file_object))
         form.actions.add_action("/crud")

@@ -5,7 +5,7 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QDialog, QMdiSubWindow, QApplication
+from PyQt5.QtWidgets import QDialog, QMdiSubWindow, QApplication, qApp
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeySequence, QKeyEvent
 
@@ -26,6 +26,11 @@ class ZzForm(zzform.ZzForm):
         super().__init__(title=title)
         self._ZzFormWindow_class = ZzFormWindow
         self._zzdialogs = zzgui.zzdialogs
+        # if qApp.activeWindow():
+        #     self.zz_app = qApp.activeWindow()
+        # else:
+        #     self.zz_app = zzapp.zz_app
+        self.zz_app = qApp.activeWindow()
 
 
 class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):

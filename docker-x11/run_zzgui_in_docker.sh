@@ -3,4 +3,4 @@ docker run --rm -it \
     -e DISPLAY=$DISPLAY \
     -u zzgui \
     zzgui \
-    python3 demo/${1-demo_07.py} /ini:none
+    python3 demo/${1-demo_00.py} /ini:none
