@@ -56,11 +56,9 @@ class DemoApp(ZzApp):
         self.form.run()
 
     def launcher(self):
-        def z(py):
-            mo = importlib.import_module(f"demo.{py}")
-            mo.demo()
-
-        z(self.launch_data[self.form.s.app_list]["py"])
+        py = self.launch_data[self.form.s.app_list]
+        mo = importlib.import_module(f"demo.{py}")
+        mo.demo()
 
     def after_form_show(self):
         self.form.w.run.set_style_sheet("{background-color:lightblue}")
