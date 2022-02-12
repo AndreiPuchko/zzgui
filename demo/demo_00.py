@@ -25,7 +25,10 @@ class DemoApp(ZzApp):
         self.form.maximized = True
         self.form.hide_title = True
         self.form.set_style_sheet(
-            "QWidget{font:35px;} zzbutton {font:30px; padding: 10 100px} zzlist::item {margin: 10px;}"
+            """QWidget{font:25px;} 
+                zzbutton {font:30px; padding: 10 200px} 
+                zzlist::item {margin: 10px;}
+            """
         )
         self.form.add_control("/")
         if self.form.add_control("/v"):
@@ -77,6 +80,7 @@ class DemoApp(ZzApp):
             "Code editor": "demo_06",
             "Database App 1": "demo_07",
             "Database App 2": "demo_08",
+            "This launcher": "demo_00",
         }
 
     def set_description(self):

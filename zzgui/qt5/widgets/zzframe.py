@@ -28,6 +28,7 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
             self.layout().addWidget(self.splitter)
         if meta.get("label"):
             self.set_title(meta.get("label"))
+        self.setContentsMargins(0, 0, 0, 0)
 
     def hide_border(self):
         self.setObjectName("grb")
@@ -66,6 +67,10 @@ class zzsplitter(QSplitter):
             init_sizes = [self.widget(x).meta.get("stretch", 1) for x in range(self.count())]
             widget_size = self.width() if self.orientation() is Qt.Horizontal else self.height()
             init_sizes = [str(int(x * widget_size / sum(init_sizes))) for x in init_sizes]
+            for x in range(self.count()):
+                widgget = self.widget(x)
+                if widgget.meta.get("control") == "toolbar":
+                    init_sizes[x] = str(widgget.sizeHint().height())
             sizes = ",".join(init_sizes)
         if sizes:
             sizes = [int(x) for x in sizes.split(",")]

@@ -951,7 +951,6 @@ class ZzFormWindow:
         # Restore grid columns sizes
         self.restore_grid_columns()
         self.zz_form._after_grid_create()
-        
         self.zz_form.zz_app.show_form(self, modal)
 
     def get_controls_list(self, name: str):
