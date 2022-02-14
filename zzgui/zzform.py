@@ -65,6 +65,10 @@ class ZzForm:
 
         self.current_row = 0
         self.current_column = 0
+        self.on_init()
+
+    def on_init(self):
+        pass
 
     def run(self):
         if self.model:
@@ -269,7 +273,7 @@ class ZzForm:
             return
         self.close()
 
-    def _after_grid_create(self):
+    def before_grid_show(self):
         pass
 
     def add_ok_cancel_buttons(self):
@@ -392,6 +396,8 @@ class ZzForm:
             self.set_grid_index(row)
 
     def crud_save(self):
+        if self.before_crud_save() is False:
+            return
         crud_data = self.get_crud_form_data()
         if self.crud_mode in [EDIT, VIEW]:
             rez = self.model.update(crud_data, self.current_row)
@@ -402,6 +408,7 @@ class ZzForm:
         if rez is False:
             self._zzdialogs.zzMess(self.model.get_data_error())
         else:
+            self.after_crud_save(crud_data)
             self.close()
 
     def get_crud_form_data(self):
@@ -530,6 +537,12 @@ class ZzForm:
         pass
 
     def after_form_show(self):
+        pass
+
+    def before_crud_save(self):
+        pass
+
+    def after_crud_save(self, crud_data):
         pass
 
     def add_control(
@@ -765,7 +778,6 @@ class ZzFormWindow:
             controls.insert(0, {"name": "/f"})
         # Create widgets
         for meta in controls:
-            # print(frame_stack)
             meta["form"] = self.zz_form
             if meta.get("noform", ""):
                 continue
@@ -950,17 +962,12 @@ class ZzFormWindow:
             self.widgets[x].splitter.set_sizes(sizes)
         # Restore grid columns sizes
         self.restore_grid_columns()
-        self.zz_form._after_grid_create()
+        if self.zz_form.before_grid_show() is False:
+            return
         self.zz_form.zz_app.show_form(self, modal)
 
     def get_controls_list(self, name: str):
         return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == name]
-
-    # def get_grid_list(self):
-    #     return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "zzgrid"]
-
-    # def get_sub_form_list(self):
-    #     return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == "ZzFormWindow"]
 
     def restore_grid_columns(self):
         # for grid in self.get_grid_list():
@@ -973,6 +980,7 @@ class ZzFormWindow:
                         c_w = zzapp.GRID_COLUMN_WIDTH
                     else:
                         c_w = int_(self.zz_form.model.meta[count].get("datalen"))
+                    print(count, x, c_w)
                     c_w = zzapp.zz_app.get_char_width() * (min(c_w, zzapp.GRID_COLUMN_WIDTH))
                     data = f"{count}, {c_w}"
                 col_settings[x] = data
@@ -981,7 +989,6 @@ class ZzFormWindow:
             x.restore_grid_columns()
 
     def save_grid_columns(self):
-        # for grid in self.get_grid_list():
         for grid in self.get_controls_list("zzgrid"):
             for x in grid.get_columns_settings():
                 zzapp.zz_app.settings.set(
@@ -1062,7 +1069,6 @@ class ZzFormWidget:
                 widgets = self.zz_form.last_closed_form.widgets
         else:
             widgets = self.zz_form.form_stack[-1].widgets
-        # print(widgets)
         if attrname.startswith("_") and attrname.endswith("_"):
             pos = int_(attrname.replace("_", ""))
             if pos < len(widgets):

@@ -40,7 +40,7 @@ class ZzModel:
         self.update_enabled = False
 
         self.filterable = False
-        
+
         self.data_changed = False
 
         self.order_text = ""
@@ -69,6 +69,7 @@ class ZzModel:
 
     def set_where(self, where_text=""):
         self.where_text = where_text
+        return self
 
     def get_where(self):
         return self.where_text
@@ -112,7 +113,8 @@ class ZzModel:
 
         meta = zzapp.ZzControls.validate(meta)
         self.columns.append(meta["name"])
-        self.headers.append(meta["label" if meta.get("saygrid") else "label"])
+        self.headers.append(meta["gridlabel" if meta.get("gridlabel") else "label"])
+        # print(self.headers[-1])
         self.alignments.append(meta.get("alignment", "7"))
         self.meta.append(meta)
 
@@ -341,7 +343,7 @@ class ZzCursorModel(ZzModel):
             self.refresh()
             return True
         else:
-            self.set_data_error(self.cursor.last_sql_error())
+            self.set_data_error(f"{self.cursor.last_sql_error()}<br>{self.cursor.last_sql()}")
             return False
 
     def insert(self, record: dict, current_row=0):
@@ -361,6 +363,7 @@ class ZzCursorModel(ZzModel):
         if self.cursor.table_name:
             super().set_order(order_data=order_data)
             self.cursor.set_order(self.order_text)
+        return self
 
     def add_column(self, meta):
         """update metadata from db"""

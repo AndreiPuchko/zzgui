@@ -25,8 +25,11 @@ class zzradio(QFrame, ZzWidget):
         self.layout().setSpacing(0)
         self.button_list = []
         for item in meta.get("pic", "").split(";"):
-            self.button_list.append(zzRadioButton(item, self))
-            self.layout().addWidget(self.button_list[-1])
+            button = zzRadioButton(item, self)
+            # button.toggled.connect(lambda: print(self.get_text(), button))
+            self.button_list.append(button)
+            self.layout().addWidget(button)
+
         self.button_list[0].setChecked(True)
 
     def set_text(self, text):
@@ -49,7 +52,7 @@ class zzradio(QFrame, ZzWidget):
         if index_list:
             index = index_list[0]
             if self.meta.get("num"):
-                return index + 1
+                return str(index + 1)
             else:
                 return self.button_list[index].get_text()
         else:
@@ -60,6 +63,15 @@ class zzRadioButton(QRadioButton):
     def __init__(self, text, radio: zzradio):
         super().__init__(text)
         self.radio = radio
+        self.toggled.connect(self.value_changed)
+
+    def value_changed(self, value):
+        if value:
+            if self.radio.meta.get("valid"):
+                self.radio.meta.get("valid")()
+        else:
+            if self.radio.meta.get("when"):
+                self.radio.meta.get("when")()
 
     def get_text(self):
         return self.text()

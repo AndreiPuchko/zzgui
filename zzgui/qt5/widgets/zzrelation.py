@@ -51,7 +51,7 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
                 row = self.to_form.model.cursor.seek_row({self.meta["to_column"]: self.get_text()})
                 self.to_form.set_grid_index(row)
 
-            self.to_form._after_grid_create = seek
+            self.to_form.before_grid_show = seek
             self.to_form.show_mdi_modal_grid()
             # self.set_related()
 

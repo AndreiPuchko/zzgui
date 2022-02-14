@@ -13,10 +13,14 @@ from PyQt5.QtWidgets import QCheckBox, QSizePolicy
 from zzgui.qt5.zzwidget import ZzWidget
 from zzgui.zzutils import int_
 
+
 class zzcheck(QCheckBox, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
-        self.setText(meta.get("pic", meta.get("label", "")))
+        if meta.get("pic"):
+            self.setText(meta.get("pic"))
+        else:
+            self.setText(meta.get("label", ""))
         self.managed_widgets = []
         self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.stateChanged.connect(self.state_changed)

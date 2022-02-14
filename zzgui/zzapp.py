@@ -16,6 +16,7 @@ from zzgui.zzutils import num
 
 import re
 import io
+import time
 
 
 zz_app = None
@@ -211,10 +212,11 @@ class ZzControls(list):
             meta["datalen"] = 16
 
         if not meta.get("control"):
-            # meta["control"] = "line"
-            meta["control"] = ""
+            meta["control"] = "line"
+            # meta["control"] = ""
 
-        if num(meta.get("datalen", 0)) == 0 and meta["control"] == "line":
+        if num(meta.get("datalen", 0)) == 0 and meta["control"] in ("line", "radio"):
+            # if num(meta.get("datalen", 0)) == 0:
             if meta.get("datatype", "").lower() == "int":
                 meta["datalen"] = 9
             elif meta.get("datatype", "").lower() == "bigint":
@@ -333,6 +335,9 @@ class ZzApp:
         if text.startswith("|"):
             text = text[1:]
         self.menu_list.append({"TEXT": text, "WORKER": worker, "BEFORE": before, "TOOLBAR": toolbar})
+
+    def clear_menu(self):
+        self.menu_list = []
 
     def build_menu(self):
         self.menu_list = self.reorder_menu(self.menu_list)
@@ -463,6 +468,9 @@ class ZzApp:
     def show_statusbar(self, mode=True):
         pass
 
+    def keyboard_modifiers(self):
+        pass
+
     def hide_statusbar(self, mode=True):
         if mode:
             self.show_statusbar(False)
@@ -477,6 +485,9 @@ class ZzApp:
 
     def get_char_height(self):
         return 9
+
+    def sleep(self, seconds=0):
+        time.sleep(seconds)
 
     @staticmethod
     def get_open_file_dialoq(header="Open file", path="", filter=""):

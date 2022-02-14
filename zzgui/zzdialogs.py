@@ -22,6 +22,7 @@ def center_window(form: ZzForm):
 def zzMess(mess="", title="Message"):
     form = ZzForm(title)
     form.do_not_save_geometry = True
+    form.add_control("/v")
     form.add_control("mess", control="text", data=f"{mess}", readonly=True)
     if form.add_control("/h"):
         form.add_control("/s")

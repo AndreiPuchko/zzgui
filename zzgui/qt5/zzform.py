@@ -148,13 +148,6 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
         self.zz_form.form_stack.append(self)
 
-        if self.zz_form.before_form_show() is False:
-            self.zz_form.close()
-            return
-
-        if not isinstance(self.parent(), QMdiSubWindow):
-            self.escapeEnabled = False
-
         # first_widget = self.widgets[list(self.widgets.keys())[0]]
         # while (
         #     not first_widget.isEnabled()
@@ -176,6 +169,13 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             if widget.isEnabled():
                 widget.setFocus()
                 break
+
+        if self.zz_form.before_form_show() is False:
+            self.zz_form.close()
+            return
+
+        if not isinstance(self.parent(), QMdiSubWindow):
+            self.escapeEnabled = False
 
         self.shown = True
         self.restore_geometry(zzapp.zz_app.settings)

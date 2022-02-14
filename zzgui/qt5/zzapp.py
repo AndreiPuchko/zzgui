@@ -149,6 +149,7 @@ class ZzApp(QMainWindow, zzapp.ZzApp,  ZzQtWindow):
         self.menu_list = super().reorder_menu(self.menu_list)
         self._main_menu = {}
         QMainWindow.menuBar(self).clear()
+        self.zz_toolbar.clear()
         QMainWindow.menuBar(self).show()
         for x in self.menu_list:
             _path = x["TEXT"]
@@ -279,6 +280,17 @@ class ZzApp(QMainWindow, zzapp.ZzApp,  ZzQtWindow):
         self.add_new_tab()
         self.process_events()
         self.on_start()
+
+    def keyboard_modifiers(self):
+        modifiers = QApplication.keyboardModifiers()
+        rez = []
+        if modifiers == Qt.ShiftModifier:
+            rez.append("shift")
+        elif modifiers == Qt.ControlModifier:
+            rez.append("control")
+        elif modifiers == (Qt.AltModifier):
+            rez.append("alt")
+        return "+".join(rez)
 
     def save_geometry(self, settings):
         ZzQtWindow.save_geometry(self, settings)
