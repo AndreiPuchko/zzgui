@@ -13,8 +13,12 @@ import re
 
 import zzgui.zzapp as zzapp
 from zzgui.zzutils import num
-from zzdb.cursor import ZzCursor
-from zzdb.db import ZzDb
+
+try:
+    from zzdb.cursor import ZzCursor
+    from zzdb.db import ZzDb
+except Exception:
+    pass
 
 
 class ZzModel:
@@ -34,7 +38,6 @@ class ZzModel:
 
         # CRUD flags
         self.readonly = True
-
         self.delete_enabled = False
         self.insert_enabled = False
         self.update_enabled = False
@@ -45,6 +48,12 @@ class ZzModel:
 
         self.order_text = ""
         self.where_text = ""
+
+    def get_row(self, row_number):
+        if row_number < len(self.records):
+            return self.records[row_number]
+        else:
+            return None
 
     def get_table_name(self):
         return ""

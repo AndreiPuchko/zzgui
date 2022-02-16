@@ -211,11 +211,13 @@ class ZzControls(list):
             meta["control"] = "date"
             meta["datalen"] = 16
 
-        if not meta.get("control"):
+        if meta.get("name").startswith("/"):
+            meta["control"] = ""
+        elif not meta.get("control") and not meta.get("widget") and meta.get("name"):
             meta["control"] = "line"
             # meta["control"] = ""
 
-        if num(meta.get("datalen", 0)) == 0 and meta["control"] in ("line", "radio"):
+        if num(meta.get("datalen", 0)) == 0 and meta.get("control", "") in ("line", "radio"):
             # if num(meta.get("datalen", 0)) == 0:
             if meta.get("datatype", "").lower() == "int":
                 meta["datalen"] = 9
@@ -235,7 +237,7 @@ class ZzControls(list):
 
         if (
             re.match(".*text.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE)
-            and meta["control"] != "script"
+            and not "code" in meta["control"]
         ):
             meta["datalen"] = 0
             meta["control"] = "text"

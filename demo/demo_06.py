@@ -25,7 +25,7 @@ class DemoApp(ZzApp):
         form.add_control("", "First Label")
         form.add_control("field", "First Field")
         form.add_control("/")
-        form.add_control("code", "Text Field", control="codepyth_on")
+        form.add_control("code", "Text Field", control="codepython")
         form.add_control("/h")
 
         def open_file():

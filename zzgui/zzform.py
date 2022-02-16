@@ -75,6 +75,7 @@ class ZzForm:
             self.show_mdi_modal_grid()
         else:
             self.show_mdi_modal_form()
+        return self
 
     def set_model(self, model):
         self.model: ZzModel = model
@@ -856,7 +857,7 @@ class ZzFormWindow:
 
     def widget(self, meta):
         """Widgets fabric"""
-        if not meta.get("control"):
+        if not meta.get("control") or meta.get("control") == "":
             if meta.get("widget"):
                 control = "widget"
             else:
