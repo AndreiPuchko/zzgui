@@ -123,7 +123,6 @@ class ZzModel:
         meta = zzapp.ZzControls.validate(meta)
         self.columns.append(meta["name"])
         self.headers.append(meta["gridlabel" if meta.get("gridlabel") else "label"])
-        # print(self.headers[-1])
         self.alignments.append(meta.get("alignment", "7"))
         self.meta.append(meta)
 

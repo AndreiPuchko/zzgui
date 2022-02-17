@@ -65,7 +65,8 @@ class ZzForm:
 
         self.current_row = 0
         self.current_column = 0
-        self.on_init()
+        # Must be called in subclass
+        # self.on_init()
 
     def on_init(self):
         pass
@@ -157,6 +158,7 @@ class ZzForm:
                 worker=lambda: self.show_crud_form(VIEW),
                 icon=zzapp.ACTION_VIEW_ICON,
                 hotkey=zzapp.ACTION_VIEW_HOTKEY,
+                eof_disabled=1,
                 tag="view",
             )
         if is_crud and not self.model.readonly:
@@ -171,12 +173,14 @@ class ZzForm:
                 worker=lambda: self.show_crud_form(COPY),
                 icon=zzapp.ACTION_COPY_ICON,
                 hotkey=zzapp.ACTION_COPY_HOTKEY,
+                eof_disabled=1,
             )
             tmp_actions.add_action(
                 text="Edit",
                 worker=lambda: self.show_crud_form(EDIT),
                 icon=zzapp.ACTION_EDIT_ICON,
                 hotkey=zzapp.ACTION_EDIT_HOTKEY,
+                eof_disabled=1,
                 tag="edit",
             )
             tmp_actions.add_action(text="-")
@@ -185,6 +189,7 @@ class ZzForm:
                 worker=self.crud_delete,
                 icon=zzapp.ACTION_REMOVE_ICON,
                 hotkey=zzapp.ACTION_REMOVE_HOTKEY,
+                eof_disabled=1,
             )
             tmp_actions.add_action(text="-")
 
@@ -250,21 +255,22 @@ class ZzForm:
         if self.model is not None:
             table_name = ""
             table_name = self.model.get_table_name()
-            for x in self.controls:
-                if x["name"].startswith("/"):
+            for meta in self.controls:
+                meta = zzapp.ZzControls.validate(meta)
+                if meta["name"].startswith("/"):
                     continue
-                if x.get("control") in NO_DATA_WIDGETS:
+                if meta.get("control") in NO_DATA_WIDGETS:
                     continue
                 column = {
                     "table": table_name,
-                    "column": x["name"],
-                    "datatype": x["datatype"],
-                    "datalen": x["datalen"],
-                    "datadec": x["datadec"],
-                    "to_table": x["to_table"],
-                    "to_column": x["to_column"],
-                    "related": x["related"],
-                    "pk": x["pk"],
+                    "column": meta["name"],
+                    "datatype": meta["datatype"],
+                    "datalen": meta["datalen"],
+                    "datadec": meta["datadec"],
+                    "to_table": meta["to_table"],
+                    "to_column": meta["to_column"],
+                    "related": meta["related"],
+                    "pk": meta["pk"],
                 }
                 rez.append(column)
         return rez
@@ -273,9 +279,6 @@ class ZzForm:
         if self.valid() is False:
             return
         self.close()
-
-    def before_grid_show(self):
-        pass
 
     def add_ok_cancel_buttons(self):
         buttons = zzapp.ZzControls()
@@ -395,6 +398,7 @@ class ZzForm:
                             show_error_messages = False
             self.model.refresh()
             self.set_grid_index(row)
+            self.refresh_children()
 
     def crud_save(self):
         if self.before_crud_save() is False:
@@ -476,6 +480,11 @@ class ZzForm:
             self.refresh_children()
 
     def refresh_children(self):
+        for x in self.actions:
+            if x.get("engineAction"):
+                x["engineAction"].setDisabled(
+                    True if x.get("eof_disabled") and self.model.row_count() <= 0 else False
+                )
         for action in self.children_forms:
             filter = self.get_where_for_child(action)
             action["child_form_object"].model.set_where(filter)
@@ -532,6 +541,9 @@ class ZzForm:
         pass
 
     def valid(self):
+        pass
+
+    def before_grid_show(self):
         pass
 
     def before_form_show(self):
@@ -600,6 +612,7 @@ class ZzForm:
         mess="",
         hotkey="",
         tag="",
+        eof_disabled="",
         child_form=None,
         child_where="",
     ):
@@ -963,8 +976,9 @@ class ZzFormWindow:
             self.widgets[x].splitter.set_sizes(sizes)
         # Restore grid columns sizes
         self.restore_grid_columns()
-        if self.zz_form.before_grid_show() is False:
-            return
+        if self.mode == "grid":
+            if self.zz_form.before_grid_show() is False:
+                return
         self.zz_form.zz_app.show_form(self, modal)
 
     def get_controls_list(self, name: str):
@@ -977,11 +991,14 @@ class ZzFormWindow:
             for count, x in enumerate(self.zz_form.model.headers):
                 data = zzapp.zz_app.settings.get(self.window_title, f"grid_column__'{x}'")
                 if data == "":
-                    if self.zz_form.model.meta[count].get("relation"):
+                    if (
+                        self.zz_form.model.meta[count].get("relation")
+                        or self.zz_form.model.meta[count].get("num") is None
+                    ):
                         c_w = zzapp.GRID_COLUMN_WIDTH
                     else:
                         c_w = int_(self.zz_form.model.meta[count].get("datalen"))
-                    print(count, x, c_w)
+                    # print(count, x, c_w)
                     c_w = zzapp.zz_app.get_char_width() * (min(c_w, zzapp.GRID_COLUMN_WIDTH))
                     data = f"{count}, {c_w}"
                 col_settings[x] = data

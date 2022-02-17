@@ -31,6 +31,7 @@ class ZzForm(zzform.ZzForm):
         # else:
         #     self.zz_app = zzapp.zz_app
         self.zz_app = qApp.activeWindow()
+        self.on_init()
 
 
 class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):

@@ -104,6 +104,7 @@ class ZzActions(list):
         mess="",
         hotkey="",
         tag="",
+        eof_disabled="",
         child_form=None,
         child_where="",
     ):
@@ -120,6 +121,7 @@ class ZzActions(list):
         action["mess"] = mess
         action["hotkey"] = hotkey
         action["tag"] = tag
+        action["eof_disabled"] = eof_disabled
         action["child_form"] = child_form
         action["child_where"] = child_where
         self.append(action)
@@ -218,26 +220,25 @@ class ZzControls(list):
             # meta["control"] = ""
 
         if num(meta.get("datalen", 0)) == 0 and meta.get("control", "") in ("line", "radio"):
-            # if num(meta.get("datalen", 0)) == 0:
             if meta.get("datatype", "").lower() == "int":
                 meta["datalen"] = 9
             elif meta.get("datatype", "").lower() == "bigint":
                 meta["datalen"] = 17
             else:
-                meta["datalen"] = 10
+                meta["datalen"] = 100
 
-        if re.match(".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE):
-            meta["num"] = True
-            if meta.get("pic", "") == "":
-                meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
-                    "" if num(meta["datadec"]) == 0 else "." + "9" * int(num(meta["datadec"]))
-                )
-            if num(meta.get("alignment", 0)) == 0:
-                meta["alignment"] = 9
+        # if re.match(".*int.*|.*dec.*|.*num.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE):
+        #     meta["num"] = True
+        #     if meta.get("pic", "") == "":
+        #         meta["pic"] = "9" * int(num(meta["datalen"]) - num(meta["datadec"])) + (
+        #             "" if num(meta["datadec"]) == 0 else "." + "9" * int(num(meta["datadec"]))
+        #         )
+        #     if num(meta.get("alignment", 0)) == 0:
+        #         meta["alignment"] = 9
 
         if (
             re.match(".*text.*", meta.get("datatype", ""), re.RegexFlag.IGNORECASE)
-            and not "code" in meta["control"]
+            and "code" not in meta["control"]
         ):
             meta["datalen"] = 0
             meta["control"] = "text"
@@ -254,6 +255,12 @@ class ZzControls(list):
             if meta.get("alignment", -1) == -1:
                 meta["alignment"] = 9
 
+        if not meta["name"].startswith("/"):
+            if "char" in meta.get("datatype", "") and num(meta.get("datalen")) == 0:
+                if meta.get("control") in ("check"):
+                    meta["datalen"] = 1
+                elif meta.get("control") in ("line"):
+                    meta["datalen"] = 100
         return meta
 
 
