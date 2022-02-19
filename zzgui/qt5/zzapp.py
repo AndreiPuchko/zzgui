@@ -35,7 +35,7 @@ from zzgui.qt5.zzwindow import layout
 import zzgui.zzapp as zzapp
 
 
-class ZzApp(QMainWindow, zzapp.ZzApp,  ZzQtWindow):
+class ZzApp(QMainWindow, zzapp.ZzApp, ZzQtWindow):
     class ZzTabWidget(QTabWidget):
         def __init__(self, parent):
             super().__init__(parent)
@@ -54,9 +54,6 @@ class ZzApp(QMainWindow, zzapp.ZzApp,  ZzQtWindow):
             self.closeButton.clicked.connect(self.closeSubWindow)
             self.setCornerWidget(self.closeButton)
             self.currentChanged.connect(self._currentChanged)
-
-            # self.addTab()
-            # self.setCurrentIndex(0)
 
         def _currentChanged(self, index: int):
             # bug path when subwindow in tab 0 lost focus if we close subwindow in other tab
@@ -104,6 +101,11 @@ class ZzApp(QMainWindow, zzapp.ZzApp,  ZzQtWindow):
 
         super().__init__(title)
         qApp.focusChanged.connect(self.focus_changed)
+
+        # replace static methods for instance
+        self.get_open_file_dialoq = self._get_open_file_dialoq
+        self.get_save_file_dialoq = self._get_save_file_dialoq
+
 
     def get_self(self):
         if qApp.activeWindow():
@@ -269,9 +271,19 @@ class ZzApp(QMainWindow, zzapp.ZzApp,  ZzQtWindow):
     def get_open_file_dialoq(header="Open file", path="", filter=""):
         return QFileDialog.getOpenFileName(None, header, path, filter)
 
+    def _get_open_file_dialoq(self, header="Open file", path="", filter=""):
+        rez = ZzApp.get_open_file_dialoq(header, path, filter)
+        self.qApp.setActiveWindow(self)
+        return rez
+
     @staticmethod
     def get_save_file_dialoq(header="Save file", path="", filter=""):
         return QFileDialog.getSaveFileName(None, header, path, filter)
+
+    def _get_save_file_dialoq(self, header="Save file", path="", filter=""):
+        rez = ZzApp.get_save_file_dialoq(header, path, filter)
+        self.qApp.setActiveWindow(self)
+        return rez
 
     def _wait_for_show(self):
         while qApp.activeWindow() is None:

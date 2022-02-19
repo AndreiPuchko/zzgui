@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
 import zzgui.zzapp as zzapp
 from configparser import ConfigParser
-from zzgui.zzwindow import ZzWindow
+# from zzgui.zzwindow import ZzWindow
 from zzgui.zzutils import num
 
 import re
@@ -154,7 +154,6 @@ class ZzControls(list):
             return [line["name"] for line in self.controls]
 
     def __init__(self):
-        # self.controls = []
         self.c = self._C(self)
 
     # def __getitem__(self, list_index):
@@ -178,6 +177,7 @@ class ZzControls(list):
         datalen=0,
         datadec=0,
         pk="",
+        ai="",
         actions=[],
         alignment=-1,
         to_table="",
@@ -203,6 +203,7 @@ class ZzControls(list):
     ):
         meta = locals().copy()
         del meta["self"]
+        meta["_control"] = None
         # meta = self.validate(meta)
         self.append(meta)
         return True
@@ -403,7 +404,8 @@ class ZzApp:
             "zzScriptEdit",
             "zzScriptSqlEdit",
         ):
-            to_widget.when()
+            if to_widget:
+                to_widget.when()
 
     def lock(self):
         pass

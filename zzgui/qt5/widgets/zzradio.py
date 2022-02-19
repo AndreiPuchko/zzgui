@@ -65,13 +65,16 @@ class zzRadioButton(QRadioButton):
         self.radio = radio
         self.toggled.connect(self.value_changed)
 
-    def value_changed(self, value):
+    def _value_changed(self, value):
         if value:
             if self.radio.meta.get("valid"):
                 self.radio.meta.get("valid")()
         else:
             if self.radio.meta.get("when"):
                 self.radio.meta.get("when")()
+
+    def value_changed(self, value):
+        return self.radio.valid()
 
     def get_text(self):
         return self.text()

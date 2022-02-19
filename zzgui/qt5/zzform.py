@@ -149,18 +149,6 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
         self.zz_form.form_stack.append(self)
 
-        # first_widget = self.widgets[list(self.widgets.keys())[0]]
-        # while (
-        #     not first_widget.isEnabled()
-        #     or (hasattr(first_widget, "isReadOnly") and first_widget.isReadOnly())
-        #     or first_widget.focusPolicy() == Qt.NoFocus
-        # ):
-        #     # print(first_widget)
-        #     first_widget = first_widget.nextInFocusChain()
-
-        # first_widget.setFocus()
-        # print(first_widget)
-        # set focus into first enabled widget
         for widget_name in self.widgets:
             widget = self.widgets[widget_name]
             if widget.focusPolicy() == Qt.NoFocus:
@@ -171,9 +159,11 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
                 widget.setFocus()
                 break
 
-        if self.zz_form.before_form_show() is False:
-            self.zz_form.close()
-            return
+        if self.mode == "form":
+            self.zz_form.form_is_active = True
+            if self.zz_form.before_form_show() is False:
+                self.zz_form.close()
+                return
 
         if not isinstance(self.parent(), QMdiSubWindow):
             self.escapeEnabled = False
@@ -181,13 +171,12 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         self.shown = True
         self.restore_geometry(zzapp.zz_app.settings)
 
-        if self.mode == "form":
-            self.parent().setWindowFlag(Qt.WindowMaximizeButtonHint, False)
+        # if self.mode == "form":
+        #     self.parent().setWindowFlag(Qt.WindowMaximizeButtonHint, False)
 
         self.parent().setWindowFlag(Qt.WindowMinimizeButtonHint, False)
 
         if self.zz_form.hide_title:
-            # self.setWindowFlag(0)
             self.parent().setWindowFlags(
                 Qt.CustomizeWindowHint
                 | Qt.FramelessWindowHint
@@ -244,6 +233,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
 
     def closeEvent(self, event=None):
         self.zz_form.close()
+        self.zz_form.form_is_active = False
         if event:
             event.accept()
 

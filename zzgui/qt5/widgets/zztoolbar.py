@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
     QToolBar,
-    QLabel,
+    # QLabel,
     QToolButton,
     QSizePolicy,
     QMenu,

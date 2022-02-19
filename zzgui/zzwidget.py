@@ -62,13 +62,22 @@ class ZzWidget:
         pass
 
     def valid(self):
-        if self.meta.get("valid") is not None:
-            return self.meta.get("valid")()
+        if not self.meta.get("form"):
+            return
+        if not self.meta.get("form").form_is_active is True:
+            return
+        valid = self.meta.get("valid")
+        if valid is not None:
+            return valid()
         else:
             return True
 
     def when(self):
-        return self.meta.get("when", lambda: True)()
+        when = self.meta.get("when", lambda: True)
+        if when:
+            return self.meta.get("when", lambda: True)()
+        else:
+            return True
 
     def set_maximum_len(self, length):
         pass

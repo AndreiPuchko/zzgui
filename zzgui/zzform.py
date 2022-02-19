@@ -44,6 +44,7 @@ class ZzForm:
         self.a = ZzFormAction(self)  # Actions by text
         self.r = ZzModelData(self)  # Grid data by name
 
+        self.prev_form = None
         self.children_forms = []  # forms inside this form
         self.i_am_child = None
         self.max_child_level = 1  # max depth for child forms
@@ -60,6 +61,8 @@ class ZzForm:
 
         self.crud_form = None
         self.crud_mode = ""
+
+        self.form_is_active = False
 
         self.grid_form = None
 
@@ -271,6 +274,7 @@ class ZzForm:
                     "to_column": meta["to_column"],
                     "related": meta["related"],
                     "pk": meta["pk"],
+                    "ai": meta["ai"],
                 }
                 rez.append(column)
         return rez
@@ -494,6 +498,7 @@ class ZzForm:
 
     def show_child_form(self, action):
         child_form = action.get("child_form")()
+        child_form.prev_form = self
         child_form.model.set_where(self.get_where_for_child(action))
         child_form.model.refresh()
         child_form.show_mdi_modal_grid()
@@ -570,6 +575,7 @@ class ZzForm:
         datalen=0,
         datadec=0,
         pk="",
+        ai="",
         actions=[],
         alignment=-1,
         to_table="",
@@ -759,9 +765,9 @@ class ZzFormWindow:
                     tmp_grid_form.add_control("/t", action.get("text", "="), stretch=100)
                     #  create child form!
                     action["child_form_object"] = action.get("child_form")()
-
+                    action["child_form_object"].prev_form = self.zz_form
                     action["child_form_object"].title = (
-                        self.zz_form.title + "_" + action["child_form_object"].title
+                        self.zz_form.title + " / " + action["child_form_object"].title
                     )
                     action["child_form_object"].i_am_child = True
                     action["child_form_object"].max_child_level = self.zz_form.max_child_level - 1
@@ -1014,8 +1020,6 @@ class ZzFormWindow:
                     f"grid_column__'{x['name']}'",
                     x["data"],
                 )
-        # for x in self.zz_form.children_forms:
-        #     x["child_form_object"].close()
         for x in self.get_controls_list("ZzFormWindow"):
             x.close()
 
