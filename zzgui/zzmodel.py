@@ -64,20 +64,47 @@ class ZzModel:
     def set_data_error(self, text=""):
         self.lastdata_error_text = text
 
-    def insert(self, record: dict, current_row=0):
-        # print(record)
+    # def insert(self, record: dict, current_row=0):
+    #     # print(record)
+    #     return True
+
+    # def update(self, record: dict, current_row=0):
+    #     # print(record)
+    #     return True
+
+    # def delete(self, current_row=0):
+    #     # print(current_row)
+    #     return True
+
+    def update(self, record: dict, current_row):
+        self.records[current_row] = record
+        self.data_changed = True
+        self.refresh()
         return True
 
-    def update(self, record: dict, current_row=0):
-        # print(record)
+    def insert(self, record: dict, current_row):
+        self.records.append(record)
+        self.data_changed = True
+        self.refresh()
         return True
 
-    def delete(self, current_row=0):
-        # print(current_row)
+    def delete(self, row_number):
+        self.records.pop(row_number)
+        self.data_changed = True
+        self.refresh()
         return True
 
     def set_where(self, where_text=""):
         self.where_text = where_text
+        if self.where_text:
+            self.use_proxy = True
+            self.proxy_records = []
+            for row, rec in enumerate(self.records):
+                if eval(self.where_text, rec):
+                    self.proxy_records.append(row)
+        else:
+            self.use_proxy = False
+        self.refresh()
         return self
 
     def get_where(self):
@@ -90,6 +117,35 @@ class ZzModel:
             self.order_text = ",".join(order_data)
         else:
             self.order_text = order_data
+        if self.records:
+            colname = self.order_text
+
+            if self.proxy_records:
+                sort_records = {}
+                for x in range(len(self.proxy_records)):
+                    value = self.records[self.proxy_records[x]][colname]
+                    if value not in sort_records:
+                        sort_records[value] = [self.proxy_records[x]]
+                    else:
+                        sort_records[value].append(self.proxy_records[x])
+            else:
+                sort_records = {}
+                for x in range(len(self.records)):
+                    if self.records[x][colname] not in sort_records:
+                        sort_records[self.records[x][colname]] = [x]
+                    else:
+                        sort_records[self.records[x][colname]].append(x)
+
+            sorted_keys = sorted([x for x in sort_records.keys()])
+            # sorted_keys.sort()
+            tmp_proxy_records = []
+            for x in sorted_keys:
+                for y in sort_records[x]:
+                    tmp_proxy_records.append(y)
+
+            self.proxy_records = tmp_proxy_records
+            self.use_proxy = True
+
 
     def refresh(self):
         self.relation_cache = {}
@@ -251,66 +307,66 @@ class ZzCsvModel(ZzModel):
         self.set_records([x for x in csv_dict])
         self.filterable = True
 
-    def update(self, record: dict, current_row):
-        self.records[current_row] = record
-        self.data_changed = True
-        self.refresh()
-        return True
+    # def update(self, record: dict, current_row):
+    #     self.records[current_row] = record
+    #     self.data_changed = True
+    #     self.refresh()
+    #     return True
 
-    def insert(self, record: dict, current_row):
-        self.records.append(record)
-        self.data_changed = True
-        self.refresh()
-        return True
+    # def insert(self, record: dict, current_row):
+    #     self.records.append(record)
+    #     self.data_changed = True
+    #     self.refresh()
+    #     return True
 
-    def delete(self, row_number):
-        self.records.pop(row_number)
-        self.data_changed = True
-        self.refresh()
-        return True
+    # def delete(self, row_number):
+    #     self.records.pop(row_number)
+    #     self.data_changed = True
+    #     self.refresh()
+    #     return True
 
-    def set_where(self, where_text=""):
-        self.where_text = where_text
-        if self.where_text:
-            self.use_proxy = True
-            self.proxy_records = []
-            for row, rec in enumerate(self.records):
-                if eval(self.where_text, rec):
-                    self.proxy_records.append(row)
-        else:
-            self.use_proxy = False
-        self.refresh()
+    # def set_where(self, where_text=""):
+    #     self.where_text = where_text
+    #     if self.where_text:
+    #         self.use_proxy = True
+    #         self.proxy_records = []
+    #         for row, rec in enumerate(self.records):
+    #             if eval(self.where_text, rec):
+    #                 self.proxy_records.append(row)
+    #     else:
+    #         self.use_proxy = False
+    #     self.refresh()
 
-    def set_order(self, order_data=""):
-        super().set_order(order_data=order_data)
+    # def set_order(self, order_data=""):
+    #     super().set_order(order_data=order_data)
 
-        colname = self.order_text
+    #     colname = self.order_text
 
-        if self.proxy_records:
-            sort_records = {}
-            for x in range(len(self.proxy_records)):
-                value = self.records[self.proxy_records[x]][colname]
-                if value not in sort_records:
-                    sort_records[value] = [self.proxy_records[x]]
-                else:
-                    sort_records[value].append(self.proxy_records[x])
-        else:
-            sort_records = {}
-            for x in range(len(self.records)):
-                if self.records[x][colname] not in sort_records:
-                    sort_records[self.records[x][colname]] = [x]
-                else:
-                    sort_records[self.records[x][colname]].append(x)
+    #     if self.proxy_records:
+    #         sort_records = {}
+    #         for x in range(len(self.proxy_records)):
+    #             value = self.records[self.proxy_records[x]][colname]
+    #             if value not in sort_records:
+    #                 sort_records[value] = [self.proxy_records[x]]
+    #             else:
+    #                 sort_records[value].append(self.proxy_records[x])
+    #     else:
+    #         sort_records = {}
+    #         for x in range(len(self.records)):
+    #             if self.records[x][colname] not in sort_records:
+    #                 sort_records[self.records[x][colname]] = [x]
+    #             else:
+    #                 sort_records[self.records[x][colname]].append(x)
 
-        sorted_keys = sorted([x for x in sort_records.keys()])
-        # sorted_keys.sort()
-        tmp_proxy_records = []
-        for x in sorted_keys:
-            for y in sort_records[x]:
-                tmp_proxy_records.append(y)
+    #     sorted_keys = sorted([x for x in sort_records.keys()])
+    #     # sorted_keys.sort()
+    #     tmp_proxy_records = []
+    #     for x in sorted_keys:
+    #         for y in sort_records[x]:
+    #             tmp_proxy_records.append(y)
 
-        self.proxy_records = tmp_proxy_records
-        self.use_proxy = True
+    #     self.proxy_records = tmp_proxy_records
+    #     self.use_proxy = True
 
 
 class ZzCursorModel(ZzModel):

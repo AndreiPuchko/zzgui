@@ -67,9 +67,16 @@ class zztoolbar(QFrame, ZzWidget):
                     if x + 1 == len(action_text_list):  # real action
 
                         action["engineAction"] = cascade_action[action_key].addAction(action_text)
+                        action["_set_enabled"] = lambda mode=True, act=action["engineAction"]: act.setEnabled(
+                            mode
+                        )
+                        action["_set_disabled"] = lambda mode=True, act=action[
+                            "engineAction"
+                        ]: act.setDisabled(mode)
                         action["engineAction"].setToolTip(action.get("mess", ""))
                         action["engineAction"].setStatusTip(action.get("mess", ""))
                         if worker:
+                            action["_worker"] = worker
                             action["engineAction"].triggered.connect(worker)
                         elif action.get("child_where") and action.get("child_form"):
 
@@ -79,6 +86,7 @@ class zztoolbar(QFrame, ZzWidget):
 
                                 return rd
 
+                            action["_worker"] = getChildForm(action)
                             action["engineAction"].triggered.connect(getChildForm(action))
 
                         action["engineAction"].setShortcut(

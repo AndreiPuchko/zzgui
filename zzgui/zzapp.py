@@ -178,6 +178,7 @@ class ZzControls(list):
         datadec=0,
         pk="",
         ai="",
+        migrate="*",
         actions=[],
         alignment=-1,
         to_table="",

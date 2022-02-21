@@ -159,11 +159,15 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
                 widget.setFocus()
                 break
 
-        if self.mode == "form":
-            self.zz_form.form_is_active = True
-            if self.zz_form.before_form_show() is False:
-                self.zz_form.close()
-                return
+        if event:
+            event.accept()
+
+        # if self.mode == "form":
+        #     self.zz_form.form_is_active = True
+        #     if self.zz_form.before_form_show() is False:
+        #         # self.close()
+        #         self.zz_form.close()
+        #         return
 
         if not isinstance(self.parent(), QMdiSubWindow):
             self.escapeEnabled = False
@@ -186,8 +190,6 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         if self.zz_form.maximized:
             self.showMaximized()
 
-        if event:
-            event.accept()
         self.zz_form.after_form_show()
 
     def keyPressEvent(self, event: QEvent):
@@ -228,6 +230,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         if self.parent() is not None:
             if isinstance(self.parent(), QMdiSubWindow):
                 self.parent().close()
+                # QDialog.close(self)
         else:
             QDialog.close(self)
 
