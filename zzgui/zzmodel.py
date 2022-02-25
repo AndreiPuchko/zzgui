@@ -77,12 +77,12 @@ class ZzModel:
     #     return True
 
     def update(self, record: dict, current_row):
-        self.records[current_row] = record
+        self.records[current_row].update(record)
         self.data_changed = True
         self.refresh()
         return True
 
-    def insert(self, record: dict, current_row):
+    def insert(self, record: dict, current_row=0):
         self.records.append(record)
         self.data_changed = True
         self.refresh()
@@ -100,7 +100,8 @@ class ZzModel:
             self.use_proxy = True
             self.proxy_records = []
             for row, rec in enumerate(self.records):
-                if eval(self.where_text, rec):
+                rc = dict(rec)
+                if eval(self.where_text, rc):
                     self.proxy_records.append(row)
         else:
             self.use_proxy = False
@@ -146,9 +147,12 @@ class ZzModel:
             self.proxy_records = tmp_proxy_records
             self.use_proxy = True
 
-
     def refresh(self):
         self.relation_cache = {}
+
+    # def refresh(self):
+    #     self.set_where(self.where_text)
+    #     self.set_order(self.order_text)
 
     def reset(self):
         self.records = []
@@ -183,6 +187,8 @@ class ZzModel:
         self.meta.append(meta)
 
     def get_record(self, row):
+        if row < 0 or row > len(self.records)-1:
+            return {}
         if self.use_proxy:
             return self.records[self.proxy_records[row]]
         else:
@@ -429,6 +435,11 @@ class ZzCursorModel(ZzModel):
             self.cursor.set_order(self.order_text)
         return self
 
+    def set_where(self, where_text=""):
+        self.cursor.set_where(where_text)
+        self.refresh()
+        return super().set_where(where_text)
+
     def add_column(self, meta):
         """update metadata from db"""
         db: ZzDb = self.cursor.zz_db
@@ -440,11 +451,6 @@ class ZzCursorModel(ZzModel):
         if "datadec" not in meta:
             meta["datadec"] = int(num(db_meta.get("datadec", 2)))
         return super().add_column(meta)
-
-    def set_where(self, where_text=""):
-        self.cursor.set_where(where_text)
-        self.refresh()
-        return super().set_where(where_text)
 
     def data_export(self, file: str):
         if file.lower().endswith(".csv"):

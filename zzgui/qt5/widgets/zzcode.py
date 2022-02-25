@@ -47,6 +47,7 @@ class zzcode(QsciScintilla, ZzWidget):
         self.__markOccurrencesTimer.setSingleShot(True)
         self.__markOccurrencesTimer.setInterval(500)
         self.__markOccurrencesTimer.timeout.connect(self.__markOccurrences)
+        self.textChanged.connect(self.valid)
 
     def set_lexer(self, lexer=""):
         if lexer != "":
@@ -63,7 +64,7 @@ class zzcode(QsciScintilla, ZzWidget):
             self.setLexer(self.lexer)
 
     def set_background_color(self, red=150, green=200, blue=230):
-        # self.lexer.setDefaultPaper(QColor(red, green, blue))
+        self.lexer.setDefaultPaper(QColor(red, green, blue))
         self.lexer.setPaper(QColor(red, green, blue))
         # self.setMatchedBraceForegroundColor(QColor("lightgreen"))
 

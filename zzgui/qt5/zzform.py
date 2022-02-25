@@ -147,7 +147,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         if self.shown:
             return
 
-        self.zz_form.form_stack.append(self)
+        # self.zz_form.form_stack.append(self)
 
         for widget_name in self.widgets:
             widget = self.widgets[widget_name]

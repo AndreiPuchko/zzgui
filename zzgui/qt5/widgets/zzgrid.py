@@ -139,7 +139,7 @@ class zzgrid(QTableView):
         # self.currentCellChangedSignal.emit(current.row(), current.column())
         super().currentChanged(current, previous)
         self.model().dataChanged.emit(current, previous)
-        self.zz_form.grid_index_changed(self.currentIndex().row(), self.currentIndex().column())
+        self.zz_form._grid_index_changed(self.currentIndex().row(), self.currentIndex().column())
 
     def current_index(self):
         return self.currentIndex().row(), self.currentIndex().column()

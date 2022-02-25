@@ -145,6 +145,7 @@ class ZzApp(QMainWindow, zzapp.ZzApp, ZzQtWindow):
 
             if prev_focus_widget is not None:
                 prev_focus_widget.setFocus()
+                # print(prev_focus_widget)
             self.set_tabbar_text(prev_tabbar_text)
 
     def build_menu(self):

@@ -62,14 +62,16 @@ class ZzForm:
         self.grid_form = None
         self.crud_form = None
         self.crud_mode = ""
-        
+
         self.no_view_action = False
 
         self.form_is_active = False
 
-
         self.current_row = 0
         self.current_column = 0
+        self.last_current_row = 0
+        self.last_current_column = 0
+
         # Must be called in subclass
         # self.on_init()
 
@@ -78,18 +80,18 @@ class ZzForm:
 
     def run_action(self, text=""):
         for x in self.actions:
-            if text == x['text']:
-                x['_worker']()
+            if text == x["text"]:
+                x["_worker"]()
 
     def disable_action(self, text="", mode=True):
         for x in self.actions:
-            if text == x['text']:
-                x['_set_disabled'](mode)
+            if text == x["text"]:
+                x["_set_disabled"](mode)
 
     def enable_action(self, text="", mode=True):
         for x in self.actions:
-            if text == x['text']:
-                x['_set_enabled'](mode)
+            if text == x["text"]:
+                x["_set_enabled"](mode)
 
     def run(self):
         if self.model:
@@ -171,44 +173,13 @@ class ZzForm:
 
         tmp_actions = zzapp.ZzActions()
         if not self.no_view_action:
-            tmp_actions.add_action(
-                text=zzapp.ACTION_VIEW_TEXT,
-                worker=lambda: self.show_crud_form(VIEW),
-                icon=zzapp.ACTION_VIEW_ICON,
-                hotkey=zzapp.ACTION_VIEW_HOTKEY,
-                eof_disabled=1,
-                tag="view",
-            )
+            self.add_action_view(tmp_actions)
         if is_crud and not self.model.readonly:
-            tmp_actions.add_action(
-                text=zzapp.ACTION_NEW_TEXT,
-                worker=lambda: self.show_crud_form(NEW),
-                icon=zzapp.ACTION_NEW_ICON,
-                hotkey=zzapp.ACTION_NEW_HOTKEY,
-            )
-            tmp_actions.add_action(
-                text=zzapp.ACTION_COPY_TEXT,
-                worker=lambda: self.show_crud_form(COPY),
-                icon=zzapp.ACTION_COPY_ICON,
-                hotkey=zzapp.ACTION_COPY_HOTKEY,
-                eof_disabled=1,
-            )
-            tmp_actions.add_action(
-                text="Edit",
-                worker=lambda: self.show_crud_form(EDIT),
-                icon=zzapp.ACTION_EDIT_ICON,
-                hotkey=zzapp.ACTION_EDIT_HOTKEY,
-                eof_disabled=1,
-                tag="edit",
-            )
+            self.add_action_new(tmp_actions)
+            self.add_action_copy(tmp_actions)
+            self.add_action_edit(tmp_actions)
             tmp_actions.add_action(text="-")
-            tmp_actions.add_action(
-                text=zzapp.ACTION_REMOVE_TEXT,
-                worker=self.crud_delete,
-                icon=zzapp.ACTION_REMOVE_ICON,
-                hotkey=zzapp.ACTION_REMOVE_HOTKEY,
-                eof_disabled=1,
-            )
+            self.add_action_delete(tmp_actions)
             tmp_actions.add_action(text="-")
 
         for x in self.actions:
@@ -216,6 +187,62 @@ class ZzForm:
                 continue
             tmp_actions.append(x)
         self.actions = tmp_actions
+
+    def add_action_view(self, actions=None):
+        if actions is None:
+            actions = self.actions
+        actions.add_action(
+            text=zzapp.ACTION_VIEW_TEXT,
+            worker=lambda: self.show_crud_form(VIEW),
+            icon=zzapp.ACTION_VIEW_ICON,
+            hotkey=zzapp.ACTION_VIEW_HOTKEY,
+            eof_disabled=1,
+            tag="view",
+        )
+
+    def add_action_delete(self, actions=None):
+        if actions is None:
+            actions = self.actions
+        actions.add_action(
+            text=zzapp.ACTION_REMOVE_TEXT,
+            worker=self.crud_delete,
+            icon=zzapp.ACTION_REMOVE_ICON,
+            hotkey=zzapp.ACTION_REMOVE_HOTKEY,
+            eof_disabled=1,
+        )
+
+    def add_action_copy(self, actions=None):
+        if actions is None:
+            actions = self.actions
+        actions.add_action(
+            text=zzapp.ACTION_COPY_TEXT,
+            worker=lambda: self.show_crud_form(COPY),
+            icon=zzapp.ACTION_COPY_ICON,
+            hotkey=zzapp.ACTION_COPY_HOTKEY,
+            eof_disabled=1,
+        )
+
+    def add_action_edit(self, actions=None):
+        if actions is None:
+            actions = self.actions
+        actions.add_action(
+            text=zzapp.ACTION_EDIT_TEXT,
+            worker=lambda: self.show_crud_form(EDIT),
+            icon=zzapp.ACTION_EDIT_ICON,
+            hotkey=zzapp.ACTION_EDIT_HOTKEY,
+            eof_disabled=1,
+            tag="edit",
+        )
+
+    def add_action_new(self, actions=None):
+        if actions is None:
+            actions = self.actions
+        actions.add_action(
+            text=zzapp.ACTION_NEW_TEXT,
+            worker=lambda: self.show_crud_form(NEW),
+            icon=zzapp.ACTION_NEW_ICON,
+            hotkey=zzapp.ACTION_NEW_HOTKEY,
+        )
 
     def build_grid_view_auto_form(self):
         # Define layout
@@ -429,8 +456,7 @@ class ZzForm:
             return
         crud_data = self.get_crud_form_data()
         if self.crud_mode in [EDIT, VIEW]:
-            rez = self.model.update(crud_data, self.current_row)
-            self.set_grid_index(self.current_row)
+            rez = self.update_current_row(crud_data)
         else:
             rez = self.model.insert(crud_data, self.current_row)
             self.move_grid_index(1)
@@ -439,6 +465,11 @@ class ZzForm:
         else:
             self.after_crud_save(crud_data)
             self.close()
+
+    def update_current_row(self, crud_data):
+        rez = self.model.update(crud_data, self.current_row)
+        self.set_grid_index(self.current_row)
+        return rez
 
     def get_crud_form_data(self):
         crud_data = {}
@@ -495,18 +526,24 @@ class ZzForm:
                 else:
                     self.crud_form.widgets[x].set_text(self._model_record[x])
 
-    def grid_index_changed(self, row, column):
+    def _grid_index_changed(self, row, column):
         refresh_children_forms = row != self.current_row and row >= 0
         refresh_children_forms = True
+        self.last_current_row = self.current_row
+        self.last_current_column = self.current_column
         self.current_row = row
         self.current_column = column
         if refresh_children_forms:
             self.refresh_children()
+            self.grid_index_changed()
+
+    def grid_index_changed(self):
+        pass
 
     def refresh_children(self):
         for x in self.actions:
             if x.get("engineAction") and "_set_disabled" in x:
-                x["engineAction"].setDisabled(
+                x["_set_disabled"](
                     True if x.get("eof_disabled") and self.model.row_count() <= 0 else False
                 )
         for action in self.children_forms:
@@ -921,7 +958,6 @@ class ZzFormWindow:
         else:
             label2add = None
 
-
         actions2add = None
         if meta.get("actions") and meta.get("control") != "toolbar":
             actions2add = self._get_widget("toolbar", "toolbar")(
@@ -1006,6 +1042,8 @@ class ZzFormWindow:
         if no_build is False:
             self.build_form()
         self.set_style_sheet(self.zz_form.style_sheet)
+
+        self.zz_form.form_stack.append(self)
         # Restore splitters sizes
         for x in self.get_splitters():
             sizes = zzapp.zz_app.settings.get(
@@ -1018,14 +1056,15 @@ class ZzFormWindow:
         self.restore_grid_columns()
         if self.mode == "grid":
             if self.zz_form.before_grid_show() is False:
+                self.zz_form.form_stack.pop()
                 return
 
         if self.mode == "form":
             self.zz_form.form_is_active = True
             if self.zz_form.before_form_show() is False:
                 self.zz_form.form_is_active = False
+                self.zz_form.form_stack.pop()
                 return
-
 
         self.zz_form.zz_app.show_form(self, modal)
 
