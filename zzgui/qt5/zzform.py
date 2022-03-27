@@ -146,6 +146,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def showEvent(self, event=None):
         if self.shown:
             return
+        # print("show event")
         if self not in self.zz_form.form_stack:
             self.zz_form.form_stack.append(self)
 
@@ -189,8 +190,10 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             )
         if self.zz_form.maximized:
             self.showMaximized()
-
-        self.zz_form.after_form_show()
+        if self.mode == "form":
+            self.zz_form.after_form_show()
+        elif self.mode == "grid":
+            self.zz_form.after_grid_show()
 
     def keyPressEvent(self, event: QEvent):
         key = event.key()
@@ -226,6 +229,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
         pass
 
     def close(self):
+        # print("close event", self)
         super().close()
         if self.parent() is not None:
             if isinstance(self.parent(), QMdiSubWindow):

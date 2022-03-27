@@ -125,8 +125,10 @@ class ZzForm:
         self._in_close_flag = True
         if self.form_stack:
             # if self.form_stack[-1].escapeEnabled:
-            self.last_closed_form = self.form_stack.pop()
-            self.last_closed_form.close()
+            # self.last_closed_form = self.form_stack.pop()
+            self.last_closed_form = self.form_stack[-1]
+            # print("-",self.title, self)
+            # self.last_closed_form.close()
         self._in_close_flag = False
 
     def show_form(self, title="", modal="modal"):
@@ -464,7 +466,8 @@ class ZzForm:
             self._zzdialogs.zzMess(self.model.get_data_error())
         else:
             self.after_crud_save(crud_data)
-            self.close()
+            self.crud_form.close()
+            # self.close()
 
     def update_current_row(self, crud_data):
         rez = self.model.update(crud_data, self.current_row)
@@ -494,7 +497,9 @@ class ZzForm:
         self.add_crud_buttons(mode)
         self.crud_form = self._ZzFormWindow_class(self, f"{self.title}.[{mode}]")
         self.crud_form.build_form()
+        # print(self.w._ok_button)
         self.set_crud_form_data(mode)
+        # self.before_crud_show
         self.crud_form.show_form()
 
     def set_crud_form_data(self, mode=EDIT):
@@ -543,9 +548,7 @@ class ZzForm:
     def refresh_children(self):
         for x in self.actions:
             if x.get("engineAction") and "_set_disabled" in x:
-                x["_set_disabled"](
-                    True if x.get("eof_disabled") and self.model.row_count() <= 0 else False
-                )
+                x["_set_disabled"](True if x.get("eof_disabled") and self.model.row_count() <= 0 else False)
         for action in self.children_forms:
             filter = self.get_where_for_child(action)
             action["child_form_object"].model.set_where(filter)
@@ -612,6 +615,9 @@ class ZzForm:
         pass
 
     def after_form_show(self):
+        pass
+
+    def after_grid_show(self):
         pass
 
     def before_crud_save(self):
@@ -1047,21 +1053,22 @@ class ZzFormWindow:
 
         self.zz_form.form_stack.append(self)
         # Restore splitters sizes
-        for x in self.get_splitters():
-            sizes = zzapp.zz_app.settings.get(
-                self.window_title,
-                f"splitter-{x}",
-                "",
-            )
-            self.widgets[x].splitter.set_sizes(sizes)
+        # for x in self.get_splitters():
+        #     sizes = zzapp.zz_app.settings.get(
+        #         self.window_title,
+        #         f"splitter-{x}",
+        #         "",
+        #     )
+        #     self.widgets[x].splitter.set_sizes(sizes)
         # Restore grid columns sizes
+        self.restore_splitters()
         self.restore_grid_columns()
+
         if self.mode == "grid":
             if self.zz_form.before_grid_show() is False:
                 self.zz_form.form_stack.pop()
                 return
-
-        if self.mode == "form":
+        elif self.mode == "form":
             self.zz_form.form_is_active = True
             if self.zz_form.before_form_show() is False:
                 self.zz_form.form_is_active = False
@@ -1072,6 +1079,16 @@ class ZzFormWindow:
 
     def get_controls_list(self, name: str):
         return [self.widgets[x] for x in self.widgets if type(self.widgets[x]).__name__ == name]
+
+    def restore_splitters(self):
+        # Restore splitters sizes
+        for x in self.get_splitters():
+            sizes = zzapp.zz_app.settings.get(
+                self.window_title,
+                f"splitter-{x}",
+                "",
+            )
+            self.widgets[x].splitter.set_sizes(sizes)
 
     def restore_grid_columns(self):
         # for grid in self.get_grid_list():
@@ -1087,13 +1104,13 @@ class ZzFormWindow:
                         c_w = zzapp.GRID_COLUMN_WIDTH
                     else:
                         c_w = int_(self.zz_form.model.meta[count].get("datalen"))
-                    # print(count, x, c_w)
                     c_w = zzapp.zz_app.get_char_width() * (min(c_w, zzapp.GRID_COLUMN_WIDTH))
                     data = f"{count}, {c_w}"
                 col_settings[x] = data
             grid.set_column_settings(col_settings)
         for x in self.get_controls_list("ZzFormWindow"):
             x.restore_grid_columns()
+            x.restore_splitters()
 
     def save_grid_columns(self):
         for grid in self.get_controls_list("zzgrid"):
@@ -1110,9 +1127,10 @@ class ZzFormWindow:
         if self._in_close_flag:
             return
         self._in_close_flag = True
-        # if self in self.zz_form.form_stack[-1:]:
-        #     self.zz_form.form_stack.pop()
+        if self in self.zz_form.form_stack[-1:]:
+            self.zz_form.form_stack.pop()
         # Splitters sizes
+        # print(self.window_title, self, self.zz_form)
         for x in self.get_splitters():
             zzapp.zz_app.settings.set(
                 self.window_title,
@@ -1139,11 +1157,12 @@ class ZzFormData:
 
     def __setattr__(self, name, value):
         if name != "zz_form":
-            widget = self.zz_form.form_stack[-1].widgets.get(name)
-            if widget:
-                widget.set_text(value)
-            else:  # no widget - put data to model's record
-                self.zz_form._model_record[name] = value
+            if self.zz_form.form_stack:
+                widget = self.zz_form.form_stack[-1].widgets.get(name)
+                if widget:
+                    widget.set_text(value)
+                else:  # no widget - put data to model's record
+                    self.zz_form._model_record[name] = value
         else:
             self.__dict__[name] = value
 

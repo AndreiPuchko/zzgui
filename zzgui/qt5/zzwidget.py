@@ -68,17 +68,17 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         if hasattr(self, "setAlignment"):
             self.setAlignment(zz_align[f"{alignment}"])
 
-    # def valid(self):
-    #     if self.meta.get("valid"):
-    #         return self.meta.get("valid", lambda: True)()
-    #     else:
-    #         return True
+    def valid(self):
+        if self.meta.get("valid"):
+            return self.meta.get("valid", lambda: True)()
+        else:
+            return True
 
-    # def when(self):
-    #     if self.meta.get("when"):
-    #         return self.meta.get("when", lambda: True)()
-    #     else:
-    #         return True
+    def when(self):
+        if self.meta.get("when"):
+            return self.meta.get("when", lambda: True)()
+        else:
+            return True
 
     def set_style_sheet(self, css: str):
         super().set_style_sheet(css)

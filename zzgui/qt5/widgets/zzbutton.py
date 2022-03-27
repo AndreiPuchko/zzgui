@@ -16,6 +16,7 @@ from PyQt5.QtGui import QFontMetrics
 from zzgui.qt5.zzwidget import ZzWidget
 from zzgui.zzutils import num
 
+
 class zzbutton(QPushButton, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)

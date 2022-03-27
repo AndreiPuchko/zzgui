@@ -50,7 +50,7 @@ class zzcode(QsciScintilla, ZzWidget):
         self.textChanged.connect(self.valid)
 
     def set_lexer(self, lexer=""):
-        if lexer != "":
+        if lexer == "":
             lexer = self.meta["control"]
         if "python" in lexer:
             self.lexer = QsciLexerPython()
