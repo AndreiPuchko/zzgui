@@ -146,8 +146,8 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
     def showEvent(self, event=None):
         if self.shown:
             return
-
-        # self.zz_form.form_stack.append(self)
+        if self not in self.zz_form.form_stack:
+            self.zz_form.form_stack.append(self)
 
         for widget_name in self.widgets:
             widget = self.widgets[widget_name]

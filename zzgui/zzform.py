@@ -977,6 +977,8 @@ class ZzFormWindow:
                 else:
                     widget2add = meta.get("widget").get_form_widget()
                 widget2add.meta = meta
+                # widget2add.zz_form.form_stack.append
+                # print(widget2add)
             else:
                 widget2add = meta.get("widget")
         else:  # Special cases
@@ -1108,6 +1110,8 @@ class ZzFormWindow:
         if self._in_close_flag:
             return
         self._in_close_flag = True
+        # if self in self.zz_form.form_stack[-1:]:
+        #     self.zz_form.form_stack.pop()
         # Splitters sizes
         for x in self.get_splitters():
             zzapp.zz_app.settings.set(
