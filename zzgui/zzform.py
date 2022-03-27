@@ -120,6 +120,10 @@ class ZzForm:
         return zzapp.zz_app.focus_widget()
 
     def close(self):
+        if self.form_stack:
+            self.form_stack[-1].close()
+
+    def _close(self):
         if self._in_close_flag:
             return
         self._in_close_flag = True
