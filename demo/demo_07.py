@@ -4,6 +4,7 @@ if __name__ == "__main__":
     sys.path.insert(0, ".")
 
 
+from doctest import FAIL_FAST
 from zzgui.qt5.zzapp import ZzApp
 from zzgui.qt5.zzform import ZzForm as ZzForm
 from zzgui.qt5.zzform import zzMess
@@ -286,8 +287,9 @@ class DemoApp(ZzApp):
             form_orders = self.form_orders()
             form_orders.model.set_where(" and ".join(filter_list))
             form_orders.run()
+            return False
 
-        form._valid = show_filtered_orders
+        form.valid = show_filtered_orders
         form.add_ok_cancel_buttons()
         return form
 

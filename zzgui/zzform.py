@@ -74,6 +74,7 @@ class ZzForm:
 
         # Must be called in subclass
         # self.on_init()
+        pass
 
     def on_init(self):
         pass
@@ -170,8 +171,8 @@ class ZzForm:
         self.grid_form = self._ZzFormWindow_class(self, title)
         self.model.build()
         self.get_grid_crud_actions()
+        self.before_grid_build()
         self.grid_form.build_grid()
-        # self._after_grid_create()
         return self.grid_form
 
     def get_grid_crud_actions(self):
@@ -193,6 +194,9 @@ class ZzForm:
                 continue
             tmp_actions.append(x)
         self.actions = tmp_actions
+        
+    def before_grid_build(self):
+        pass
 
     def add_action_view(self, actions=None):
         if actions is None:
@@ -410,7 +414,8 @@ class ZzForm:
             label=zzapp.CRUD_BUTTON_CANCEL_TEXT,
             control="button",
             mess=zzapp.CRUD_BUTTON_CANCEL_MESSAGE,
-            valid=self.crud_close,
+            # valid=self.crud_close,
+            valid=self.close,
         )
         self.system_controls = buttons
 
@@ -438,6 +443,8 @@ class ZzForm:
         if selected_rows and self._zzdialogs.zzAskYN(ask_text):
             show_error_messages = True
             for row in selected_rows:
+                if self.before_delete() is False:
+                    continue
                 if self.model.delete(row) is not True and show_error_messages:
                     if selected_rows.index(row) == len(selected_rows) - 1:
                         self._zzdialogs.zzMess(self.model.get_data_error())
@@ -453,9 +460,16 @@ class ZzForm:
                             == 2
                         ):
                             show_error_messages = False
+                self.after_delete()
             self.model.refresh()
             self.set_grid_index(row)
             self.refresh_children()
+
+    def before_delete(self):
+        pass
+
+    def after_delete(self):
+        pass
 
     def crud_save(self):
         if self.before_crud_save() is False:
@@ -470,8 +484,8 @@ class ZzForm:
             self._zzdialogs.zzMess(self.model.get_data_error())
         else:
             self.after_crud_save(crud_data)
-            self.crud_form.close()
-            # self.close()
+            # self.crud_form.close()
+            self.close()
 
     def update_current_row(self, crud_data):
         rez = self.model.update(crud_data, self.current_row)
@@ -491,9 +505,9 @@ class ZzForm:
 
         return crud_data
 
-    def crud_close(self):
-        self.crud_form.close()
-        pass
+    # def crud_close(self):
+    #     self.crud_form.close()
+    #     pass
 
     def show_crud_form(self, mode):
         """mode - VIEW, NEW, COPY, EDIT"""
@@ -501,13 +515,13 @@ class ZzForm:
         self.add_crud_buttons(mode)
         self.crud_form = self._ZzFormWindow_class(self, f"{self.title}.[{mode}]")
         self.crud_form.build_form()
-        # print(self.w._ok_button)
         self.set_crud_form_data(mode)
         # self.before_crud_show
         self.crud_form.show_form()
 
     def set_crud_form_data(self, mode=EDIT):
-        """set current record's value in crud_form"""
+        """ set current record's value in crud_form
+        """
         where_string = self.model.get_where()
         if "=" in where_string:
             where_dict = {
@@ -534,6 +548,9 @@ class ZzForm:
                         self.crud_form.widgets[x].set_disabled()
                 else:
                     self.crud_form.widgets[x].set_text(self._model_record[x])
+                    # Disable primary key when edit
+                    if self.controls.c.__getattr__(x)["pk"]:
+                        self.crud_form.widgets[x].set_disabled()
 
     def _grid_index_changed(self, row, column):
         refresh_children_forms = row != self.current_row and row >= 0
@@ -615,13 +632,13 @@ class ZzForm:
     def before_grid_show(self):
         pass
 
+    def after_grid_show(self):
+        pass
+
     def before_form_show(self):
         pass
 
     def after_form_show(self):
-        pass
-
-    def after_grid_show(self):
         pass
 
     def before_crud_save(self):
