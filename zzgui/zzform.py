@@ -48,6 +48,8 @@ class ZzForm:
         self.children_forms = []  # forms inside this form
         self.i_am_child = None
         self.max_child_level = 1  # max depth for child forms
+        self.ok_button = False
+        self.cancel_button = False
 
         self.show_grid_action_top = True
         self.do_not_save_geometry = False
@@ -194,7 +196,10 @@ class ZzForm:
                 continue
             tmp_actions.append(x)
         self.actions = tmp_actions
-        
+
+    def before_form_build(self):
+        pass
+
     def before_grid_build(self):
         pass
 
@@ -339,25 +344,29 @@ class ZzForm:
         self.close()
 
     def add_ok_cancel_buttons(self):
+        if not self.ok_button and not self.cancel_button:
+            return
         buttons = zzapp.ZzControls()
         buttons.add_control("/")
-        buttons.add_control("/h", "")
+        buttons.add_control("/h")
         buttons.add_control("/s")
-
-        buttons.add_control(
-            name="_ok_button",
-            label="Ok",
-            control="button",
-            hotkey="PgDown",
-            valid=self._valid,
-        )
-        buttons.add_control(
-            name="_cancel_button",
-            label="Cancel",
-            control="button",
-            mess="Do not save data",
-            valid=self.close,
-        )
+        if self.ok_button:
+            buttons.add_control(
+                name="_ok_button",
+                label="Ok",
+                control="button",
+                hotkey="PgDown",
+                valid=self._valid,
+            )
+        if self.cancel_button:
+            buttons.add_control(
+                name="_cancel_button",
+                label="Cancel",
+                control="button",
+                mess="Do not save data",
+                valid=self.close,
+            )
+        buttons.add_control("/")
 
         self.system_controls = buttons
 
@@ -443,6 +452,7 @@ class ZzForm:
         if selected_rows and self._zzdialogs.zzAskYN(ask_text):
             show_error_messages = True
             for row in selected_rows:
+                print("BD", self.before_delete())
                 if self.before_delete() is False:
                     continue
                 if self.model.delete(row) is not True and show_error_messages:
@@ -483,8 +493,7 @@ class ZzForm:
         if rez is False:
             self._zzdialogs.zzMess(self.model.get_data_error())
         else:
-            self.after_crud_save(crud_data)
-            # self.crud_form.close()
+            self.after_crud_save()
             self.close()
 
     def update_current_row(self, crud_data):
@@ -493,21 +502,16 @@ class ZzForm:
         return rez
 
     def get_crud_form_data(self):
-        crud_data = {}
-        crud_data.update(self._model_record)
+        # put data from form into self._model_record
         for x in self.crud_form.widgets:
             if x.startswith("/"):
                 continue
             widget = self.crud_form.widgets[x]
             if widget.meta.get("control") in NO_DATA_WIDGETS:
                 continue
-            crud_data[x] = self.s.__getattr__(x)
+            self._model_record[x] = self.s.__getattr__(x)
 
-        return crud_data
-
-    # def crud_close(self):
-    #     self.crud_form.close()
-    #     pass
+        return self._model_record
 
     def show_crud_form(self, mode):
         """mode - VIEW, NEW, COPY, EDIT"""
@@ -621,6 +625,8 @@ class ZzForm:
         self.grid_form.move_grid_index(mode)
 
     def get_controls(self):
+        self.add_ok_cancel_buttons()
+        self.before_form_build()
         return self.controls + self.system_controls
 
     def when(self):
@@ -644,7 +650,7 @@ class ZzForm:
     def before_crud_save(self):
         pass
 
-    def after_crud_save(self, crud_data):
+    def after_crud_save(self):
         pass
 
     def add_control(

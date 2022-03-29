@@ -189,8 +189,10 @@ class DemoApp(ZzApp):
                 valid=close_form,
             )
             form.add_control("/s")
-            form.add_ok_cancel_buttons()
-            form.system_controls.c._ok_button["label"] = "I am a system button,\ni have been renamed"
+            form.ok_button = 1
+            form.cancel_button = 1
+            # form.add_ok_cancel_buttons()
+            # form.system_controls.c._ok_button["label"] = "I am a system button,\ni have been renamed"
 
             form.valid = (
                 lambda: zzAskYN("<font color=darkcyan size=+4>" "Are you really want to close ME?") == 2

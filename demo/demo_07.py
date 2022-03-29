@@ -120,21 +120,6 @@ def load_mock_data(db: ZzDb):
 
 
 class DemoApp(ZzApp):
-    def on_new_tab(self):
-    # def on_start(self):
-        # self.form_order_lines().run()
-        # self.orders()
-        self.customers()
-        # self.filter_orders()
-        # self.products()
-        # self.show_sales()
-        pass
-
-    def create_database(self):
-        self.db = ZzDb("sqlite3", database_name=":memory:")
-        self.db.set_schema(dataSchema())
-        load_mock_data(self.db)
-
     def on_init(self):
         self.create_database()
 
@@ -146,6 +131,21 @@ class DemoApp(ZzApp):
         self.add_menu("Documents|Orders", self.filter_orders, toolbar=1)
         self.add_menu("Reports|Sales", self.show_sales, toolbar=1)
         return super().on_init()
+
+    def on_new_tab(self):
+    # def on_start(self):
+        # self.form_order_lines().run()
+        # self.orders()
+        # self.customers()
+        self.filter_orders()
+        # self.products()
+        # self.show_sales()
+        pass
+
+    def create_database(self):
+        self.db = ZzDb("sqlite3", database_name=":memory:")
+        self.db.set_schema(dataSchema())
+        load_mock_data(self.db)
 
     def form_customers(self):
         form = ZzForm("Customers")
@@ -237,9 +237,6 @@ class DemoApp(ZzApp):
         form.set_model(ZzCursorModel(self.db.table("order_lines")))
         return form
 
-    def filter_orders(self):
-        self.form_filter_orders().run()
-
     def form_filter_orders(self):
         form = ZzForm("Filter orders")
         form.add_control("/")
@@ -289,9 +286,13 @@ class DemoApp(ZzApp):
             form_orders.run()
             return False
 
+        form.ok_button = 1
+        form.cancel_button = 1
         form.valid = show_filtered_orders
-        form.add_ok_cancel_buttons()
         return form
+
+    def filter_orders(self):
+        self.form_filter_orders().run()
 
     def show_sales(self):
         cursor = self.db.cursor(
