@@ -289,6 +289,11 @@ class DemoApp(ZzApp):
         form.ok_button = 1
         form.cancel_button = 1
         form.valid = show_filtered_orders
+
+        # def after_form_show():
+        #     form.s.date1 = '2023-05-05'
+        #     print(form.s.date1)
+        # form.after_form_show = after_form_show
         return form
 
     def filter_orders(self):

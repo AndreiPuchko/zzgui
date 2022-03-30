@@ -23,6 +23,7 @@ class ZzForm:
     def __init__(self, title=""):
         super().__init__()
         self.title = title
+        self.name = title
         self.form_stack = []
         self.style_sheet = ""
 
@@ -524,8 +525,7 @@ class ZzForm:
         self.crud_form.show_form()
 
     def set_crud_form_data(self, mode=EDIT):
-        """ set current record's value in crud_form
-        """
+        """set current record's value in crud_form"""
         where_string = self.model.get_where()
         if "=" in where_string:
             where_dict = {
@@ -1186,7 +1186,7 @@ class ZzFormData:
         if name != "zz_form":
             if self.zz_form.form_stack:
                 widget = self.zz_form.form_stack[-1].widgets.get(name)
-                if widget:
+                if hasattr(widget, "set_text"):
                     widget.set_text(value)
                 else:  # no widget - put data to model's record
                     self.zz_form._model_record[name] = value
