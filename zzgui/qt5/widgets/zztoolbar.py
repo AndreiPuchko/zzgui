@@ -106,7 +106,7 @@ class zztoolbar(QFrame, ZzWidget):
         self.main_button_action.setMenu(tool_bar_qt_actions)
         self.main_button.widgetForAction(self.main_button_action).setPopupMode(QToolButton.InstantPopup)
         self.layout().addWidget(self.main_button)
-        if actions.show_main_button is False:
+        if not actions.show_main_button:
             self.main_button.setVisible(False)
 
         self.toolBarPanel.addSeparator()

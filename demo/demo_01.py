@@ -18,10 +18,11 @@ from zzgui.zzdialogs import zzAskYN
 
 class DemoApp(ZzApp):
     def on_start(self):
-        self.first_form()
+        self.sheet_form()
 
     def on_init(self):
         self.add_menu("File|First", self.first_form, toolbar="*")
+        self.add_menu("File|Sheet", self.sheet_form, toolbar="*")
         self.add_menu("File|-", None)
         self.add_menu("File|Toogle toolbar", self.show_hide_toolbar, toolbar="*")
         self.add_menu("File|Toogle menubar", self.show_hide_menubar, toolbar="*")
@@ -32,6 +33,50 @@ class DemoApp(ZzApp):
         self.add_menu("Documents|Business", None)
         self.add_menu("Help|About", lambda: zzMess("About zzgui"))
         self.add_menu("File|Quit", self.close, toolbar="*")
+
+    def sheet_form(self):
+        form = ZzForm("Sheet Form")
+        form.add_control("/vr")
+
+        sheet_actions = ZzActions()
+        sheet_actions.add_action("A1", lambda: zzMess(12))
+        # sheet_actions.show_actions = 0
+        # sheet_actions.show_main_button= 0
+
+        form.add_control("sheet", "", control="sheet", actions=sheet_actions)
+        for x in range(344):
+            form.add_control("", f"label {x}")
+        form.ok_button = 1
+        form.cancel_button = 1
+
+        def before_form_show():
+
+            form.w.sheet.set_auto_expand()
+            form.w.sheet.set_row_count(15)
+            form.w.sheet.set_column_count(17)
+            form.w.sheet.set_column_headers(["122", "2fff"])
+            form.w.sheet.set_row_headers(["122", "2fff"])
+            form.w.sheet.set_column_header(3, "___")
+            form.w.sheet.set_row_header(5, "abrakada")
+
+
+            form.w.sheet.hide_column_headers()
+            form.w.sheet.hide_row_headers()
+
+            form.w.sheet.set_column_sizes(10)
+            form.w.sheet.set_column_sizes([23, 23, 34])
+            form.w.sheet.set_column_size(5, 50)
+
+            form.w.sheet.set_row_sizes(10)
+            form.w.sheet.set_row_sizes([23, 23, 34])
+            form.w.sheet.set_row_size(5, 50)
+
+            form.w.sheet.set_span(1, 1, 30, 30)
+            form.w.sheet.set_auto_expand()
+
+        form.before_form_show = before_form_show
+
+        form.run()
 
     def first_form(self):
         form = ZzForm("First form ever333")

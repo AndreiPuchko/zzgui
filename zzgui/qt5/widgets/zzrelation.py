@@ -24,16 +24,23 @@ class zzrelation(QFrame, ZzWidget, ZzFrame):
     def __init__(self, meta):
         super().__init__(meta)
         ZzFrame.__init__(self, "h")
+        # print(meta)
         self.meta = meta
         meta["valid"] = self.get_valid
 
         self.get = zzline(meta)
+        
         self.get.textChanged.connect(self.get_text_changed)
-        self.button = zzbutton({"label": "?", "datalen": 3, "valid": self.show_related_form})
+        self.button = zzbutton(
+            {"label": "?", "datalen": 3, "valid": self.show_related_form, "form": self.meta["form"]}
+        )
         self.say = zzline({"disabled": "*"})
         self.to_form = None
         if self.meta.get("to_form"):
-            self.to_form: ZzForm = self.meta.get("to_form")()
+            if isinstance(self.meta.get("to_form"), ZzForm):
+                self.to_form: ZzForm = self.meta.get("to_form")
+            else:
+                self.to_form: ZzForm = self.meta.get("to_form")()
             self.to_form.max_child_level = 0
             self.to_form.title += " ."
 

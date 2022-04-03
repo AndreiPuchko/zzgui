@@ -349,7 +349,7 @@ class ZzForm:
             return
         buttons = zzapp.ZzControls()
         buttons.add_control("/")
-        buttons.add_control("/h")
+        buttons.add_control("/h", "-")
         buttons.add_control("/s")
         if self.ok_button:
             buttons.add_control(
@@ -374,7 +374,7 @@ class ZzForm:
     def add_crud_buttons(self, mode):
         buttons = zzapp.ZzControls()
         buttons.add_control("/")
-        buttons.add_control("/h", "")
+        buttons.add_control("/h", "-")
         if not self.no_view_action:
             buttons.add_control(
                 name="_prev_button",
@@ -921,8 +921,13 @@ class ZzFormWindow:
                             current_frame.add_widget(label2add)
                     if action2add is not None:
                         current_frame.add_widget(action2add)
+                        action2add.set_maximum_height(action2add.get_default_height())
                     if widget2add is not None:
-                        current_frame.add_widget(widget2add)
+                        if meta.get("name", "") in ("/vr", "/hr"):  # scroller
+                            scroller = self._get_widget("scroller")({"widget": widget2add})
+                            current_frame.add_widget(scroller)
+                        else:
+                            current_frame.add_widget(widget2add)
                         if meta.get("control") == "toolbar":  # context menu for frame
                             # widget2add.hide()
                             widget2add.set_context_menu(current_frame)
@@ -1058,7 +1063,6 @@ class ZzFormWindow:
         #             "stretch": 0,
         #         }
         #     )
-
         return label2add, widget2add, actions2add
 
     def _get_widget(self, module_name, class_name=""):

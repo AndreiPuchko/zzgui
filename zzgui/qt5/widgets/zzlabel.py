@@ -18,3 +18,4 @@ class zzlabel(QLabel, ZzWidget):
     def __init__(self, meta):
         super().__init__({"label": meta.get("label", "")})
         self.set_text(self.meta["label"])
+        self.set_maximum_height(self.get_default_height())

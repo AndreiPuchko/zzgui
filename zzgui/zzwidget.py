@@ -92,3 +92,9 @@ class ZzWidget:
         if css.strip().startswith("{"):
             css = type(self).__name__ + css
         self.style_sheet = css
+
+    def get_default_height(self):
+        pass
+
+    def set_maximum_height(self, height):
+        pass

@@ -163,7 +163,9 @@ class ZzApp(QMainWindow, zzapp.ZzApp, ZzQtWindow):
             if _path.count("|") == 0:  # first in chain - menu bar
                 node = QMainWindow.menuBar(self)
             else:
-                node = self._main_menu[prevNode]
+                node = self._main_menu.get(prevNode)
+                if node is None:
+                    node = QMainWindow.menuBar(self)
             if _path.endswith("-"):
                 node.addSeparator()
             elif x["WORKER"]:

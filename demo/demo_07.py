@@ -136,8 +136,8 @@ class DemoApp(ZzApp):
     # def on_start(self):
         # self.form_order_lines().run()
         # self.orders()
-        # self.customers()
-        self.filter_orders()
+        self.customers()
+        # self.filter_orders()
         # self.products()
         # self.show_sales()
         pass
@@ -265,7 +265,7 @@ class DemoApp(ZzApp):
             control="line",
             to_table="products",
             to_column="product_id",
-            to_form=self.form_customers,
+            to_form=self.form_products,
             related="name",
             check="*",
         )

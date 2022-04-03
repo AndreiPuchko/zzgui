@@ -21,19 +21,25 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
         super().__init__(meta)
         ZzFrame.__init__(self, meta.get("name", "/v")[1])
         self.splitter = None
+        self.scroller = None
         if meta.get("name", "")[2:3] == "s":  # Splitter!
             self.splitter = zzsplitter()
             if meta.get("name").startswith("/v"):
                 self.splitter.setOrientation(Qt.Orientation.Vertical)
             self.layout().addWidget(self.splitter)
-        if meta.get("label"):
+        if meta.get("label") not in ("", "-"):
             self.set_title(meta.get("label"))
+        if meta.get("label", "") == "":
+            self.hide_border()
         self.setContentsMargins(0, 0, 0, 0)
 
     def hide_border(self):
         self.setObjectName("grb")
-        self.setStyleSheet("QGroupBox#grb {border:0}")
-        self.set_title("")
+        no_border_style = "QGroupBox#grb {border:0}"
+        last_style = self.styleSheet()
+        if no_border_style not in last_style:
+            self.setStyleSheet(no_border_style + ";" + no_border_style)
+        # self.set_title("")
 
     def set_title(self, title):
         self.setTitle(title)
@@ -45,11 +51,7 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
         if self.splitter is not None:
             self.splitter.addWidget(widget)
             if hasattr(widget, "meta"):
-                # print(widget.meta.get("stretch"), widget)
                 self.splitter.setStretchFactor(self.splitter.count() - 1, widget.meta.get("stretch", 0))
-            # if hasattr(widget, "meta"):
-            #     if "toolbar" in widget.meta.get("name", ""):
-            #         widget.set_context_menu(self.splitter)
         else:
             return super().add_widget(widget=widget, label=label)
 

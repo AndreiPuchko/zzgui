@@ -239,6 +239,7 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
             QDialog.close(self)
 
     def closeEvent(self, event=None):
+        super().close()
         self.zz_form._close()
         self.zz_form.form_is_active = False
         if event:
