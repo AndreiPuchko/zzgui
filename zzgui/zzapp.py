@@ -90,6 +90,7 @@ class ZzActions(list):
     def __init__(self, action=None):
         self.show_main_button = True
         self.show_actions = True
+        self.main_button_text = "☰"
         if isinstance(action, list):
             # self.action_list = action[:]
             self.extend(action[:])

@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     demo()
 
-from PyQt5.QtWidgets import QTableWidget
+from PyQt5.QtWidgets import QTableWidget, QSizePolicy
 
 
 from zzgui.qt5.zzwidget import ZzWidget
@@ -29,16 +29,18 @@ class zzsheet(QTableWidget, ZzWidget):
 
     def expand(self):
         if self.auto_expand:
-            height = self.horizontalHeader().height() + 2
+            self.setSizePolicy(QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum))
+            height = self.horizontalHeader().height() + 0
             for x in range(self.rowCount()):
                 height += self.rowHeight(x)
             self.setFixedHeight(height)
-            
-            width = self.verticalHeader().width() + 2
+
+            width = self.verticalHeader().width() + 0
             for x in range(self.columnCount()):
                 width += self.columnWidth(x)
             self.setFixedWidth(width)
         else:
+            self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
             self.setMinimumWidth(0)
             self.setMinimumHeight(0)
         # self.setFixedWidth(0)

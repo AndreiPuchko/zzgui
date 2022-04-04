@@ -85,6 +85,9 @@ class ZzWidget:
     def set_maximum_width(self, width):
         pass
 
+    def set_fixed_width(self, width):
+        pass
+
     def set_alignment(self, alignment):
         pass
 

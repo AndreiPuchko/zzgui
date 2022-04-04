@@ -961,12 +961,12 @@ class ZzFormWindow:
                         frame_stack.pop()
             elif meta.get("name", "").startswith("/"):
                 frame_stack.append(widget2add)
-        # Make it no more working
 
         if len(self.tab_widget_list) > 1:
             for x in self.tab_widget_list:
                 x.set_shortcuts_local()
 
+        # Make it no more working
         self.build_grid = lambda: None
         self.build_form = lambda: None
 

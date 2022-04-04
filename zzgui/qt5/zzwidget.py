@@ -60,6 +60,10 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         if self.meta.get("control", "") not in ("radio", "check"):
             self.setMaximumWidth(QFontMetrics(self.font()).width("W") * width)
 
+    def set_fixed_width(self, width):
+        if self.meta.get("control", "") not in ("radio", "check"):
+            self.setFixedWidth(QFontMetrics(self.font()).width("W") * width)
+
     def set_maximum_len(self, length):
         if hasattr(self, "setMaxLength"):
             return self.setMaxLength(length)
