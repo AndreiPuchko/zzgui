@@ -36,3 +36,18 @@ def num(tonum):
 
 def today():
     return datetime.date.today()
+
+
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+
+def set_dict_default(_dict, _key, _value):
+    """set only key does not exist"""
+    
+    if not _dict.get(_key):
+        _dict[_key] = _value

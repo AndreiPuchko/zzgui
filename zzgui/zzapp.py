@@ -111,7 +111,8 @@ class ZzActions(list):
     ):
         """ "/view", "/crud" """
         for x in range(len(self)):
-            if text in self[x]["text"] and text != "-":
+            # if text in self[x]["text"] and text.strip()[-1] != "-":
+            if text == self[x]["text"] and text.strip()[-1] != "-":
                 self[x]["worker"] = worker
                 self[x]["hotkey"] = hotkey
                 return True

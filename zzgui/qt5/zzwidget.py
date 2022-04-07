@@ -93,3 +93,9 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
 
     def set_maximum_height(self, height):
         self.setMaximumHeight(height)
+
+    def get_default_width(self):
+        return self.sizeHint().width()
+
+    def set_size_policy(self, horizontal, vertical):
+        self.setSizePolicy(horizontal, vertical)

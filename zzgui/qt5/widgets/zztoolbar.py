@@ -36,7 +36,6 @@ class zztoolbar(QFrame, ZzWidget):
         self.layout().setSpacing(-1)
         self.layout().setContentsMargins(QMargins(0, 0, 0, 0))
         self.toolBarPanel = QToolBar()
-
         action_list = []
         if isinstance(meta.get("actions"), ZzActions):
             action_list.extend(meta.get("actions"))

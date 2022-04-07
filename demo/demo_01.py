@@ -38,12 +38,31 @@ class DemoApp(ZzApp):
         form = ZzForm("Sheet Form")
         form.add_control("/vr")
 
-        sheet_actions = ZzActions()
-        sheet_actions.add_action("A1", lambda: zzMess(12))
+        actions = ZzActions()
+        actions.add_action("Column|Width")
+        actions.add_action("Column|-")
+        actions.add_action("Column|Add left")
+        actions.add_action("Column|Add right")
+        actions.add_action("Column|-")
+        actions.add_action("Column|Move left")
+        actions.add_action("Column|Move right")
+        actions.add_action("Column|-")
+        actions.add_action("Column|Remove")
+
+        actions.add_action("-")
+        actions.add_action("Clone")
+        actions.add_action("Add above")
+        actions.add_action("Add below")
+        actions.add_action("-")
+        actions.add_action("Hide/Show")
+        actions.add_action("Remove")
+        actions.add_action("Move up")
+        actions.add_action("Move down")
+
         # sheet_actions.show_actions = 0
         # sheet_actions.show_main_button= 0
 
-        form.add_control("sheet", "", control="sheet", actions=sheet_actions)
+        form.add_control("sheet", "", control="sheet", actions=actions)
         for x in range(344):
             form.add_control("", f"label {x}")
         form.ok_button = 1
@@ -58,7 +77,6 @@ class DemoApp(ZzApp):
             form.w.sheet.set_row_headers(["122", "2fff"])
             form.w.sheet.set_column_header(3, "___")
             form.w.sheet.set_row_header(5, "abrakada")
-
 
             form.w.sheet.hide_column_headers()
             form.w.sheet.hide_row_headers()

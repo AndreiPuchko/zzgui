@@ -101,3 +101,9 @@ class ZzWidget:
 
     def set_maximum_height(self, height):
         pass
+
+    def get_default_width(self):
+        pass
+
+    def set_size_policy(self, horizontal, vertical):
+        pass
