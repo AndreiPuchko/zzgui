@@ -81,12 +81,12 @@ class DemoApp(ZzApp):
             form.w.sheet.hide_column_headers()
             form.w.sheet.hide_row_headers()
 
-            form.w.sheet.set_column_sizes(10)
-            form.w.sheet.set_column_sizes([23, 23, 34])
+            form.w.sheet.set_column_size(10)
+            form.w.sheet.set_column_size([23, 23, 34])
             form.w.sheet.set_column_size(5, 50)
 
-            form.w.sheet.set_row_sizes(10)
-            form.w.sheet.set_row_sizes([23, 23, 34])
+            form.w.sheet.set_row_size(10)
+            form.w.sheet.set_row_size([23, 23, 34])
             form.w.sheet.set_row_size(5, 50)
 
             form.w.sheet.set_span(1, 1, 30, 30)

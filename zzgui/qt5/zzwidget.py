@@ -16,7 +16,7 @@ from zzgui.qt5.zzwindow import zz_align
 
 
 class ZzWidget(QWidget, zzwidget.ZzWidget):
-    def __init__(self, meta):
+    def __init__(self, meta={}):
         super().__init__()
         zzwidget.ZzWidget.__init__(self, meta)
         # self.setContentsMargins(0, 0, 0, 0)
@@ -49,6 +49,10 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
     def set_visible(self, arg=True):
         self.setVisible(arg)
 
+    def is_visible(self):
+        if hasattr(self, "isVisible"):
+            return self.isVisible()
+
     def is_readonly(self):
         if hasattr(self, "isReadOnly"):
             return self.isReadOnly()
@@ -56,13 +60,19 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
     def set_focus(self):
         self.setFocus()
 
-    def set_maximum_width(self, width):
+    def set_maximum_width(self, width, char="O"):
         if self.meta.get("control", "") not in ("radio", "check"):
-            self.setMaximumWidth(QFontMetrics(self.font()).width("W") * width)
+            if char != "":
+                self.setMaximumWidth(QFontMetrics(self.font()).width(char) * width)
+            else:
+                self.setMaximumWidth(width)
 
-    def set_fixed_width(self, width):
+    def set_fixed_width(self, width, char="O"):
         if self.meta.get("control", "") not in ("radio", "check"):
-            self.setFixedWidth(QFontMetrics(self.font()).width("W") * width)
+            if char != "":
+                self.setFixedWidth(QFontMetrics(self.font()).width(char) * width)
+            else:
+                self.setFixedWidth(width)
 
     def set_maximum_len(self, length):
         if hasattr(self, "setMaxLength"):
@@ -99,3 +109,45 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
 
     def set_size_policy(self, horizontal, vertical):
         self.setSizePolicy(horizontal, vertical)
+
+    def get_next_focus_widget(self, pos=1):
+        return self.nextInFocusChain()
+
+    def get_next_widget(self, pos=1):
+        return self.layout().widget()
+
+    def add_widget_above(self, widget, pos=0):
+        my_pos = self.parentWidget().layout().indexOf(self)
+        self.parent().layout().insertWidget(my_pos - pos, widget)
+
+    def add_widget_below(self, widget, pos=0):
+        my_pos = self.parentWidget().layout().indexOf(self)
+        self.parent().layout().insertWidget(my_pos + pos + 1, widget)
+
+    def remove(self):
+        self.parentWidget().layout().removeWidget(self)
+        self.setParent(None)
+
+    def get_layout_position(self):
+        return self.parentWidget().layout().indexOf(self)
+
+    def get_layout_count(self):
+        return self.parentWidget().layout().count()
+
+    def get_layout_widget(self, pos):
+        return self.parentWidget().layout().itemAt(pos).widget()
+
+    def get_layout_widgets(self):
+        return [self.get_layout_widget(x) for x in range(self.get_layout_count())]
+
+    def move_up(self):
+        pos = self.get_layout_position()
+        if pos > 0:
+            w = self.parentWidget().layout().takeAt(pos).widget()
+            self.parentWidget().layout().insertWidget(pos - 1, w)
+
+    def move_down(self):
+        pos = self.get_layout_position()
+        if pos < self.get_layout_count()-1:
+            w = self.parentWidget().layout().takeAt(pos+1).widget()
+            self.parentWidget().layout().insertWidget(pos, w)

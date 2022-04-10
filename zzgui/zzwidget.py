@@ -46,6 +46,9 @@ class ZzWidget:
     def set_visible(self, arg=True):
         pass
 
+    def is_visible(self):
+        pass
+
     def set_tooltip(self, mess):
         pass
 
@@ -82,10 +85,10 @@ class ZzWidget:
     def set_maximum_len(self, length):
         pass
 
-    def set_maximum_width(self, width):
+    def set_maximum_width(self, width, char="O"):
         pass
 
-    def set_fixed_width(self, width):
+    def set_fixed_width(self, width, char="O"):
         pass
 
     def set_alignment(self, alignment):
@@ -99,11 +102,44 @@ class ZzWidget:
     def get_default_height(self):
         pass
 
-    def set_maximum_height(self, height):
+    def set_maximum_height(self, height, char="O"):
         pass
 
     def get_default_width(self):
         pass
 
     def set_size_policy(self, horizontal, vertical):
+        pass
+
+    def get_next_focus_widget(self, pos=1):
+        pass
+
+    def get_next_widget(self, pos=1):
+        pass
+
+    def add_widget_above(self, widget, pos=0):
+        pass
+
+    def add_widget_below(self, widget, pos=0):
+        pass
+
+    def remove(self):
+        pass
+
+    def get_layout_position(self):
+        pass
+
+    def get_layout_count(self):
+        pass
+
+    def get_layout_widget(self):
+        pass
+
+    def get_layout_widgets(self):
+        pass
+
+    def move_up(self):
+        pass
+
+    def move_down(self):
         pass

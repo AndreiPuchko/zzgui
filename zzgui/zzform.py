@@ -114,6 +114,10 @@ class ZzForm:
         self.refresh_children()
         self.set_grid_index()
 
+    def widget(self):
+        if self.form_stack:
+            return self.form_stack[-1]
+
     def widgets(self):
         return self.form_stack[-1].widgets
 
@@ -177,6 +181,12 @@ class ZzForm:
         self.before_grid_build()
         self.grid_form.build_grid()
         return self.grid_form
+
+    def get_widget(self):
+        if self.model is not None:
+            return self.get_grid_widget()
+        else:
+            return self.get_form_widget()
 
     def get_grid_crud_actions(self):
         is_crud = self.a.__getattr__("/crud")

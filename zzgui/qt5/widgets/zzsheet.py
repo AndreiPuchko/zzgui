@@ -10,19 +10,31 @@ if __name__ == "__main__":
     demo()
 
 from PyQt5.QtWidgets import QTableWidget, QSizePolicy
+from PyQt5.QtCore import Qt
 
 
 from zzgui.qt5.zzwidget import ZzWidget
+from zzgui.qt5.widgets.zzlabel import zzlabel
+
+from zzgui.zzutils import num
 
 
 class zzsheet(QTableWidget, ZzWidget):
     def __init__(self, meta):
-        super().__init__({"label": meta.get("label", "")})
+        # super().__init__({"label": meta.get("label", "")})
+        super().__init__(meta)
         self.column_headers = []
         self.row_headers = []
         self.horizontalHeader().setMinimumSectionSize(0)
         self.verticalHeader().setMinimumSectionSize(0)
         self.auto_expand = False
+        self.setEditTriggers(self.NoEditTriggers)
+
+        if self.meta.get("when"):
+            self.clicked.connect(self.meta.get("when"))
+
+        if self.meta.get("valid"):
+            self.currentCellChanged.connect(self.meta.get("valid"))
 
     def set_auto_expand(self, mode=True):
         self.auto_expand = mode
@@ -43,8 +55,6 @@ class zzsheet(QTableWidget, ZzWidget):
             self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
             self.setMinimumWidth(0)
             self.setMinimumHeight(0)
-        # self.setFixedWidth(0)
-        # self.setFixedHeight(0)
 
     def set_row_count(self, row=2):
         self.setRowCount(row)
@@ -106,32 +116,77 @@ class zzsheet(QTableWidget, ZzWidget):
         self.verticalHeader().show()
         self.expand()
 
-    def set_column_size(self, column, size):
-        self.setColumnWidth(column, size)
-        self.expand()
-
-    def set_column_sizes(self, sizes=[]):
-        if isinstance(sizes, list):
-            for column, size in enumerate(sizes):
-                self.set_column_size(column, size)
-        elif isinstance(sizes, int):
+    def set_column_size(self, width=[], column=None):
+        if isinstance(width, list):
+            for column, size in enumerate(width):
+                self.set_column_size(size, column)
+        elif isinstance(width, int) and column is None:
             for x in range(self.columnCount()):
-                self.set_column_size(x, sizes)
+                self.set_column_size(width, x)
+        else:
+            self.setColumnWidth(column, width)
         self.expand()
 
-    def set_row_size(self, row, size):
-        self.setRowHeight(row, size)
-        self.expand()
-
-    def set_row_sizes(self, sizes=[]):
-        if isinstance(sizes, list):
-            for row, size in enumerate(sizes):
-                self.set_row_size(row, size)
-        elif isinstance(sizes, int):
+    def set_row_size(self, heights=[], row=None):
+        if isinstance(heights, list):
+            for row, size in enumerate(heights):
+                self.set_row_size(size, row)
+        elif isinstance(heights, int) and row is None:
             for x in range(self.rowCount()):
-                self.set_row_size(x, sizes)
+                self.set_row_size(heights, x)
+        else:
+            self.setRowHeight(row, heights)
         self.expand()
 
     def set_span(self, row, column, row_span, column_span):
         self.setSpan(row, column, row_span, column_span)
         self.expand()
+
+    def set_cell_text(self, text="", row=None, column=None):
+        if isinstance(text, list):
+            if row is None and column is None:
+                row = 0
+            if row is not None:
+                for x in range(self.columnCount()):
+                    if x < len(text):
+                        self.set_cell_text(text[x], row, x)
+            else:
+                for x in range(self.rowCount()):
+                    if x < len(text):
+                        self.set_cell_text(text[x], x, column)
+        else:
+            row = num(row)
+            column = num(column)
+            cell_widget = self.get_cell_widget(row, column)
+            cell_widget.setText(text)
+
+    def set_cell_style(self, style_text="", row=None, column=None):
+        if row is None and column is None:
+            row = 0
+        if row is not None and column is None:
+            for x in range(self.columnCount()):
+                if isinstance(style_text, dict):
+                    if x < len(style_text):
+                        self.set_cell_style(style_text[x], row, x)
+                else:
+                    self.set_cell_style(style_text, row, x)
+        elif row is None and column is not None:
+            for x in range(self.rowCount()):
+                if isinstance(style_text, dict):
+                    if x < len(style_text):
+                        self.set_cell_style(style_text[x], x, column)
+                else:
+                    self.set_cell_style(style_text, x, column)
+        else:
+            row = num(row)
+            column = num(column)
+            cell_widget = self.get_cell_widget(row, column)
+            cell_widget.set_style_sheet(style_text)
+
+    def get_cell_widget(self, row, column):
+        cell_widget = self.cellWidget(row, column)
+        if cell_widget is None:
+            cell_widget = zzlabel()
+            cell_widget.set_maximum_height(9999)
+            self.setCellWidget(row, column, cell_widget)
+        return cell_widget

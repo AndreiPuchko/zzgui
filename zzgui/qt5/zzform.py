@@ -20,6 +20,7 @@ from zzgui.zzutils import num
 import zzgui.zzdialogs
 from zzgui.zzdialogs import zzMess, zzWait, zzAskYN
 
+from zzgui.qt5.zzwidget import ZzWidget
 
 class ZzForm(zzform.ZzForm):
     def __init__(self, title=""):
@@ -34,7 +35,7 @@ class ZzForm(zzform.ZzForm):
         self.on_init()
 
 
-class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow):
+class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow, ZzWidget):
     def __init__(self, zz_form: ZzForm, title=""):
         super().__init__(zz_form)
         title = title if title else zz_form.title
