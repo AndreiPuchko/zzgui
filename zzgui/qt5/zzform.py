@@ -151,19 +151,21 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow, ZzWidget):
         if self not in self.zz_form.form_stack:
             self.zz_form.form_stack.append(self)
 
-        for widget_name in self.widgets:
-            widget = self.widgets[widget_name]
-            if widget.focusPolicy() == Qt.NoFocus:
-                continue
-            if hasattr(widget, "isReadOnly") and widget.isReadOnly():
-                continue
-            if widget.isEnabled():
-                widget.setFocus()
-                break
+        if not self.zz_form.i_am_child:
+            for widget_name in self.widgets:
+                widget = self.widgets[widget_name]
+                if widget.focusPolicy() == Qt.NoFocus:
+                    continue
+                if hasattr(widget, "isReadOnly") and widget.isReadOnly():
+                    continue
+                if widget.isEnabled():
+                    widget.setFocus()
+                    break
 
         if event:
             event.accept()
 
+        self.zz_form.form_is_active = True
         # if self.mode == "form":
         #     self.zz_form.form_is_active = True
         #     if self.zz_form.before_form_show() is False:

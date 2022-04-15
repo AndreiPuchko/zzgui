@@ -49,8 +49,10 @@ class ZzForm:
         self.children_forms = []  # forms inside this form
         self.i_am_child = None
         self.max_child_level = 1  # max depth for child forms
+        
         self.ok_button = False
         self.cancel_button = False
+        self.ok_pressed = None
 
         self.show_grid_action_top = True
         self.do_not_save_geometry = False
@@ -129,6 +131,7 @@ class ZzForm:
 
     def close(self):
         if self.form_stack:
+            self.last_closed_form = self.form_stack[-1]
             self.form_stack[-1].close()
 
     def _close(self):
@@ -352,6 +355,7 @@ class ZzForm:
     def _valid(self):
         if self.valid() is False:
             return
+        self.ok_pressed = True
         self.close()
 
     def add_ok_cancel_buttons(self):
@@ -686,13 +690,14 @@ class ZzForm:
         db=None,
         mask="",
         opts="",
+        when=None,
         valid=None,
+        dblclick=None,
         readonly=None,
         disabled=None,
         check=None,
         noform=None,
         nogrid=None,
-        when=None,
         widget=None,
         stretch=0,
         mess="",

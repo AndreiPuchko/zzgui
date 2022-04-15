@@ -29,6 +29,14 @@ class zzbutton(QPushButton, ZzWidget):
         if ml:
             self.setMinimumWidth(QFontMetrics(self.font()).width("W") * ml)
 
+    def focusInEvent(self, event):
+        if not self.meta.get("form").form_is_active is True:
+            return
+        if self.meta.get("when"):
+            self.when()
+        return super().focusInEvent(event)
+
+
     def keyPressEvent(self, ev):
         if ev.key() in [Qt.Key_Enter, Qt.Key_Return] and not self.meta.get("eat_enter"):
             ev.accept()

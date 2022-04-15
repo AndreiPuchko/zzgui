@@ -94,10 +94,18 @@ class ZzWidget:
     def set_alignment(self, alignment):
         pass
 
-    def set_style_sheet(self, css: str):
+    def set_style_sheet(self, css):
+        if isinstance(css, dict):
+            css = ";".join(([f"{y}:{css[y]}" for y in css]))
         if css.strip().startswith("{"):
             css = type(self).__name__ + css
         self.style_sheet = css
+
+    def add_style_sheet(self, css: str):
+        pass
+
+    def get_style_sheet(self):
+        pass
 
     def get_default_height(self):
         pass

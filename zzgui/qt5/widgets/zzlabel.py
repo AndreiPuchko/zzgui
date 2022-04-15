@@ -31,16 +31,19 @@ class zzlabel(QLabel, ZzWidget):
     def __init__(self, meta={}):
         super().__init__({"label": meta.get("label", "")})
         self.set_text(self.meta["label"])
-        self.set_maximum_height(self.get_default_height())
+        # self.set_maximum_height(self.get_default_height())
 
     def set_style_sheet(self, style_text):
         super().set_style_sheet(style_text)
 
         if "vertical-align" in style_text or "text-align" in style_text:
-            style_dict = {
-                x[0].strip().replace("{", ""): x[1].strip().replace("}", "")
-                for x in [x.split(":") for x in style_text.split(";") if ":" in x]
-            }
+            if isinstance(style_text, str):
+                style_dict = {
+                    x[0].strip().replace("{", ""): x[1].strip().replace("}", "")
+                    for x in [x.split(":") for x in style_text.split(";") if ":" in x]
+                }
+            else:
+                style_dict = style_text
             CA = vertical_align_dict.get(style_dict.get("vertical-align", "top"), Qt.AlignTop)
             CA |= horizontal_align_dict.get(style_dict.get("text-align", "left"), Qt.AlignLeft)
 

@@ -29,12 +29,20 @@ class zzsheet(QTableWidget, ZzWidget):
         self.verticalHeader().setMinimumSectionSize(0)
         self.auto_expand = False
         self.setEditTriggers(self.NoEditTriggers)
+        self.dbl_click = None
+
+        # self.doubleClicked.connect(self.zz_form.grid_double_clicked)
 
         if self.meta.get("when"):
             self.clicked.connect(self.meta.get("when"))
 
         if self.meta.get("valid"):
             self.currentCellChanged.connect(self.meta.get("valid"))
+
+    def mouseDoubleClickEvent(self, e):
+        if self.meta.get("form"):
+            self.meta.get("form").grid_double_clicked()
+        return super().mouseDoubleClickEvent(e)
 
     def set_auto_expand(self, mode=True):
         self.auto_expand = mode
@@ -142,6 +150,44 @@ class zzsheet(QTableWidget, ZzWidget):
         self.setSpan(row, column, row_span, column_span)
         self.expand()
 
+    def get_cell_text(self, row=None, column=None):
+        rez = []
+        if row is None and column is None:
+            row = 0
+        if row is not None and column is None:
+            for column in range(self.columnCount()):
+                rez.append(self.get_cell_text(row, column))
+        elif row is None and column is not None:
+            for row in range(self.rowCount()):
+                rez.append(self.get_cell_text(row, column))
+        else:
+            row = num(row)
+            column = num(column)
+            rez = self.get_cell_widget(row, column).get_text()
+        return rez
+
+    def get_cell_style_sheet(self, row=None, column=None):
+        rez = []
+        if row is None and column is None:
+            row = 0
+        if row is not None and column is None:
+            for column in range(self.columnCount()):
+                rez.append(self.get_cell_style(row, column))
+        elif row is None and column is not None:
+            for row in range(self.rowCount()):
+                rez.append(self.get_cell_style(row, column))
+        else:
+            row = num(row)
+            column = num(column)
+            rez = self.get_cell_widget(row, column).get_style_sheet()
+        return rez
+
+    def get_text(self):
+        return self.get_cell_widget(self.current_row(), self.current_column()).get_text()
+
+    def set_text(self, text):
+        self.set_cell_text(text, self.current_row(), self.current_column())
+
     def set_cell_text(self, text="", row=None, column=None):
         if isinstance(text, list):
             if row is None and column is None:
@@ -160,23 +206,23 @@ class zzsheet(QTableWidget, ZzWidget):
             cell_widget = self.get_cell_widget(row, column)
             cell_widget.setText(text)
 
-    def set_cell_style(self, style_text="", row=None, column=None):
+    def set_cell_style_sheet(self, style_text="", row=None, column=None):
         if row is None and column is None:
             row = 0
         if row is not None and column is None:
             for x in range(self.columnCount()):
                 if isinstance(style_text, dict):
                     if x < len(style_text):
-                        self.set_cell_style(style_text[x], row, x)
+                        self.set_cell_style_sheet(style_text[x], row, x)
                 else:
-                    self.set_cell_style(style_text, row, x)
+                    self.set_cell_style_sheet(style_text, row, x)
         elif row is None and column is not None:
             for x in range(self.rowCount()):
                 if isinstance(style_text, dict):
                     if x < len(style_text):
-                        self.set_cell_style(style_text[x], x, column)
+                        self.set_cell_style_sheet(style_text[x], x, column)
                 else:
-                    self.set_cell_style(style_text, x, column)
+                    self.set_cell_style_sheet(style_text, x, column)
         else:
             row = num(row)
             column = num(column)
@@ -190,3 +236,38 @@ class zzsheet(QTableWidget, ZzWidget):
             cell_widget.set_maximum_height(9999)
             self.setCellWidget(row, column, cell_widget)
         return cell_widget
+
+    def get_current_widget(self):
+        return self.get_cell_widget(self.currentRow(), self.currentColumn())
+
+    def current_row(self):
+        return self.currentRow()
+
+    def current_column(self):
+        return self.currentColumn()
+
+    def insert_row(self, after_row=None):
+        self.setRowCount(self.rowCount() + 1)
+        for row in range(self.rowCount() - 1, after_row, -1):
+            for col in range(self.columnCount()):
+                self.set_cell_text(self.get_cell_text(row - 1, col), row, col)
+                self.set_cell_style_sheet(self.get_cell_style_sheet(row - 1, col), row, col)
+                if row == after_row+1:
+                    self.set_cell_text("", row - 1, col)
+                    self.set_cell_style_sheet("", row - 1, col)
+
+    def move_row(self, after_row):
+        for col in range(self.columnCount()):
+            text = self.get_cell_text(after_row, col)
+            style = self.get_cell_style_sheet(after_row, col)
+            self.set_cell_text(self.get_cell_text(after_row+1, col), after_row, col)
+            self.set_cell_style_sheet(self.get_cell_style_sheet(after_row+1, col), after_row, col)
+            self.set_cell_text(text, after_row+1, col)
+            self.set_cell_style_sheet(style, after_row+1, col)
+
+    def remove_row(self, move_row):
+        for row in range(move_row, self.rowCount()):
+            for col in range(self.columnCount()):
+                self.set_cell_text(self.get_cell_text(row+1 , col), row, col)
+                self.set_cell_style_sheet(self.get_cell_style_sheet(row + 1, col), row, col)
+        self.setRowCount(self.rowCount() - 1)

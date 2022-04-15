@@ -185,13 +185,25 @@ class ZzApp(QMainWindow, zzapp.ZzApp, ZzQtWindow):
     def focus_widget(self):
         return qApp.focusWidget()
 
-    def set_style_sheet(self):
-        if os.path.isfile(self.style_file):
+    def set_style_sheet(self, style=None):
+        file_name = self.style_file
+        if isinstance(style, str):
+            if os.path.isfile(style):
+                file_name = style
+            else:
+                file_name = ""
+        if os.path.isfile(file_name):
             try:
-                with open(self.style_file, "r") as style_data:
+                with open(file_name, "r") as style_data:
                     self.setStyleSheet(style_data.read())
             except Exception:
-                print(f"File {self.style_file} reading error...")
+                print(f"File {file_name} reading error...")
+        elif isinstance(style, str):
+            self.setStyleSheet(style)
+
+    def add_style_sheet(self, style):
+        current_style = self.styleSheet() + f"{style}"
+        self.setStyleSheet(current_style)
 
     def lock(self):
         self.menuBar().setDisabled(True)

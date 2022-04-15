@@ -98,6 +98,15 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         super().set_style_sheet(css)
         self.setStyleSheet(self.style_sheet)
 
+    def add_style_sheet(self, css: str):
+        last_style = self.styleSheet() + f"; {css}"
+        super().set_style_sheet(last_style)
+        self.setStyleSheet(last_style)
+
+    def get_style_sheet(self):
+        return self.styleSheet()
+
+
     def get_default_height(self):
         return self.sizeHint().height()
 
