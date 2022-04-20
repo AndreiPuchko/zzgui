@@ -22,9 +22,11 @@ class zzcombo(QComboBox, ZzWidget):
         for item in meta.get("pic", "").split(";"):
             self.addItem(item)
         self.currentIndexChanged.connect(self.valid)
+        if self.meta.get("data"):
+            self.set_text(self.meta.get("data"))
 
     def set_text(self, text):
-        if self.meta.get("num"):
+        if self.meta.get("num") or isinstance(text, int):
             index = int_(text)
             index = index - 1 if index else 0
         else:

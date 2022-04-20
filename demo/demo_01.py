@@ -18,7 +18,8 @@ from zzgui.zzdialogs import zzAskYN
 
 class DemoApp(ZzApp):
     def on_start(self):
-        self.sheet_form()
+        # self.sheet_form()
+        self.first_form()
 
     def on_init(self):
         self.add_menu("File|First", self.first_form, toolbar="*")
@@ -198,6 +199,7 @@ class DemoApp(ZzApp):
                     label="combobox",
                     control="combo",
                     pic="item1;item2;item3",
+                    data="item3",
                 )
             form.add_control("/")
 

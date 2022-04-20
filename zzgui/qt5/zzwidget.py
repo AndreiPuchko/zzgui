@@ -21,6 +21,11 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         zzwidget.ZzWidget.__init__(self, meta)
         # self.setContentsMargins(0, 0, 0, 0)
 
+    def mouseDoubleClickEvent(self, event):
+        if self.meta.get("dblclick"):
+            self.meta.get("dblclick")()
+        return super().mouseDoubleClickEvent(event)
+
     def set_tooltip(self, mess):
         self.setToolTip(mess)
 
@@ -105,7 +110,6 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
 
     def get_style_sheet(self):
         return self.styleSheet()
-
 
     def get_default_height(self):
         return self.sizeHint().height()

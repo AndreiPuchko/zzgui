@@ -77,6 +77,10 @@ class zzsheet(QTableWidget, ZzWidget):
         self.set_column_count(column)
         self.expand()
 
+    def set_row_header_size(self, size):
+        self.verticalHeader().setFixedWidth(size)
+        self.expand()
+
     def set_column_headers(self, headers_list=[]):
         self.column_headers = headers_list
         self.setHorizontalHeaderLabels(self.column_headers)
@@ -135,6 +139,9 @@ class zzsheet(QTableWidget, ZzWidget):
             self.setColumnWidth(column, width)
         self.expand()
 
+    def get_row_size(self, row=None):
+        return self.rowHeight(row)
+
     def set_row_size(self, heights=[], row=None):
         if isinstance(heights, list):
             for row, size in enumerate(heights):
@@ -145,6 +152,9 @@ class zzsheet(QTableWidget, ZzWidget):
         else:
             self.setRowHeight(row, heights)
         self.expand()
+
+    def clear_span(self):
+        self.clearSpans()
 
     def set_span(self, row, column, row_span, column_span):
         self.setSpan(row, column, row_span, column_span)
@@ -232,7 +242,8 @@ class zzsheet(QTableWidget, ZzWidget):
     def get_cell_widget(self, row, column):
         cell_widget = self.cellWidget(row, column)
         if cell_widget is None:
-            cell_widget = zzlabel()
+            cell_widget = zzlabel({"label":"", "dblclick": self.meta.get("dblclick")})
+            cell_widget.setTextInteractionFlags(Qt.NoTextInteraction)
             cell_widget.set_maximum_height(9999)
             self.setCellWidget(row, column, cell_widget)
         return cell_widget
@@ -252,7 +263,7 @@ class zzsheet(QTableWidget, ZzWidget):
             for col in range(self.columnCount()):
                 self.set_cell_text(self.get_cell_text(row - 1, col), row, col)
                 self.set_cell_style_sheet(self.get_cell_style_sheet(row - 1, col), row, col)
-                if row == after_row+1:
+                if row == after_row + 1:
                     self.set_cell_text("", row - 1, col)
                     self.set_cell_style_sheet("", row - 1, col)
 
@@ -260,14 +271,40 @@ class zzsheet(QTableWidget, ZzWidget):
         for col in range(self.columnCount()):
             text = self.get_cell_text(after_row, col)
             style = self.get_cell_style_sheet(after_row, col)
-            self.set_cell_text(self.get_cell_text(after_row+1, col), after_row, col)
-            self.set_cell_style_sheet(self.get_cell_style_sheet(after_row+1, col), after_row, col)
-            self.set_cell_text(text, after_row+1, col)
-            self.set_cell_style_sheet(style, after_row+1, col)
+            self.set_cell_text(self.get_cell_text(after_row + 1, col), after_row, col)
+            self.set_cell_style_sheet(self.get_cell_style_sheet(after_row + 1, col), after_row, col)
+            self.set_cell_text(text, after_row + 1, col)
+            self.set_cell_style_sheet(style, after_row + 1, col)
 
-    def remove_row(self, move_row):
-        for row in range(move_row, self.rowCount()):
+    def remove_row(self, remove_row):
+        for row in range(remove_row, self.rowCount()):
             for col in range(self.columnCount()):
-                self.set_cell_text(self.get_cell_text(row+1 , col), row, col)
+                self.set_cell_text(self.get_cell_text(row + 1, col), row, col)
                 self.set_cell_style_sheet(self.get_cell_style_sheet(row + 1, col), row, col)
         self.setRowCount(self.rowCount() - 1)
+
+    def insert_column(self, after_column=None):
+        self.setColumnCount(self.columnCount() + 1)
+        for col in range(self.columnCount() - 1, after_column, -1):
+            for row in range(self.rowCount()):
+                self.set_cell_text(self.get_cell_text(row, col - 1), row, col)
+                self.set_cell_style_sheet(self.get_cell_style_sheet(row, col - 1), row, col)
+                if col == after_column + 1:
+                    self.set_cell_text("", row, col - 1)
+                    self.set_cell_style_sheet("", row, col - 1)
+
+    def remove_column(self, remove_column):
+        for col in range(remove_column, self.columnCount()):
+            for row in range(self.rowCount()):
+                self.set_cell_text(self.get_cell_text(row, col + 1), row, col)
+                self.set_cell_style_sheet(self.get_cell_style_sheet(row, col + 1), row, col)
+        self.setColumnCount(self.columnCount() - 1)
+
+    def move_column(self, after_column):
+        for row in range(self.rowCount()):
+            text = self.get_cell_text(row, after_column)
+            style = self.get_cell_style_sheet(row, after_column)
+            self.set_cell_text(self.get_cell_text(row, after_column + 1), row, after_column)
+            self.set_cell_style_sheet(self.get_cell_style_sheet(row, after_column + 1), row, after_column)
+            self.set_cell_text(text, row, after_column + 1)
+            self.set_cell_style_sheet(style, row, after_column + 1)

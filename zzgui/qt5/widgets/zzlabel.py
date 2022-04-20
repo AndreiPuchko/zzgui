@@ -29,9 +29,10 @@ horizontal_align_dict = {
 
 class zzlabel(QLabel, ZzWidget):
     def __init__(self, meta={}):
-        super().__init__({"label": meta.get("label", "")})
+        super().__init__({"label": meta.get("label", ""), "dblclick": meta.get("dblclick")})
+        # super().__init__(meta)
         self.set_text(self.meta["label"])
-        # self.set_maximum_height(self.get_default_height())
+        self.set_maximum_height(self.get_default_height() * 1.5)
 
     def set_style_sheet(self, style_text):
         super().set_style_sheet(style_text)
