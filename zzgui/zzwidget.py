@@ -151,3 +151,9 @@ class ZzWidget:
 
     def move_down(self):
         pass
+
+    def action_set_visible(self, text, mode):
+        pass
+
+    def action_set_enabled(self, text, mode):
+        pass

@@ -33,11 +33,16 @@ class zzsheet(QTableWidget, ZzWidget):
 
         # self.doubleClicked.connect(self.zz_form.grid_double_clicked)
 
-        if self.meta.get("when"):
-            self.clicked.connect(self.meta.get("when"))
+        # if self.meta.get("when"):
+        #     self.clicked.connect(self.meta.get("when"))
 
         if self.meta.get("valid"):
             self.currentCellChanged.connect(self.meta.get("valid"))
+
+    def mousePressEvent(self, event):
+        if self.meta.get("when"):
+            self.meta.get("when")()
+        return super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, e):
         if self.meta.get("form"):

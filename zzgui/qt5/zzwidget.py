@@ -164,3 +164,13 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
         if pos < self.get_layout_count()-1:
             w = self.parentWidget().layout().takeAt(pos+1).widget()
             self.parentWidget().layout().insertWidget(pos, w)
+
+    def action_set_visible(self, text, mode=True):
+        for action in self.actions():
+            if action.text().strip() == text:
+                action.setVisible(mode)
+
+    def action_set_enabled(self, text, mode=True):
+        for action in self.actions():
+            if action.text().strip() == text:
+                action.setVisible(mode)

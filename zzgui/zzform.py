@@ -90,14 +90,16 @@ class ZzForm:
                 x["_worker"]()
 
     def disable_action(self, text="", mode=True):
-        for x in self.actions:
-            if text == x["text"]:
-                x["_set_disabled"](mode)
+        self.actions.set_disabled(text, mode)
+        # for x in self.actions:
+        #     if text == x["text"]:
+        #         x["_set_disabled"](mode)
 
     def enable_action(self, text="", mode=True):
-        for x in self.actions:
-            if text == x["text"]:
-                x["_set_enabled"](mode)
+        self.actions.set_enabled(text, mode)
+        # for x in self.actions:
+        #     if text == x["text"]:
+        #         x["_set_enabled"](mode)
 
     def run(self):
         if self.model:

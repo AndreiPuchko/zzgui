@@ -11,6 +11,7 @@ if __name__ == "__main__":
 
 import zzgui.zzapp as zzapp
 from configparser import ConfigParser
+
 # from zzgui.zzwindow import ZzWindow
 from zzgui.zzutils import num
 
@@ -96,6 +97,28 @@ class ZzActions(list):
             self.extend(action[:])
         # else:
         #     self.action_list = []
+
+    def run(self, text):
+        for action in self:
+            if text == action["text"]:
+                action["_worker"]()
+
+    def set_visible(self, text, mode=True):
+        for action in self:
+            if text == action["text"]:
+                action["_set_visible"](mode)
+            # elif text == action.get("parent_action_text"):
+            #     action["_set_visible_parent_action"](mode)
+
+    def set_disabled(self, text="", mode=True):
+        for action in self:
+            if text == action["text"]:
+                action["_set_disabled"](mode)
+
+    def set_enabled(self, text="", mode=True):
+        for action in self:
+            if text == action["text"]:
+                action["_set_enabled"](mode)
 
     def add_action(
         self,

@@ -64,8 +64,17 @@ class zztoolbar(QFrame, ZzWidget):
                     action["engineAction"] = cascade_action[action_key].addSeparator()
                 else:
                     if x + 1 == len(action_text_list):  # real action
-
                         action["engineAction"] = cascade_action[action_key].addAction(action_text)
+                        # action["parent_action"] = cascade_action[action_key]
+                        # action["parent_action_text"] = action_key
+
+                        # action["_set_visible_parent_action"] = lambda mode=True, act=action[
+                        #     "parent_action"
+                        # ]: act.setVisible(mode)
+
+                        action["_set_visible"] = lambda mode=True, act=action["engineAction"]: act.setVisible(
+                            mode
+                        )
                         action["_set_enabled"] = lambda mode=True, act=action["engineAction"]: act.setEnabled(
                             mode
                         )
