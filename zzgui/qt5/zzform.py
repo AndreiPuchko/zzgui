@@ -182,15 +182,16 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow, ZzWidget):
         # if self.mode == "form":
         #     self.parent().setWindowFlag(Qt.WindowMaximizeButtonHint, False)
 
-        self.parent().setWindowFlag(Qt.WindowMinimizeButtonHint, False)
+        if hasattr(self.parent(), "setWindowFlag"):
+            self.parent().setWindowFlag(Qt.WindowMinimizeButtonHint, False)
 
-        if self.zz_form.hide_title:
-            self.parent().setWindowFlags(
-                Qt.CustomizeWindowHint
-                | Qt.FramelessWindowHint
-                | Qt.WindowStaysOnBottomHint
-                | Qt.WindowCloseButtonHint
-            )
+            if self.zz_form.hide_title:
+                self.parent().setWindowFlags(
+                    Qt.CustomizeWindowHint
+                    | Qt.FramelessWindowHint
+                    | Qt.WindowStaysOnBottomHint
+                    | Qt.WindowCloseButtonHint
+                )
         if self.zz_form.maximized:
             self.showMaximized()
         if self.mode == "form":
