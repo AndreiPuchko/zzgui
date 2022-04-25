@@ -938,7 +938,7 @@ class ZzFormWindow:
                             current_frame.add_widget(label2add)
                     if action2add is not None:
                         current_frame.add_widget(action2add)
-                        action2add.set_maximum_height(action2add.get_default_height())
+                        action2add.fix_default_height()
                     if widget2add is not None:
                         if meta.get("name", "") in ("/vr", "/hr"):  # scroller
                             scroller = self._get_widget("scroller")({"widget": widget2add})

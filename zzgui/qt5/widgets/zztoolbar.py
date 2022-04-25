@@ -31,7 +31,7 @@ class zztoolbar(QFrame, ZzWidget):
     def __init__(self, meta):
         super().__init__(meta)
         self.setLayout(QVBoxLayout() if "v" in meta.get("control") else QHBoxLayout())
-        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        # self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().setAlignment(zz_align["7"])
         self.layout().setSpacing(-1)
         self.layout().setContentsMargins(QMargins(0, 0, 0, 0))

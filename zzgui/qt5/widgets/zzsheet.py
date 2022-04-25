@@ -16,7 +16,7 @@ from PyQt5.QtCore import Qt
 from zzgui.qt5.zzwidget import ZzWidget
 from zzgui.qt5.widgets.zzlabel import zzlabel
 
-from zzgui.zzutils import num
+from zzgui.zzutils import num, int_
 
 
 class zzsheet(QTableWidget, ZzWidget):
@@ -38,6 +38,17 @@ class zzsheet(QTableWidget, ZzWidget):
 
         if self.meta.get("valid"):
             self.currentCellChanged.connect(self.meta.get("valid"))
+
+    def selectionChanged(self, selected, deselected):
+        selection_background_style = ";background:yellow;"
+        for x in deselected.indexes():
+            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
+            st= st.replace(selection_background_style, "")
+            self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
+        for x in selected.indexes():
+            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()+selection_background_style
+            self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
+        return super().selectionChanged(selected, deselected)
 
     def mousePressEvent(self, event):
         if self.meta.get("when"):
@@ -162,6 +173,7 @@ class zzsheet(QTableWidget, ZzWidget):
         self.clearSpans()
 
     def set_span(self, row, column, row_span, column_span):
+        # print(row, column, row_span, column_span, self.get_cell_text(row, column))
         self.setSpan(row, column, row_span, column_span)
         self.expand()
 
@@ -176,8 +188,8 @@ class zzsheet(QTableWidget, ZzWidget):
             for row in range(self.rowCount()):
                 rez.append(self.get_cell_text(row, column))
         else:
-            row = num(row)
-            column = num(column)
+            row = int_(row)
+            column = int_(column)
             rez = self.get_cell_widget(row, column).get_text()
         return rez
 
@@ -192,8 +204,8 @@ class zzsheet(QTableWidget, ZzWidget):
             for row in range(self.rowCount()):
                 rez.append(self.get_cell_style(row, column))
         else:
-            row = num(row)
-            column = num(column)
+            row = int_(row)
+            column = int_(column)
             rez = self.get_cell_widget(row, column).get_style_sheet()
         return rez
 
@@ -216,8 +228,8 @@ class zzsheet(QTableWidget, ZzWidget):
                     if x < len(text):
                         self.set_cell_text(text[x], x, column)
         else:
-            row = num(row)
-            column = num(column)
+            row = int_(row)
+            column = int_(column)
             cell_widget = self.get_cell_widget(row, column)
             cell_widget.setText(text)
 
@@ -239,15 +251,15 @@ class zzsheet(QTableWidget, ZzWidget):
                 else:
                     self.set_cell_style_sheet(style_text, x, column)
         else:
-            row = num(row)
-            column = num(column)
+            row = int_(row)
+            column = int_(column)
             cell_widget = self.get_cell_widget(row, column)
             cell_widget.set_style_sheet(style_text)
 
     def get_cell_widget(self, row, column):
         cell_widget = self.cellWidget(row, column)
         if cell_widget is None:
-            cell_widget = zzlabel({"label":"", "dblclick": self.meta.get("dblclick")})
+            cell_widget = zzlabel({"label": "", "dblclick": self.meta.get("dblclick")})
             cell_widget.setTextInteractionFlags(Qt.NoTextInteraction)
             cell_widget.set_maximum_height(9999)
             self.setCellWidget(row, column, cell_widget)

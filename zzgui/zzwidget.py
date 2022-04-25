@@ -91,6 +91,9 @@ class ZzWidget:
     def set_fixed_width(self, width, char="O"):
         pass
 
+    def set_fixed_height(self, width, char="O"):
+        pass
+
     def set_alignment(self, alignment):
         pass
 
@@ -107,11 +110,17 @@ class ZzWidget:
     def get_style_sheet(self):
         pass
 
+    def fix_default_height(self):
+        self.set_maximum_height(self.get_default_height())
+
     def get_default_height(self):
         pass
 
     def set_maximum_height(self, height, char="O"):
         pass
+
+    def fix_default_width(self):
+        self.set_maximum_width(self.get_default_width(), "")
 
     def get_default_width(self):
         pass
@@ -157,3 +166,4 @@ class ZzWidget:
 
     def action_set_enabled(self, text, mode):
         pass
+

@@ -79,6 +79,13 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
             else:
                 self.setFixedWidth(width)
 
+    def set_fixed_height(self, width, char="O"):
+        if self.meta.get("control", "") not in ("radio", "check"):
+            if char != "":
+                self.setFixedHeight(QFontMetrics(self.font()).height() * width)
+            else:
+                self.setFixedHeight(width)
+
     def set_maximum_len(self, length):
         if hasattr(self, "setMaxLength"):
             return self.setMaxLength(length)
@@ -111,11 +118,17 @@ class ZzWidget(QWidget, zzwidget.ZzWidget):
     def get_style_sheet(self):
         return self.styleSheet()
 
+    # def fix_default_height(self):
+    #     self.set_maximum_height(self.get_default_height())
+
     def get_default_height(self):
         return self.sizeHint().height()
 
     def set_maximum_height(self, height):
         self.setMaximumHeight(height)
+
+    # def fix_default_width(self):
+    #     self.set_maximum_width(self.get_default_width())
 
     def get_default_width(self):
         return self.sizeHint().width()
