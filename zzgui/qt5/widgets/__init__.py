@@ -21,6 +21,7 @@ from zzgui.qt5.widgets import (
     zzspace,
     zzlist,
     zzspin,
+    zzdoublespin,
 )
 
 
@@ -47,4 +48,5 @@ from zzgui.qt5.widgets import (
     zzspace,
     zzlist,
     zzspin,
+    zzdoublespin,
 )

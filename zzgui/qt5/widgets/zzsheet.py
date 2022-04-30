@@ -1,4 +1,3 @@
-import enum
 import sys
 
 if __name__ == "__main__":
@@ -16,7 +15,7 @@ from PyQt5.QtCore import Qt
 from zzgui.qt5.zzwidget import ZzWidget
 from zzgui.qt5.widgets.zzlabel import zzlabel
 
-from zzgui.zzutils import num, int_
+from zzgui.zzutils import int_
 
 
 class zzsheet(QTableWidget, ZzWidget):
@@ -30,35 +29,74 @@ class zzsheet(QTableWidget, ZzWidget):
         self.auto_expand = False
         self.setEditTriggers(self.NoEditTriggers)
         self.dbl_click = None
-
-        # self.doubleClicked.connect(self.zz_form.grid_double_clicked)
-
-        # if self.meta.get("when"):
-        #     self.clicked.connect(self.meta.get("when"))
-
+        self.spaned_cells = []
         if self.meta.get("valid"):
-            self.currentCellChanged.connect(self.meta.get("valid"))
+            self.itemSelectionChanged.connect(self.meta.get("valid"))
 
     def selectionChanged(self, selected, deselected):
         selection_background_style = ";background:yellow;"
+        # print("dese")
         for x in deselected.indexes():
             st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
-            st= st.replace(selection_background_style, "")
-            self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
+            st = st.replace(selection_background_style, "")
+            if (x.row(), x.column(),) not in self.spaned_cells:
+                # print(x.row(), x.column())
+                self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
+
+        # print("-----------", self.current_row(), self.current_column())
+        # o = selected.indexes()
+        # o.append(self.currentIndex())
+        # for x in o:
         for x in selected.indexes():
-            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()+selection_background_style
-            self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
+            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
+            # st = st.replace(selection_background_style, "") + selection_background_style
+            st = st + selection_background_style
+            if (x.row(), x.column(),) not in self.spaned_cells:
+                self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
+        # if self.currentIndex() not in selected.indexes():
+        #     self.setCurrentCell(self.current_row(),self.current_column())
         return super().selectionChanged(selected, deselected)
 
     def mousePressEvent(self, event):
+        rez = super().mousePressEvent(event)
         if self.meta.get("when"):
             self.meta.get("when")()
-        return super().mousePressEvent(event)
+        return rez
+
+    def focusInEvent(self, event):
+        rez = super().focusInEvent(event)
+        if self.meta.get("when"):
+            self.meta.get("when")()
+            x = self.currentIndex()
+            if x.isValid():
+                self.setCurrentCell(x.row(), x.column())
+            else:
+                self.setCurrentCell(0, 0)
+        return rez
+
+    def focusOutEvent(self, event):
+        if self.meta.get("valid"):
+            if self.meta.get("valid")() is False:
+                self.setFocus()
+                return
+        if event.reason() not in (Qt.PopupFocusReason, Qt.OtherFocusReason,):
+            self.clearSelection()
+        return super().focusOutEvent(event)
 
     def mouseDoubleClickEvent(self, e):
         if self.meta.get("form"):
             self.meta.get("form").grid_double_clicked()
         return super().mouseDoubleClickEvent(e)
+
+    def keyPressEvent(self, ev):
+        if ev.key() in [Qt.Key_Enter, Qt.Key_Return] and self.meta.get("eat_enter"):
+            if self.meta.get("form"):
+                if self.meta.get("dblclick"):
+                    self.meta.get("dblclick")()
+                else:
+                    self.meta.get("form").grid_double_clicked()
+        else:
+            super().keyPressEvent(ev)
 
     def set_auto_expand(self, mode=True):
         self.auto_expand = mode
@@ -170,11 +208,15 @@ class zzsheet(QTableWidget, ZzWidget):
         self.expand()
 
     def clear_span(self):
+        self.spaned_cells = []
         self.clearSpans()
 
     def set_span(self, row, column, row_span, column_span):
-        # print(row, column, row_span, column_span, self.get_cell_text(row, column))
         self.setSpan(row, column, row_span, column_span)
+        for sr in range(row, row + row_span):
+            for sc in range(column, column + column_span):
+                if sr != row or sc != column:
+                    self.spaned_cells.append((sr, sc))
         self.expand()
 
     def get_cell_text(self, row=None, column=None):

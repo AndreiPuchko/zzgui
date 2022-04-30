@@ -36,7 +36,6 @@ class zzbutton(QPushButton, ZzWidget):
             self.when()
         return super().focusInEvent(event)
 
-
     def keyPressEvent(self, ev):
         if ev.key() in [Qt.Key_Enter, Qt.Key_Return] and not self.meta.get("eat_enter"):
             ev.accept()
