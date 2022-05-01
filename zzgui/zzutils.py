@@ -26,6 +26,12 @@ def int_(toInt):
     except Exception:
         return int(num(toInt))
 
+def float_(toFloat):
+    try:
+        return float(f"{toFloat}")
+    except Exception:
+        return float(num(toFloat))
+
 
 def num(tonum):
     try:

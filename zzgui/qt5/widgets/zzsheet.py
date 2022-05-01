@@ -24,38 +24,19 @@ class zzsheet(QTableWidget, ZzWidget):
         super().__init__(meta)
         self.column_headers = []
         self.row_headers = []
+        self.selection_background_style = ";background:yellow;"
+        self.selection_background_color = "yellow"
         self.horizontalHeader().setMinimumSectionSize(0)
         self.verticalHeader().setMinimumSectionSize(0)
         self.auto_expand = False
         self.setEditTriggers(self.NoEditTriggers)
         self.dbl_click = None
         self.spaned_cells = []
+        self.selected_cells = []
+        if self.meta.get("when"):
+            self.itemSelectionChanged.connect(self.meta.get("when"))
         if self.meta.get("valid"):
             self.itemSelectionChanged.connect(self.meta.get("valid"))
-
-    def selectionChanged(self, selected, deselected):
-        selection_background_style = ";background:yellow;"
-        # print("dese")
-        for x in deselected.indexes():
-            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
-            st = st.replace(selection_background_style, "")
-            if (x.row(), x.column(),) not in self.spaned_cells:
-                # print(x.row(), x.column())
-                self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
-
-        # print("-----------", self.current_row(), self.current_column())
-        # o = selected.indexes()
-        # o.append(self.currentIndex())
-        # for x in o:
-        for x in selected.indexes():
-            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
-            # st = st.replace(selection_background_style, "") + selection_background_style
-            st = st + selection_background_style
-            if (x.row(), x.column(),) not in self.spaned_cells:
-                self.get_cell_widget(x.row(), x.column()).set_style_sheet(st)
-        # if self.currentIndex() not in selected.indexes():
-        #     self.setCurrentCell(self.current_row(),self.current_column())
-        return super().selectionChanged(selected, deselected)
 
     def mousePressEvent(self, event):
         rez = super().mousePressEvent(event)
@@ -65,13 +46,13 @@ class zzsheet(QTableWidget, ZzWidget):
 
     def focusInEvent(self, event):
         rez = super().focusInEvent(event)
+        x = self.currentIndex()
+        if x.isValid():
+            self.setCurrentCell(x.row(), x.column())
+        else:
+            self.setCurrentCell(0, 0)
         if self.meta.get("when"):
             self.meta.get("when")()
-            x = self.currentIndex()
-            if x.isValid():
-                self.setCurrentCell(x.row(), x.column())
-            else:
-                self.setCurrentCell(0, 0)
         return rez
 
     def focusOutEvent(self, event):
@@ -79,9 +60,10 @@ class zzsheet(QTableWidget, ZzWidget):
             if self.meta.get("valid")() is False:
                 self.setFocus()
                 return
-        if event.reason() not in (Qt.PopupFocusReason, Qt.OtherFocusReason,):
-            self.clearSelection()
-        return super().focusOutEvent(event)
+        # if event.reason() not in (Qt.PopupFocusReason, Qt.OtherFocusReason,):
+        #     self.clearSelection()
+        rez = super().focusOutEvent(event)
+        return rez
 
     def mouseDoubleClickEvent(self, e):
         if self.meta.get("form"):
@@ -207,7 +189,7 @@ class zzsheet(QTableWidget, ZzWidget):
             self.setRowHeight(row, heights)
         self.expand()
 
-    def clear_span(self):
+    def clear_spans(self):
         self.spaned_cells = []
         self.clearSpans()
 
@@ -295,8 +277,33 @@ class zzsheet(QTableWidget, ZzWidget):
         else:
             row = int_(row)
             column = int_(column)
+            if (row, column) in self.spaned_cells:
+                return
             cell_widget = self.get_cell_widget(row, column)
+            print("style", row, column, [(x.row(), x.column()) for x in self.selectedIndexes()])
+
+            if (row, column) in [(x.row(), x.column()) for x in self.selectedIndexes()]:
+                # print("style sel", row, column)
+                if isinstance(style_text, dict):
+                    style_text["background-color"] = self.selection_background_color
+                else:
+                    style_text += f";background-color:{self.selection_background_color};"
+            else:
+                if isinstance(style_text, str):
+                    style_text = style_text.replace(f"background-color:{self.selection_background_color}", "")
+
             cell_widget.set_style_sheet(style_text)
+
+    def selectionChanged(self, selected, deselected):
+        rez = super().selectionChanged(selected, deselected)
+        for x in deselected.indexes():
+            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
+            self.set_cell_style_sheet(st, x.row(), x.column())
+
+        for x in selected.indexes():
+            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
+            self.set_cell_style_sheet(st, x.row(), x.column())
+        return rez
 
     def get_cell_widget(self, row, column):
         cell_widget = self.cellWidget(row, column)

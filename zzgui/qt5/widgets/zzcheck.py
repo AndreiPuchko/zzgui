@@ -28,7 +28,7 @@ class zzcheck(QCheckBox, ZzWidget):
     def state_changed(self):
         for x in self.managed_widgets:
             x.set_enabled(self.isChecked())
-            if x.is_enabled():
+            if x.is_enabled() and self.hasFocus():
                 x.set_focus()
         self.valid()
 
