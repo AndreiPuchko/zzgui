@@ -32,7 +32,10 @@ class zzsheet(QTableWidget, ZzWidget):
         self.setEditTriggers(self.NoEditTriggers)
         self.dbl_click = None
         self.spaned_cells = []
-        self.selected_cells = []
+
+        self.sheet_styles = {}
+        self.cell_styles = {}
+
         if self.meta.get("when"):
             self.itemSelectionChanged.connect(self.meta.get("when"))
         if self.meta.get("valid"):
@@ -189,6 +192,9 @@ class zzsheet(QTableWidget, ZzWidget):
             self.setRowHeight(row, heights)
         self.expand()
 
+    def clear_selection(self):
+        self.clearSelection()
+
     def clear_spans(self):
         self.spaned_cells = []
         self.clearSpans()
@@ -274,35 +280,43 @@ class zzsheet(QTableWidget, ZzWidget):
                         self.set_cell_style_sheet(style_text[x], x, column)
                 else:
                     self.set_cell_style_sheet(style_text, x, column)
-        else:
+        else:  # row and column - set style
             row = int_(row)
             column = int_(column)
             if (row, column) in self.spaned_cells:
                 return
             cell_widget = self.get_cell_widget(row, column)
-            print("style", row, column, [(x.row(), x.column()) for x in self.selectedIndexes()])
+            cell_key = f"{row},{column}"
+            if style_text is None and cell_key not in self.cell_styles:
+                style_text = cell_widget.get_style_sheet()
 
             if (row, column) in [(x.row(), x.column()) for x in self.selectedIndexes()]:
-                # print("style sel", row, column)
                 if isinstance(style_text, dict):
                     style_text["background-color"] = self.selection_background_color
-                else:
+                elif isinstance(style_text, str):
                     style_text += f";background-color:{self.selection_background_color};"
+                else:  #  None - using self.cell_styles
+                    style_text = dict(self.sheet_styles)
+                    style_text.update(self.cell_styles.get(cell_key, {}))
+                    style_text["background-color"] = self.selection_background_color
             else:
                 if isinstance(style_text, str):
                     style_text = style_text.replace(f"background-color:{self.selection_background_color}", "")
+                elif style_text is None:
+                    style_text = dict(self.sheet_styles)
+                    style_text.update(self.cell_styles.get(cell_key, {}))
 
             cell_widget.set_style_sheet(style_text)
 
     def selectionChanged(self, selected, deselected):
         rez = super().selectionChanged(selected, deselected)
         for x in deselected.indexes():
-            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
-            self.set_cell_style_sheet(st, x.row(), x.column())
+            # st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
+            self.set_cell_style_sheet(None , x.row(), x.column())
 
         for x in selected.indexes():
-            st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
-            self.set_cell_style_sheet(st, x.row(), x.column())
+            # st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
+            self.set_cell_style_sheet(None, x.row(), x.column())
         return rez
 
     def get_cell_widget(self, row, column):

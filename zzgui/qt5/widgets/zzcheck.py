@@ -30,6 +30,12 @@ class zzcheck(QCheckBox, ZzWidget):
             x.set_enabled(self.isChecked())
             if x.is_enabled() and self.hasFocus():
                 x.set_focus()
+            if self.isChecked():
+                if x.meta.get("when"):
+                    x.meta.get("when")()
+            else:
+                if x.meta.get("valid"):
+                    x.meta.get("valid")()
         self.valid()
 
     def add_managed_widget(self, widget):
