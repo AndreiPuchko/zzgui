@@ -20,6 +20,7 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
     def __init__(self, meta):
         super().__init__(meta)
         ZzFrame.__init__(self, meta.get("name", "/v")[1])
+        self.meta = meta
         self.splitter = None
         self.scroller = None
         if meta.get("name", "")[2:3] == "s":  # Splitter!
@@ -27,7 +28,7 @@ class zzframe(QGroupBox, ZzWidget, ZzFrame):
             if meta.get("name").startswith("/v"):
                 self.splitter.setOrientation(Qt.Orientation.Vertical)
             self.layout().addWidget(self.splitter)
-        if meta.get("label") not in ("", "-"):
+        if meta.get("label") not in ("", "-") and not meta.get("check"):
             self.set_title(meta.get("label"))
         if meta.get("label", "") == "":
             self.hide_border()

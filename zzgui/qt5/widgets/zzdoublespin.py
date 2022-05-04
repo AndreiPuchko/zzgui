@@ -27,5 +27,8 @@ class zzdoublespin(QDoubleSpinBox, ZzWidget):
     def set_text(self, text):
         self.setValue(float_(text))
 
+    def get_text(self):
+        return self.text().replace(",", ".")
+
     def set_maximum_width(self, width, char="O"):
         return super().set_maximum_width(width, "W")

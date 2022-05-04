@@ -24,7 +24,6 @@ class zzsheet(QTableWidget, ZzWidget):
         super().__init__(meta)
         self.column_headers = []
         self.row_headers = []
-        self.selection_background_style = ";background:yellow;"
         self.selection_background_color = "yellow"
         self.horizontalHeader().setMinimumSectionSize(0)
         self.verticalHeader().setMinimumSectionSize(0)
@@ -49,11 +48,12 @@ class zzsheet(QTableWidget, ZzWidget):
 
     def focusInEvent(self, event):
         rez = super().focusInEvent(event)
-        x = self.currentIndex()
-        if x.isValid():
-            self.setCurrentCell(x.row(), x.column())
-        else:
-            self.setCurrentCell(0, 0)
+        if event.reason() not in (Qt.PopupFocusReason,):
+            x = self.currentIndex()
+            if x.isValid():
+                self.setCurrentCell(x.row(), x.column())
+            else:
+                self.setCurrentCell(0, 0)
         if self.meta.get("when"):
             self.meta.get("when")()
         return rez
@@ -195,9 +195,13 @@ class zzsheet(QTableWidget, ZzWidget):
     def clear_selection(self):
         self.clearSelection()
 
+    def get_selection(self):
+        return [(x.row(), x.column()) for x in self.selectedIndexes()]
+
     def clear_spans(self):
         self.spaned_cells = []
         self.clearSpans()
+        self.updateGeometries()
 
     def set_span(self, row, column, row_span, column_span):
         self.setSpan(row, column, row_span, column_span)
@@ -206,6 +210,7 @@ class zzsheet(QTableWidget, ZzWidget):
                 if sr != row or sc != column:
                     self.spaned_cells.append((sr, sc))
         self.expand()
+        self.updateGeometries()
 
     def get_cell_text(self, row=None, column=None):
         rez = []
@@ -283,13 +288,13 @@ class zzsheet(QTableWidget, ZzWidget):
         else:  # row and column - set style
             row = int_(row)
             column = int_(column)
-            if (row, column) in self.spaned_cells:
-                return
             cell_widget = self.get_cell_widget(row, column)
+            if (row, column) in self.spaned_cells:
+                cell_widget.set_style_sheet("")
+                return
             cell_key = f"{row},{column}"
             if style_text is None and cell_key not in self.cell_styles:
                 style_text = cell_widget.get_style_sheet()
-
             if (row, column) in [(x.row(), x.column()) for x in self.selectedIndexes()]:
                 if isinstance(style_text, dict):
                     style_text["background-color"] = self.selection_background_color
@@ -312,7 +317,7 @@ class zzsheet(QTableWidget, ZzWidget):
         rez = super().selectionChanged(selected, deselected)
         for x in deselected.indexes():
             # st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
-            self.set_cell_style_sheet(None , x.row(), x.column())
+            self.set_cell_style_sheet(None, x.row(), x.column())
 
         for x in selected.indexes():
             # st = self.get_cell_widget(x.row(), x.column()).get_style_sheet()
@@ -336,6 +341,9 @@ class zzsheet(QTableWidget, ZzWidget):
 
     def current_column(self):
         return self.currentColumn()
+
+    def set_current_cell(self, row, column):
+        self.setCurrentCell(row, column)
 
     def insert_row(self, after_row=None):
         self.setRowCount(self.rowCount() + 1)

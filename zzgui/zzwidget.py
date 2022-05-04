@@ -7,7 +7,15 @@ if __name__ == "__main__":
 
     demo()
 
+import re
 from zzgui.zzutils import num
+
+
+RE_QSS_CM = re.compile(r"\d*\.+\d*\.*cm")
+
+
+def re_qss_cm_replace(mo):
+    return str(int(mo.group(0).replace("cm", "").replace(".", ""))/2)
 
 
 class ZzWidget:
@@ -102,6 +110,7 @@ class ZzWidget:
             css = ";".join(([f"{y}:{css[y]}" for y in css]))
         if css.strip().startswith("{"):
             css = type(self).__name__ + css
+        css = RE_QSS_CM.sub(re_qss_cm_replace, css)
         self.style_sheet = css
 
     def add_style_sheet(self, css: str):
@@ -166,4 +175,3 @@ class ZzWidget:
 
     def action_set_enabled(self, text, mode):
         pass
-

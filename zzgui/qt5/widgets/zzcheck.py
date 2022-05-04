@@ -52,6 +52,9 @@ class zzcheck(QCheckBox, ZzWidget):
         else:
             self.setChecked(True if text else False)
 
+    def set_title(self, title):
+        self.setText(title)
+
     def get_text(self):
         if self.meta.get("num"):
             return 1 if self.isChecked() else 0
