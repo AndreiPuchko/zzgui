@@ -10,6 +10,7 @@ if __name__ == "__main__":
 
 from PyQt5.QtWidgets import QTableWidget, QSizePolicy
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPalette
 
 
 from zzgui.qt5.zzwidget import ZzWidget
@@ -24,12 +25,13 @@ class zzsheet(QTableWidget, ZzWidget):
         super().__init__(meta)
         self.column_headers = []
         self.row_headers = []
+        # print()
         self.selection_background_color = "yellow"
+        self.selection_background_color = self.palette().color(QPalette.Highlight).toRgb().name()
         self.horizontalHeader().setMinimumSectionSize(0)
         self.verticalHeader().setMinimumSectionSize(0)
         self.auto_expand = False
         self.setEditTriggers(self.NoEditTriggers)
-        self.dbl_click = None
         self.spaned_cells = []
 
         self.sheet_styles = {}

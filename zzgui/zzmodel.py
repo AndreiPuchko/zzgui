@@ -77,7 +77,8 @@ class ZzModel:
     #     return True
 
     def update(self, record: dict, current_row):
-        self.records[current_row].update(record)
+        if self.records:
+            self.records[current_row].update(record)
         self.data_changed = True
         self.refresh()
         return True
