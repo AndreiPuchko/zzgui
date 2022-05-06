@@ -22,6 +22,7 @@ from zzgui.zzdialogs import zzMess, zzWait, zzAskYN
 
 from zzgui.qt5.zzwidget import ZzWidget
 
+
 class ZzForm(zzform.ZzForm):
     def __init__(self, title=""):
         super().__init__(title=title)
@@ -147,7 +148,6 @@ class ZzFormWindow(QDialog, zzform.ZzFormWindow, ZzQtWindow, ZzWidget):
     def showEvent(self, event=None):
         if self.shown:
             return
-        # print("show event")
         if self not in self.zz_form.form_stack:
             self.zz_form.form_stack.append(self)
 

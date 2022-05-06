@@ -163,7 +163,8 @@ class DemoApp(ZzApp):
         return form
 
     def customers(self):
-        self.form_customers().run()
+        customers = self.form_customers()
+        customers.run()
 
     def form_products(self):
         form = ZzForm("Products")

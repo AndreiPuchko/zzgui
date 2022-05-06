@@ -49,7 +49,7 @@ class ZzForm:
         self.children_forms = []  # forms inside this form
         self.i_am_child = None
         self.max_child_level = 1  # max depth for child forms
-        
+
         self.ok_button = False
         self.cancel_button = False
         self.ok_pressed = None
@@ -63,6 +63,7 @@ class ZzForm:
 
         self._in_close_flag = False
         self.last_closed_form = None
+        self.last_closed_form_widgets_text = {}
 
         self.grid_form = None
         self.crud_form = None
@@ -134,18 +135,23 @@ class ZzForm:
     def close(self):
         if self.form_stack:
             self.last_closed_form = self.form_stack[-1]
+            self.save_closed_from_text()
             self.form_stack[-1].close()
+
+    def save_closed_from_text(self):
+        self.last_closed_form_widgets_text = {
+                x: self.last_closed_form.widgets[x].get_text()
+                for x in self.last_closed_form.widgets
+                if hasattr(self.last_closed_form.widgets[x], "get_text")
+            }
 
     def _close(self):
         if self._in_close_flag:
             return
         self._in_close_flag = True
         if self.form_stack:
-            # if self.form_stack[-1].escapeEnabled:
-            # self.last_closed_form = self.form_stack.pop()
             self.last_closed_form = self.form_stack[-1]
-            # print("-",self.title, self)
-            # self.last_closed_form.close()
+            self.save_closed_from_text()
         self._in_close_flag = False
 
     def show_form(self, title="", modal="modal"):
@@ -469,7 +475,7 @@ class ZzForm:
         if selected_rows and self._zzdialogs.zzAskYN(ask_text):
             show_error_messages = True
             for row in selected_rows:
-                print("BD", self.before_delete())
+                # print("BD", self.before_delete())
                 if self.before_delete() is False:
                     continue
                 if self.model.delete(row) is not True and show_error_messages:
@@ -537,7 +543,6 @@ class ZzForm:
         self.crud_form = self._ZzFormWindow_class(self, f"{self.title}.[{mode}]")
         self.crud_form.build_form()
         self.set_crud_form_data(mode)
-        # self.before_crud_show
         self.crud_form.show_form()
 
     def set_crud_form_data(self, mode=EDIT):
@@ -623,6 +628,7 @@ class ZzForm:
             self.refresh()
 
     def grid_double_clicked(self):
+        # print("dbl", self.title)
         for tag in ("select", "view", "edit"):
             action = self.a.tag(tag)
             if action and action.get("worker"):
@@ -1032,8 +1038,6 @@ class ZzFormWindow:
                 else:
                     widget2add = meta.get("widget").get_form_widget()
                 widget2add.meta = meta
-                # widget2add.zz_form.form_stack.append
-                # print(widget2add)
             else:
                 widget2add = meta.get("widget")
         else:  # Special cases
@@ -1100,14 +1104,7 @@ class ZzFormWindow:
         self.set_style_sheet(self.zz_form.style_sheet)
 
         self.zz_form.form_stack.append(self)
-        # Restore splitters sizes
-        # for x in self.get_splitters():
-        #     sizes = zzapp.zz_app.settings.get(
-        #         self.window_title,
-        #         f"splitter-{x}",
-        #         "",
-        #     )
-        #     self.widgets[x].splitter.set_sizes(sizes)
+
         # Restore grid columns sizes
         self.restore_splitters()
         self.restore_grid_columns()
@@ -1122,7 +1119,6 @@ class ZzFormWindow:
                 self.zz_form.form_is_active = False
                 self.zz_form.form_stack.pop()
                 return
-
         self.zz_form.zz_app.show_form(self, modal)
 
     def get_controls_list(self, name: str):
@@ -1178,7 +1174,6 @@ class ZzFormWindow:
         if self in self.zz_form.form_stack[-1:]:
             self.zz_form.form_stack.pop()
         # Splitters sizes
-        # print(self.window_title, self, self.zz_form)
         for x in self.get_splitters():
             zzapp.zz_app.settings.set(
                 self.window_title,
@@ -1219,7 +1214,9 @@ class ZzFormData:
             if self.zz_form.last_closed_form is None:
                 return None
             else:
-                widget = self.zz_form.last_closed_form.widgets.get(name)
+                # widget = self.zz_form.last_closed_form.widgets.get(name)
+                # widget = self.zz_form.last_closed_form_widgets_text.get(name)
+                return self.zz_form.last_closed_form_widgets_text.get(name, "")
         else:
             widget = self.zz_form.form_stack[-1].widgets.get(name)
         if widget is not None:
@@ -1244,6 +1241,7 @@ class ZzFormWidget:
                 return None
             else:
                 widgets = self.zz_form.last_closed_form.widgets
+                widgets = self.last_closed_form_widgets
         else:
             widgets = self.zz_form.form_stack[-1].widgets
         if attrname.startswith("_") and attrname.endswith("_"):
