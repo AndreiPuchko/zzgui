@@ -128,7 +128,13 @@ class DemoApp(ZzApp):
 
         actions.add_action("Action 2", worker=action2)
 
-        form.add_control("toolbar", "", actions=actions, control="toolbar", mess="Form's actions")
+        form.add_control(
+            "toolbar",
+            "",
+            actions=actions,
+            control="toolbar",
+            mess="Form's actions",
+        )
         if form.add_control("/h", "main window control"):
             form.add_control(
                 label="Main menu on/off",

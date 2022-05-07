@@ -92,15 +92,9 @@ class ZzForm:
 
     def disable_action(self, text="", mode=True):
         self.actions.set_disabled(text, mode)
-        # for x in self.actions:
-        #     if text == x["text"]:
-        #         x["_set_disabled"](mode)
 
     def enable_action(self, text="", mode=True):
         self.actions.set_enabled(text, mode)
-        # for x in self.actions:
-        #     if text == x["text"]:
-        #         x["_set_enabled"](mode)
 
     def run(self):
         if self.model:
@@ -135,10 +129,10 @@ class ZzForm:
     def close(self):
         if self.form_stack:
             self.last_closed_form = self.form_stack[-1]
-            self.save_closed_from_text()
+            self.save_closed_form_text()
             self.form_stack[-1].close()
 
-    def save_closed_from_text(self):
+    def save_closed_form_text(self):
         self.last_closed_form_widgets_text = {
                 x: self.last_closed_form.widgets[x].get_text()
                 for x in self.last_closed_form.widgets
@@ -151,7 +145,8 @@ class ZzForm:
         self._in_close_flag = True
         if self.form_stack:
             self.last_closed_form = self.form_stack[-1]
-            self.save_closed_from_text()
+            self.form_stack[-1].save_splitters()
+            self.save_closed_form_text()
         self._in_close_flag = False
 
     def show_form(self, title="", modal="modal"):
@@ -475,7 +470,6 @@ class ZzForm:
         if selected_rows and self._zzdialogs.zzAskYN(ask_text):
             show_error_messages = True
             for row in selected_rows:
-                # print("BD", self.before_delete())
                 if self.before_delete() is False:
                     continue
                 if self.model.delete(row) is not True and show_error_messages:
@@ -513,6 +507,7 @@ class ZzForm:
         else:
             rez = self.model.insert(crud_data, self.current_row)
             self.move_grid_index(1)
+
         if rez is False:
             self._zzdialogs.zzMess(self.model.get_data_error())
         else:
@@ -556,7 +551,7 @@ class ZzForm:
         else:
             where_dict = {}
         if self.current_row >= 0:
-            self._model_record = self.model.get_record(self.current_row)
+            self._model_record = dict(self.model.get_record(self.current_row))
             for x in self._model_record:
                 if x not in self.crud_form.widgets:
                     continue
@@ -628,7 +623,6 @@ class ZzForm:
             self.refresh()
 
     def grid_double_clicked(self):
-        # print("dbl", self.title)
         for tag in ("select", "view", "edit"):
             action = self.a.tag(tag)
             if action and action.get("worker"):
@@ -850,6 +844,7 @@ class ZzFormWindow:
 
     def set_grid_index(self, row=0, col=0):
         self.widgets["form__grid"].set_index(row, col)
+
 
     def get_grid_index(self):
         return self.widgets["form__grid"].current_index()
@@ -1173,16 +1168,17 @@ class ZzFormWindow:
         self._in_close_flag = True
         if self in self.zz_form.form_stack[-1:]:
             self.zz_form.form_stack.pop()
-        # Splitters sizes
+        self.save_splitters()
+        self.save_grid_columns()
+        self.save_geometry(zzapp.zz_app.settings)
+
+    def save_splitters(self):
         for x in self.get_splitters():
             zzapp.zz_app.settings.set(
                 self.window_title,
                 f"splitter-{x}",
                 self.widgets[x].splitter.get_sizes(),
             )
-        # Grid columns
-        self.save_grid_columns()
-        self.save_geometry(zzapp.zz_app.settings)
 
     def get_splitters(self):
         return [

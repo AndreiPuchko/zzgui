@@ -76,23 +76,26 @@ class ZzModel:
     #     # print(current_row)
     #     return True
 
-    def update(self, record: dict, current_row):
+    def update(self, record: dict, current_row, refresh=True):
         if self.records:
             self.records[current_row].update(record)
         self.data_changed = True
-        self.refresh()
+        if refresh:
+            self.refresh()
         return True
 
-    def insert(self, record: dict, current_row=0):
+    def insert(self, record: dict, current_row=0, refresh=True):
         self.records.append(record)
         self.data_changed = True
-        self.refresh()
+        if refresh:
+            self.refresh()
         return True
 
-    def delete(self, row_number):
+    def delete(self, row_number, refresh=True):
         self.records.pop(row_number)
         self.data_changed = True
-        self.refresh()
+        if refresh:
+            self.refresh()
         return True
 
     def set_where(self, where_text=""):
