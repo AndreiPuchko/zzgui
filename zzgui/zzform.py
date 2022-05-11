@@ -845,7 +845,6 @@ class ZzFormWindow:
     def set_grid_index(self, row=0, col=0):
         self.widgets["form__grid"].set_index(row, col)
 
-
     def get_grid_index(self):
         return self.widgets["form__grid"].current_index()
 

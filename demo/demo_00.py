@@ -25,8 +25,8 @@ class DemoApp(ZzApp):
         self.form.maximized = True
         self.form.hide_title = True
         self.form.set_style_sheet(
-            """QWidget{font:25px;} 
-                zzbutton {font:30px; padding: 10 200px} 
+            """QWidget{font:25px;}
+                zzbutton {font:30px; padding: 10 200px}
                 zzlist::item {margin: 10px;}
             """
         )
@@ -39,6 +39,7 @@ class DemoApp(ZzApp):
                     control="list",
                     pic=";".join(self.launch_data.keys()),
                     valid=self.set_description,
+                    dblclick=self.launcher,
                     stretch=1,
                 )
                 self.form.add_control(
@@ -57,6 +58,7 @@ class DemoApp(ZzApp):
         self.form.add_control("/s")
         self.form.after_form_show = self.after_form_show
         self.form.run()
+        self.close()
 
     def launcher(self):
         py = self.launch_data[self.form.s.app_list]

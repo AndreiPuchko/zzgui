@@ -211,6 +211,8 @@ class zzsheet(QTableWidget, ZzWidget):
             for sc in range(column, column + column_span):
                 if sr != row or sc != column:
                     self.spaned_cells.append((sr, sc))
+                    # self.get_cell_widget(sr, sc).setVisible(False)
+                    # print(sr, sc)
         self.expand()
         self.updateGeometries()
 
@@ -293,7 +295,10 @@ class zzsheet(QTableWidget, ZzWidget):
             cell_widget = self.get_cell_widget(row, column)
             if (row, column) in self.spaned_cells:
                 cell_widget.set_style_sheet("")
+                cell_widget.setVisible(False)
                 return
+            # else:
+            #     cell_widget.setVisible(True)
             cell_key = f"{row},{column}"
             if style_text is None and cell_key not in self.cell_styles:
                 style_text = cell_widget.get_style_sheet()
@@ -302,7 +307,7 @@ class zzsheet(QTableWidget, ZzWidget):
                     style_text["background-color"] = self.selection_background_color
                 elif isinstance(style_text, str):
                     style_text += f";background-color:{self.selection_background_color};"
-                else:  #  None - using self.cell_styles
+                else:  # None - using self.cell_styles
                     style_text = dict(self.sheet_styles)
                     style_text.update(self.cell_styles.get(cell_key, {}))
                     style_text["background-color"] = self.selection_background_color

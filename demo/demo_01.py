@@ -37,7 +37,7 @@ class DemoApp(ZzApp):
 
     def sheet_form(self):
         form = ZzForm("Sheet Form")
-        form.add_control("/vr")
+        form.add_control("/vs")
 
         actions = ZzActions()
         actions.add_action("Column|Width")
@@ -64,34 +64,40 @@ class DemoApp(ZzApp):
         # sheet_actions.show_main_button= 0
 
         form.add_control("sheet", "", control="sheet", actions=actions)
+        form.add_control("/vr")
         for x in range(344):
             form.add_control("", f"label {x}")
+        form.add_control("/")
         form.ok_button = 1
         form.cancel_button = 1
 
         def before_form_show():
 
-            form.w.sheet.set_auto_expand()
+            # form.w.sheet.set_auto_expand()
+
             form.w.sheet.set_row_count(15)
             form.w.sheet.set_column_count(17)
-            form.w.sheet.set_column_headers(["122", "2fff"])
-            form.w.sheet.set_row_headers(["122", "2fff"])
-            form.w.sheet.set_column_header(3, "___")
-            form.w.sheet.set_row_header(5, "abrakada")
 
-            form.w.sheet.hide_column_headers()
-            form.w.sheet.hide_row_headers()
+            form.w.sheet.set_column_headers(["head 1", "head 2"])
+            form.w.sheet.set_column_header(8, "col 9")
+
+            # form.w.sheet.hide_column_headers()
+            # form.w.sheet.hide_row_headers()
 
             form.w.sheet.set_column_size(10)
-            form.w.sheet.set_column_size([23, 23, 34])
-            form.w.sheet.set_column_size(5, 50)
+            form.w.sheet.set_column_size([50, 60, 70])
+            form.w.sheet.set_column_size(80, 8)
 
-            form.w.sheet.set_row_size(10)
+            form.w.sheet.set_row_headers(["122", "2fff"])
+            form.w.sheet.set_row_header(8, "row 9")
+
+            form.w.sheet.set_row_size(15)
             form.w.sheet.set_row_size([23, 23, 34])
-            form.w.sheet.set_row_size(5, 50)
+            form.w.sheet.set_row_size(8, 50)
 
             form.w.sheet.set_span(1, 1, 30, 30)
             form.w.sheet.set_auto_expand()
+            form.w.sheet.set_cell_text("spanned cells", 1, 1)
 
         form.before_form_show = before_form_show
 
@@ -270,7 +276,9 @@ class DemoApp(ZzApp):
             )
         form.add_control("/")
 
-        form.show_mdi_modal_form()
+        # form.after_form_show = self.sheet_form
+
+        form.run()
 
     def show_hide_menubar(self):
         self.show_menubar(not self.is_menubar_visible())
